@@ -12,7 +12,7 @@ import (
 
 func Db() *gorm.DB {
 
-	dsn := os.Getenv("DSN_RESERVE_NOW")
+	dsn := os.Getenv("DSN_KEEP_ACTIVE")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		SkipDefaultTransaction: true, PrepareStmt: true,
