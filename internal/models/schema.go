@@ -18,3 +18,13 @@ type User struct {
 	UpdatedAt              time.Time      `gorm:"column:updatedAt"`
 	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index"`
 }
+
+type App struct {
+	ID              int            `gorm:"column:id;primaryKey;autoIncrement"`
+	Name            string         `gorm:"column:name;not null"`
+	URL             string         `gorm:"column:url;not null"`
+	RequestInterval string         `gorm:"column:requestInterval;not null"`
+	CreatedAt       time.Time      `gorm:"column:createdAt"`
+	UpdatedAt       time.Time      `gorm:"column:updatedAt"`
+	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index"`
+}
