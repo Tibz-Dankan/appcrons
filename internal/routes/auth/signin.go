@@ -6,6 +6,7 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -27,7 +28,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.ID == 0 {
+	if user.ID == uuid.Nil {
 		services.AppError("Email is not registered!", 400, w)
 		return
 	}

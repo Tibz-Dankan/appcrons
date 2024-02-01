@@ -14,28 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// type Role string
-
-// const (
-// 	Admin  Role = "admin"
-// 	Client Role = "client"
-// 	Staff  Role = "staff"
-// )
-
-// type User struct {
-// 	ID                     int            `gorm:"column:id;primaryKey;autoIncrement"`
-// 	Name                   string         `gorm:"column:name;not null"`
-// 	Email                  string         `gorm:"column:email;unique;not null"`
-// 	Password               string         `gorm:"column:password;not null"`
-// 	Country                string         `gorm:"column:country;not null"`
-// 	PasswordResetToken     string         `gorm:"column:passwordResetToken;index"`
-// 	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt"`
-// 	Role                   string         `gorm:"column:role;enum('admin', 'client', 'staff');default:'client';not null"`
-// 	CreatedAt              time.Time      `gorm:"column:createdAt"`
-// 	UpdatedAt              time.Time      `gorm:"column:updatedAt"`
-// 	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index"`
-// }
-
 var db = config.Db()
 
 func DBAutoMigrate() {
@@ -57,11 +35,11 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
-func (u *User) Create(user User) (int, error) {
+func (u *User) Create(user User) (uuid.UUID, error) {
 	result := db.Create(&user)
 
 	if result.Error != nil {
-		return 0, result.Error
+		return user.ID, result.Error
 	}
 	return user.ID, nil
 }

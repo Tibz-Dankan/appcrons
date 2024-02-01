@@ -6,6 +6,7 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -29,7 +30,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if savedUser.ID > 0 {
+	if savedUser.ID != uuid.Nil {
 		services.AppError("Email already registered!", 400, w)
 		return
 	}
