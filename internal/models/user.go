@@ -17,7 +17,7 @@ import (
 var db = config.Db()
 
 func DBAutoMigrate() {
-	err := db.AutoMigrate(&User{})
+	err := db.AutoMigrate(&User{}, &App{}, &Request{})
 	if err != nil {
 		log.Fatal("Failed to make auto migration", err)
 	}
