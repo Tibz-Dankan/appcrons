@@ -24,11 +24,12 @@ type User struct {
 
 type App struct {
 	ID              uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
-	UserID          string         `gorm:"column:userId;not null"`
-	Name            string         `gorm:"column:name;unique;not null"`
+	UserID          string         `gorm:"column:userId;not null;index"`
+	Name            string         `gorm:"column:name;unique;not null;index"`
 	URL             string         `gorm:"column:url;unique;not null"`
 	RequestInterval string         `gorm:"column:requestInterval;not null"`
 	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CreatedAt       time.Time      `gorm:"column:createdAt"`
 	UpdatedAt       time.Time      `gorm:"column:updatedAt"`
 	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index"`
@@ -36,8 +37,19 @@ type App struct {
 
 type Request struct {
 	ID        uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
-	AppID     string         `gorm:"column:appId;not null"`
+	AppID     string         `gorm:"column:appId;not null;index"`
 	Status    int            `gorm:"column:status;not null"`
+	Duration  string         `gorm:"column:duration;not null"`
+	CreatedAt time.Time      `gorm:"column:createdAt"`
+	UpdatedAt time.Time      `gorm:"column:updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index"`
+}
+
+type RequestTime struct {
+	ID        uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
+	AppID     string         `gorm:"column:appId;not null;index"`
+	Start     string         `gorm:"column:start;not null"`
+	End       string         `gorm:"column:end;not null"`
 	CreatedAt time.Time      `gorm:"column:createdAt"`
 	UpdatedAt time.Time      `gorm:"column:updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index"`
