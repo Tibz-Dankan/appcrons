@@ -21,8 +21,10 @@ func AppRouter() *mux.Router {
 	auth.ResetPasswordRoute(router)
 
 	router.Use(middlewares.Auth)
-	app.PostAppRoute(router)
 	// App routes
+	app.PostAppRoute(router)
+	app.GetAppRoute(router)
+	app.GetAppByUserByUser(router)
 
 	return router
 }
