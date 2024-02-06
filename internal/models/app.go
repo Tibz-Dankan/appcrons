@@ -2,13 +2,21 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-func (a *App) Create(app App) (uuid.UUID, error) {
+func (a *App) BeforeCreate(tx *gorm.DB) error {
+	uuid := uuid.New().String()
+	tx.Statement.SetColumn("ID", uuid)
+	return nil
+}
+
+// func (a *App) Create(app App) (uuid.UUID, error) {
+func (a *App) Create(app App) (string, error) {
 	result := db.Create(&app)
 
 	if result.Error != nil {
-		return app.ID, result.Error
+		return "", result.Error
 	}
 	return app.ID, nil
 }

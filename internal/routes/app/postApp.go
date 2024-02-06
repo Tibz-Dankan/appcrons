@@ -6,7 +6,6 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -30,7 +29,7 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if savedApp.ID != uuid.Nil {
+	if savedApp.ID != "" {
 		services.AppError("App name already taken!", 400, w)
 		return
 	}
