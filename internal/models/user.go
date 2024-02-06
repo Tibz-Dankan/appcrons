@@ -24,22 +24,23 @@ func DBAutoMigrate() {
 	fmt.Println("Auto Migration successful")
 }
 
-// Hash password before creating user
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *User) BeforeCreate(tx *gorm.DB) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
 	if err != nil {
 		return err
 	}
-
 	u.Password = string(hashedPassword)
-	return
+
+	uuid := uuid.New().String()
+	tx.Statement.SetColumn("ID", uuid)
+	return nil
 }
 
-func (u *User) Create(user User) (uuid.UUID, error) {
+func (u *User) Create(user User) (string, error) {
 	result := db.Create(&user)
 
 	if result.Error != nil {
-		return user.ID, result.Error
+		return "", result.Error
 	}
 	return user.ID, nil
 }

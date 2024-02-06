@@ -7,7 +7,6 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -27,7 +26,7 @@ func forgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.ID == uuid.Nil {
+	if user.ID == "" {
 		services.AppError("We couldn't find user with provided email!", 400, w)
 		return
 	}

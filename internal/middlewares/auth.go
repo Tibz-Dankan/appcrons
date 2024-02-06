@@ -13,12 +13,6 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-// // Create a new token object, specifying signing method and the claims
-// token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-// 	"foo": "bar",
-// 	"nbf": time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
-// })
-
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorizationHeader := r.Header.Get("Authorization")

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/google/uuid"
-
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -30,7 +28,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.ID == uuid.Nil {
+	if user.ID == "" {
 		services.AppError("Invalid or expired reset token!", 400, w)
 		return
 	}

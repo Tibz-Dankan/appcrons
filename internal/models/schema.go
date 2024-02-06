@@ -3,13 +3,11 @@ package models
 import (
 	"time"
 
-	"github.com/google/uuid"
-
 	"gorm.io/gorm"
 )
 
 type User struct {
-	ID                     uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID                     string         `gorm:"column:id;type:uuid;primaryKey"`
 	Name                   string         `gorm:"column:name;not null"`
 	Email                  string         `gorm:"column:email;unique;not null"`
 	Password               string         `gorm:"column:password;not null"`
@@ -23,7 +21,7 @@ type User struct {
 }
 
 type App struct {
-	ID              uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID              string         `gorm:"column:id;type:uuid;primaryKey"`
 	UserID          string         `gorm:"column:userId;not null;index"`
 	Name            string         `gorm:"column:name;unique;not null;index"`
 	URL             string         `gorm:"column:url;unique;not null"`
@@ -36,7 +34,7 @@ type App struct {
 }
 
 type Request struct {
-	ID        uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID        string         `gorm:"column:id;type:uuid;primaryKey"`
 	AppID     string         `gorm:"column:appId;not null;index"`
 	Status    int            `gorm:"column:status;not null"`
 	Duration  string         `gorm:"column:duration;not null"`
@@ -46,7 +44,7 @@ type Request struct {
 }
 
 type RequestTime struct {
-	ID        uuid.UUID      `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID        string         `gorm:"column:id;type:uuid;primaryKey"`
 	AppID     string         `gorm:"column:appId;not null;index"`
 	Start     string         `gorm:"column:start;not null"`
 	End       string         `gorm:"column:end;not null"`

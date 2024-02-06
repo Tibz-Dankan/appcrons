@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 )
 
-func SignJWTToken(userId uuid.UUID) (string, error) {
+func SignJWTToken(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
 		"exp":    time.Now().Add(3 * time.Hour).Unix(),
