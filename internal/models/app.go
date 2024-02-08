@@ -11,18 +11,23 @@ func (a *App) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-func (a *App) Create(app App) (string, error) {
+func (a *App) Create(app App) (App, error) {
 	result := db.Create(&app)
 
 	if result.Error != nil {
-		return "", result.Error
+		return app, result.Error
 	}
-	return app.ID, nil
+
+	if err := db.First(&app, "id = ?", app.ID).Error; err != nil {
+		return app, err
+	}
+
+	return app, nil
 }
 
 func (a *App) FindOne(id string) (App, error) {
 	var app App
-	db.First(&app, id)
+	db.First(&app, "id = ?", id)
 
 	return app, nil
 }
