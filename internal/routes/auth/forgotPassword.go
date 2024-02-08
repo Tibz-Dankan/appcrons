@@ -59,5 +59,5 @@ func forgotPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func ForgotPasswordRoute(router *mux.Router) {
-	router.HandleFunc("/api/v1/auth/forgot-password", forgotPassword).Methods("POST")
+	router.HandleFunc("/forgot-password", forgotPassword).Methods("POST")
 }

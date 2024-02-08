@@ -73,5 +73,5 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignUpRoute(router *mux.Router) {
-	router.HandleFunc("/api/v1/auth/signup", signUp).Methods("POST")
+	router.HandleFunc("/signup", signUp).Methods("POST")
 }

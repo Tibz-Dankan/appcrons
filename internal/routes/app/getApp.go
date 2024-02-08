@@ -32,5 +32,5 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAppRoute(router *mux.Router) {
-	router.HandleFunc("/api/v1/app/get/{appId}", getApp).Methods("GET")
+	router.HandleFunc("/get/{appId}", getApp).Methods("GET")
 }
