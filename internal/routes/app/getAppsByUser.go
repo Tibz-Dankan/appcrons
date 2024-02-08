@@ -38,6 +38,6 @@ func getAppByUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func GetAppByUserByUser(router *mux.Router) {
+func GetAppByUserRoute(router *mux.Router) {
 	router.HandleFunc("/get-by-user", getAppByUser).Methods("GET")
 }
