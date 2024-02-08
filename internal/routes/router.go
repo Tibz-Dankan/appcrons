@@ -17,7 +17,7 @@ func AppRouter() *mux.Router {
 	appRouter.Use(middlewares.Auth)
 	app.PostAppRoute(appRouter)
 	app.GetAppRoute(appRouter)
-	app.GetAppByUserByUser(appRouter)
+	app.GetAppByUserRoute(appRouter)
 	app.GetAllAppsRoute(appRouter)
 
 	// Auth routes
