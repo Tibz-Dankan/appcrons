@@ -68,5 +68,5 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignInRoute(router *mux.Router) {
-	router.HandleFunc("/api/v1/auth/signin", signIn).Methods("POST")
+	router.HandleFunc("/signin", signIn).Methods("POST")
 }

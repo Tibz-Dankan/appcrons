@@ -66,5 +66,5 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func PostAppRoute(router *mux.Router) {
-	router.HandleFunc("/api/v1/app/post", PostAdd).Methods("POST")
+	router.HandleFunc("/post", PostAdd).Methods("POST")
 }

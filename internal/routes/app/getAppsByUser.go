@@ -32,5 +32,5 @@ func getAppByUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAppByUserByUser(router *mux.Router) {
-	router.HandleFunc("/api/v1/app/get-by-user", getAppByUser).Methods("GET")
+	router.HandleFunc("/get-by-user", getAppByUser).Methods("GET")
 }
