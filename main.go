@@ -13,9 +13,10 @@ import (
 
 func main() {
 	router := routes.AppRouter()
+	// TODO: to add rate limiting
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "production_url"},
+		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
 		AllowCredentials: true,
 		Debug:            true,
@@ -30,5 +31,4 @@ func main() {
 
 	fmt.Println("Starting http server up on 8000")
 	log.Fatal(http.ListenAndServe(":8000", nil))
-
 }
