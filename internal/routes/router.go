@@ -13,7 +13,7 @@ func AppRouter() *mux.Router {
 
 	router.Use(middlewares.Logger)
 	// App routes
-	appRouter := router.PathPrefix("/api/v1/app").Subrouter()
+	appRouter := router.PathPrefix("/api/v1/apps").Subrouter()
 	appRouter.Use(middlewares.Auth)
 	app.PostAppRoute(appRouter)
 	app.GetAppRoute(appRouter)
