@@ -22,7 +22,7 @@ func (r *Request) Create(request Request) (string, error) {
 
 func (r *Request) FindOne(id string) (Request, error) {
 	var request Request
-	db.First(&request, id)
+	db.First(&request, "id = ?", id)
 
 	return request, nil
 }

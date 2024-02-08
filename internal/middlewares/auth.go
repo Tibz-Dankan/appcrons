@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -12,6 +12,12 @@ import (
 
 	"github.com/golang-jwt/jwt"
 )
+
+// ContextKey is a custom type for context keys
+type ContextKey string
+
+// UserIDKey is the key to access the user ID stored in context
+const UserIDKey ContextKey = "userId"
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -44,15 +50,14 @@ func Auth(next http.Handler) http.Handler {
 			return
 		}
 
-		var userId int
+		var userId string
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			userIdClaim, _ := claims["userId"].(float64)
-			userId = int(userIdClaim)
+			userIDClaim, _ := claims["userId"].(string)
+			userId = userIDClaim
 		} else {
 			services.AppError("Invalid Token, please login again", 403, w)
 			return
 		}
-		fmt.Println("userId", userId)
 
 		User := models.User{}
 
@@ -61,8 +66,14 @@ func Auth(next http.Handler) http.Handler {
 			services.AppError(err.Error(), 500, w)
 			return
 		}
-		log.Println("authorized user", user)
 
-		next.ServeHTTP(w, r)
+		if user.ID == "" {
+			services.AppError("The user belonging to this token no longer exist!", 403, w)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), UserIDKey, userId)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

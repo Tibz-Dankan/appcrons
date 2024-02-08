@@ -4,13 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
 )
 
 func PostAdd(w http.ResponseWriter, r *http.Request) {
-	app := models.App{}
+	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok {
+		services.AppError("UserID not found in context", 500, w)
+		return
+	}
+
+	app := models.App{UserID: userID}
 
 	err := json.NewDecoder(r.Body).Decode(&app)
 	if err != nil {
@@ -39,19 +46,19 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appId, err := app.Create(app)
-
+	createdApp, err := app.Create(app)
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
 	}
 
 	newApp := map[string]interface{}{
-		"id":              appId,
-		"name":            app.Name,
-		"requestInterval": app.RequestInterval,
-		"updatedAt":       app.UpdatedAt,
-		"createdAt":       app.CreatedAt,
+		"id":              createdApp.ID,
+		"name":            createdApp.Name,
+		"url":             createdApp.URL,
+		"requestInterval": createdApp.RequestInterval,
+		"updatedAt":       createdApp.UpdatedAt,
+		"createdAt":       createdApp.CreatedAt,
 	}
 
 	response := map[string]interface{}{

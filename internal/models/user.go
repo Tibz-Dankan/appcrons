@@ -45,9 +45,9 @@ func (u *User) Create(user User) (string, error) {
 	return user.ID, nil
 }
 
-func (u *User) FindOne(id int) (User, error) {
+func (u *User) FindOne(id string) (User, error) {
 	var user User
-	db.First(&user, id)
+	db.First(&user, "id = ?", id)
 
 	return user, nil
 }
@@ -74,7 +74,7 @@ func (u *User) Update() error {
 	return nil
 }
 
-func (u *User) Delete(id int) error {
+func (u *User) Delete(id string) error {
 	db.Delete(&User{}, id)
 
 	return nil
