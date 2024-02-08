@@ -32,11 +32,11 @@ func (a *App) FindOne(id string) (App, error) {
 	return app, nil
 }
 
-func (a *App) FindByUser(userId string) (App, error) {
-	var app App
-	db.Find(&app, "userId = ?", userId)
+func (a *App) FindByUser(userId string) ([]App, error) {
+	var apps []App
+	db.Find(&apps, "\"userId\" = ?", userId)
 
-	return app, nil
+	return apps, nil
 }
 
 func (a *App) FindByName(name string) (App, error) {
