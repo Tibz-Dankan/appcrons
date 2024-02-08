@@ -46,6 +46,13 @@ func (a *App) FindByName(name string) (App, error) {
 	return app, nil
 }
 
+func (a *App) FindByURL(url string) (App, error) {
+	var app App
+	db.First(&app, "url = ?", url)
+
+	return app, nil
+}
+
 func (a *App) FindAll() ([]App, error) {
 	var apps []App
 	db.Find(&apps)
