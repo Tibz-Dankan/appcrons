@@ -34,13 +34,13 @@ type App struct {
 }
 
 type Request struct {
-	ID        string         `gorm:"column:id;type:uuid;primaryKey"`
-	AppID     string         `gorm:"column:appId;not null;index"`
-	Status    int            `gorm:"column:status;not null"`
-	Duration  string         `gorm:"column:duration;not null"`
-	CreatedAt time.Time      `gorm:"column:createdAt"`
-	UpdatedAt time.Time      `gorm:"column:updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index"`
+	ID         string         `gorm:"column:id;type:uuid;primaryKey"`
+	AppID      string         `gorm:"column:appId;not null;index"`
+	StatusCode int            `gorm:"column:statusCode;not null"`
+	Duration   int            `gorm:"column:duration;not null"`
+	CreatedAt  time.Time      `gorm:"column:createdAt"`
+	UpdatedAt  time.Time      `gorm:"column:updatedAt"`
+	DeletedAt  gorm.DeletedAt `gorm:"column:deletedAt;index"`
 }
 
 type RequestTime struct {
