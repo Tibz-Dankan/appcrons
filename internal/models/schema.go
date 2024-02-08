@@ -24,7 +24,7 @@ type App struct {
 	ID              string         `gorm:"column:id;type:uuid;primaryKey"`
 	UserID          string         `gorm:"column:userId;not null;index"`
 	Name            string         `gorm:"column:name;unique;not null;index"`
-	URL             string         `gorm:"column:url;unique;not null"`
+	URL             string         `gorm:"column:url;unique;not null;index"`
 	RequestInterval string         `gorm:"column:requestInterval;not null"`
 	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
