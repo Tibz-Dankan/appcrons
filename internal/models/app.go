@@ -11,7 +11,6 @@ func (a *App) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// func (a *App) Create(app App) (uuid.UUID, error) {
 func (a *App) Create(app App) (string, error) {
 	result := db.Create(&app)
 

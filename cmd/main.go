@@ -7,6 +7,7 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
 
 	"github.com/rs/cors"
 )
@@ -22,6 +23,11 @@ func main() {
 		AllowedHeaders:   []string{"*"},
 	})
 
+	// err := godotenv.Load("../.env")
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file=> ", err.Error())
+	// }
+
 	handler := c.Handler(router)
 
 	http.Handle("/", handler)
@@ -30,4 +36,6 @@ func main() {
 
 	fmt.Println("Starting http server up on 8000")
 	log.Fatal(http.ListenAndServe(":8000", nil))
+
+	request.MakeRequest()
 }
