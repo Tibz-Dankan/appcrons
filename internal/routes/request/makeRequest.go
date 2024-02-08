@@ -10,6 +10,17 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 )
 
+func StartRequestScheduler() {
+	go MakeRequestScheduler()
+}
+
+func MakeRequestScheduler() {
+	for {
+		MakeRequest()
+		time.Sleep(5 * time.Minute)
+	}
+}
+
 func MakeRequest() {
 	app := models.App{}
 	fmt.Println("In the MakeRequest fn")
@@ -20,13 +31,7 @@ func MakeRequest() {
 		return
 	}
 
-	// Run the MakeRequest function every 5 minutes
-	ticker := time.NewTicker(5 * time.Minute)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		makeAllRequests(apps)
-	}
+	makeAllRequests(apps)
 }
 
 func makeAllRequests(apps []models.App) {

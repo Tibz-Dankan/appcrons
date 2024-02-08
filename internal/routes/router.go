@@ -4,6 +4,7 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/app"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/auth"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
 
 	"github.com/gorilla/mux"
 )
@@ -26,6 +27,9 @@ func AppRouter() *mux.Router {
 	auth.SignInRoute(authRouter)
 	auth.ForgotPasswordRoute(authRouter)
 	auth.ResetPasswordRoute(authRouter)
+
+	// Makes requests
+	request.StartRequestScheduler()
 
 	return router
 }
