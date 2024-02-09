@@ -31,6 +31,10 @@ func MakeRequest() {
 		return
 	}
 
+	if len(apps) == 0 {
+		return
+	}
+
 	makeAllRequests(apps)
 }
 
