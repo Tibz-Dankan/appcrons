@@ -29,6 +29,6 @@ func main() {
 
 	models.DBAutoMigrate()
 
-	fmt.Println("Starting http server up on 8000")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	fmt.Println("Starting http server up on 3000")
+	log.Fatal(http.ListenAndServe(":3000", nil))
 }
