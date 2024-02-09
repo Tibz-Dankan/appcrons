@@ -29,7 +29,7 @@ func (r *Request) FindOne(id string) (Request, error) {
 
 func (r *Request) FindByApp(appId string) (Request, error) {
 	var request Request
-	db.Find(&request, "appId = ?", appId)
+	db.Find(&request, "\"appId\" = ?", appId)
 
 	return request, nil
 }
