@@ -1,0 +1,15 @@
+# Exclude editor and IDE files
+.vscode
+.idea
+
+# Exclude version control files
+.git
+.gitignore
+
+# Exclude build artifacts and binary files
+*.log
+*.out
+*.exe
+
+# Exclude dependency directories
+vendor/
