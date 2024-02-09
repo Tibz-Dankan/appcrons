@@ -6,6 +6,7 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
 
 	"github.com/rs/cors"
 )
@@ -31,7 +32,7 @@ func main() {
 	go http.ListenAndServe(":3000", nil)
 
 	// Call StartRequestScheduler after server is started
-	// request.StartRequestScheduler()
+	request.StartRequestScheduler()
 
 	select {}
 }
