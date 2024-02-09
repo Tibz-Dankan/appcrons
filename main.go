@@ -2,18 +2,17 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
 
 	"github.com/rs/cors"
 )
 
 func main() {
 	router := routes.AppRouter()
-	// TODO: to add rate limiting
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -30,5 +29,10 @@ func main() {
 	models.DBAutoMigrate()
 
 	fmt.Println("Starting http server up on 3000")
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	go http.ListenAndServe(":3000", nil)
+
+	// Call StartRequestScheduler after server is started
+	request.StartRequestScheduler()
+
+	select {}
 }
