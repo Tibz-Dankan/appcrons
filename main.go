@@ -28,8 +28,8 @@ func main() {
 
 	models.DBAutoMigrate()
 
-	fmt.Println("Starting http server up on 3000")
-	go http.ListenAndServe(":3000", nil)
+	fmt.Println("Starting http server up on 8000")
+	go http.ListenAndServe(":8000", nil)
 
 	// Call StartRequestScheduler after server is started
 	request.StartRequestScheduler()

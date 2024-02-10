@@ -27,8 +27,8 @@ func (r *Request) FindOne(id string) (Request, error) {
 	return request, nil
 }
 
-func (r *Request) FindByApp(appId string) (Request, error) {
-	var request Request
+func (r *Request) FindByApp(appId string) ([]Request, error) {
+	var request []Request
 	db.Find(&request, "\"appId\" = ?", appId)
 
 	return request, nil

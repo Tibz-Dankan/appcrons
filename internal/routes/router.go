@@ -4,6 +4,7 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/app"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/auth"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
 
 	"github.com/gorilla/mux"
 )
@@ -19,6 +20,12 @@ func AppRouter() *mux.Router {
 	app.GetAppRoute(appRouter)
 	app.GetAppByUserRoute(appRouter)
 	app.GetAllAppsRoute(appRouter)
+
+	// Request routes
+	requestRouter := router.PathPrefix("/api/v1/requests").Subrouter()
+	requestRouter.Use(middlewares.Auth)
+	request.GetRequestByUserRoute(requestRouter)
+	request.GetRequestRoute(requestRouter)
 
 	// Auth routes
 	authRouter := router.PathPrefix("/api/v1/auth").Subrouter()
