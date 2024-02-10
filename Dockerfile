@@ -6,6 +6,6 @@ COPY . .
 
 RUN go build -o ./bin/myapp ./
 
-EXPOSE 3000
+EXPOSE 8000
 
 CMD ["./bin/myapp"]
