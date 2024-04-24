@@ -36,3 +36,5 @@ func main() {
 
 	select {}
 }
+
+// TO switch to net/http for routing and redis for cache
