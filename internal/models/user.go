@@ -48,6 +48,7 @@ func (u *User) Create(user User) (string, error) {
 func (u *User) FindOne(id string) (User, error) {
 	var user User
 	db.First(&user, "id = ?", id)
+	// TO include redis here
 
 	return user, nil
 }

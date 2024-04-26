@@ -9,6 +9,7 @@ import (
 
 func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 
+	// TODO: To add redis subscription of the app
 	// TODO: To use server sent events, goroutines and channels to service request operations on the client side
 
 	response := map[string]interface{}{
