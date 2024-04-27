@@ -15,6 +15,7 @@ import (
 )
 
 var db = config.Db()
+var userCache = UserCache{}
 
 func DBAutoMigrate() {
 	err := db.AutoMigrate(&User{}, &App{}, &Request{})
@@ -47,8 +48,20 @@ func (u *User) Create(user User) (string, error) {
 
 func (u *User) FindOne(id string) (User, error) {
 	var user User
+	var err error
+
+	if user, err = userCache.Read(id); err != nil {
+		return user, err
+	}
+
+	if user.ID != "" {
+		return user, nil
+	}
 	db.First(&user, "id = ?", id)
-	// TO include redis here
+
+	if err = userCache.Write(user); err != nil {
+		return user, err
+	}
 
 	return user, nil
 }
@@ -72,11 +85,18 @@ func (u *User) FindAll() ([]User, error) {
 func (u *User) Update() error {
 	db.Save(&u)
 
+	if err := userCache.Write(*u); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (u *User) Delete(id string) error {
 	db.Delete(&User{}, id)
+	if err := userCache.Delete(id); err != nil {
+		return err
+	}
 
 	return nil
 }
