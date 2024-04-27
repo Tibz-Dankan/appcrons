@@ -7,16 +7,16 @@ import (
 )
 
 type User struct {
-	ID                     string         `gorm:"column:id;type:uuid;primaryKey"`
-	Name                   string         `gorm:"column:name;not null"`
-	Email                  string         `gorm:"column:email;unique;not null"`
-	Password               string         `gorm:"column:password;not null"`
-	PasswordResetToken     string         `gorm:"column:passwordResetToken;index"`
-	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt"`
-	Role                   string         `gorm:"column:role;default:'admin';not null"`
+	ID                     string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	Name                   string         `gorm:"column:name;not null" json:"name"`
+	Email                  string         `gorm:"column:email;unique;not null" json:"email"`
+	Password               string         `gorm:"column:password;not null" json:"password"`
+	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken"`
+	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt" json:"passwordResetExpiresAt"`
+	Role                   string         `gorm:"column:role;default:'admin';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	CreatedAt              time.Time      `gorm:"column:createdAt"`
-	UpdatedAt              time.Time      `gorm:"column:updatedAt"`
+	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt              time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index"`
 }
 
