@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// ======CONSIDER CHANGING WAY OF IMPLEMENTING REDIS JSON=====
+
 type UserCache struct{}
 
 func (uc *UserCache) Write(user User) error {
