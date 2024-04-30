@@ -7,6 +7,7 @@ import (
 )
 
 // ======CONSIDER CHANGING WAY OF IMPLEMENTING REDIS JSON=====
+// ======CONSIDER CHANGING WAY OF IMPLEMENTING REDIS JSON=====
 
 type UserCache struct{}
 
