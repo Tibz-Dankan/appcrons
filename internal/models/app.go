@@ -5,6 +5,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var appCache = AppCache{}
+
 func (a *App) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
@@ -27,16 +29,41 @@ func (a *App) Create(app App) (App, error) {
 
 func (a *App) FindOne(id string) (App, error) {
 	var app App
+	var err error
+
+	if app, err = appCache.Read(id); err != nil {
+		return app, err
+	}
+
+	if app.ID != "" {
+		return app, nil
+	}
 	db.First(&app, "id = ?", id)
-	// TODO: To add redis read and write
+
+	if err = appCache.Write(app); err != nil {
+		return app, err
+	}
 
 	return app, nil
 }
 
 func (a *App) FindByUser(userId string) ([]App, error) {
 	var apps []App
+	var err error
+
+	if apps, err = appCache.ReadByUser(userId); err != nil {
+		return apps, err
+	}
+
+	if len(apps) != 0 {
+		return apps, nil
+	}
+
 	db.Find(&apps, "\"userId\" = ?", userId)
-	// TODO: To add redis read and write
+
+	if err = appCache.WriteByUser(userId, apps); err != nil {
+		return apps, err
+	}
 
 	return apps, nil
 }
@@ -69,14 +96,20 @@ func (a *App) FindAll() ([]App, error) {
 // stored in the receiver u
 func (a *App) Update() error {
 	db.Save(&a)
-	// TODO: To add redis write through update
+
+	if err := appCache.Write(*a); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (a *App) Delete(id string) error {
 	db.Delete(&App{}, id)
-	// TODO: To add redis delete through delete
+
+	if err := appCache.Delete(id); err != nil {
+		return err
+	}
 
 	return nil
 }

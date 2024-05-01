@@ -21,16 +21,16 @@ type User struct {
 }
 
 type App struct {
-	ID              string         `gorm:"column:id;type:uuid;primaryKey"`
-	UserID          string         `gorm:"column:userId;not null;index"`
-	Name            string         `gorm:"column:name;unique;not null;index"`
-	URL             string         `gorm:"column:url;unique;not null;index"`
-	RequestInterval string         `gorm:"column:requestInterval;not null"`
-	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	CreatedAt       time.Time      `gorm:"column:createdAt"`
-	UpdatedAt       time.Time      `gorm:"column:updatedAt"`
-	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index"`
+	ID              string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID          string         `gorm:"column:userId;not null;index" json:"userId"`
+	Name            string         `gorm:"column:name;unique;not null;index" json:"name"`
+	URL             string         `gorm:"column:url;unique;not null;index" json:"url"`
+	RequestInterval string         `gorm:"column:requestInterval;not null" json:"requestInterval"`
+	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"request"`
+	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestTime"`
+	CreatedAt       time.Time      `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt       time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
+	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
 
 type Request struct {
