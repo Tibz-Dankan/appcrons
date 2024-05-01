@@ -5,6 +5,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var requestCache = RequestCache{}
+
 func (r *Request) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
@@ -22,16 +24,43 @@ func (r *Request) Create(request Request) (string, error) {
 
 func (r *Request) FindOne(id string) (Request, error) {
 	var request Request
+	var err error
+
+	if request, err = requestCache.Read(id); err != nil {
+		return request, err
+	}
+
+	if request.ID != "" {
+		return request, nil
+	}
 	db.First(&request, "id = ?", id)
+
+	if err = requestCache.Write(request); err != nil {
+		return request, err
+	}
 
 	return request, nil
 }
 
 func (r *Request) FindByApp(appId string) ([]Request, error) {
-	var request []Request
-	db.Find(&request, "\"appId\" = ?", appId)
+	var requests []Request
+	var err error
 
-	return request, nil
+	if requests, err = requestCache.ReadByApp(appId); err != nil {
+		return requests, err
+	}
+
+	if len(requests) != 0 {
+		return requests, nil
+	}
+
+	db.Find(&requests, "\"appId\" = ?", appId)
+
+	if err = requestCache.WriteByApp(appId, requests); err != nil {
+		return requests, err
+	}
+
+	return requests, nil
 }
 
 func (r *Request) FindAll() ([]Request, error) {
@@ -43,6 +72,9 @@ func (r *Request) FindAll() ([]Request, error) {
 
 func (r *Request) Delete(id string) error {
 	db.Delete(&Request{}, id)
+	if err := requestCache.Delete(id); err != nil {
+		return err
+	}
 
 	return nil
 }
