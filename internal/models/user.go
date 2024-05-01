@@ -68,7 +68,20 @@ func (u *User) FindOne(id string) (User, error) {
 
 func (u *User) FindByEMail(email string) (User, error) {
 	var user User
+	var err error
+
+	if user, err = userCache.Read(email); err != nil {
+		return user, err
+	}
+
+	if user.ID != "" {
+		return user, nil
+	}
 	db.First(&user, "email = ?", email)
+
+	if err = userCache.Write(user); err != nil {
+		return user, err
+	}
 
 	return user, nil
 }

@@ -6,27 +6,23 @@ import (
 	"time"
 )
 
-// ======CONSIDER CHANGING WAY OF IMPLEMENTING REDIS JSON=====
-// ======CONSIDER CHANGING WAY OF IMPLEMENTING REDIS JSON=====
-
 type UserCache struct{}
 
 func (uc *UserCache) Write(user User) error {
-	fmt.Println("writing to cache....")
-
 	// Convert struct to JSON.
-	userData, err := json.Marshal(user)
+	userData, err := json.Marshal(&user)
 	if err != nil {
 		fmt.Println("Error marshalling JSON:", err)
 		return err
 	}
 
-	expiration := 3 * time.Hour / time.Second
+	expiration := 3 * time.Hour
 
-	fmt.Println("User to be saved in the cache:", user)
-
-	err = redisClient.Set(ctx, user.ID, userData, expiration).Err()
-	if err != nil {
+	if err = redisClient.Set(ctx, user.ID, userData, expiration).Err(); err != nil {
+		fmt.Println("Error saving data to Redis:", err)
+		return err
+	}
+	if err = redisClient.Set(ctx, user.Email, userData, expiration).Err(); err != nil {
 		fmt.Println("Error saving data to Redis:", err)
 		return err
 	}
@@ -34,17 +30,16 @@ func (uc *UserCache) Write(user User) error {
 	return nil
 }
 
-func (uc *UserCache) Read(userId string) (User, error) {
-	fmt.Println("Reading from cache....")
+func (uc *UserCache) Read(key string) (User, error) {
 
 	user := User{}
-	savedUserData, err := redisClient.Get(ctx, userId).Result()
+	savedUserData, err := redisClient.Get(ctx, key).Result()
 	if err != nil {
 		fmt.Println("Error fetching data from Redis:", err)
 		return user, nil
 	}
 
-	// Convert JSON into struct.
+	// Convert string into JSON.
 	err = json.Unmarshal([]byte(savedUserData), &user)
 	if err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
