@@ -14,10 +14,10 @@ type User struct {
 	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken"`
 	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt" json:"passwordResetExpiresAt"`
 	Role                   string         `gorm:"column:role;default:'admin';not null" json:"role"`
-	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt              time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
-	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index"`
+	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
 
 type App struct {
@@ -26,29 +26,29 @@ type App struct {
 	Name            string         `gorm:"column:name;unique;not null;index" json:"name"`
 	URL             string         `gorm:"column:url;unique;not null;index" json:"url"`
 	RequestInterval string         `gorm:"column:requestInterval;not null" json:"requestInterval"`
-	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"request"`
-	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestTime"`
+	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requests"`
+	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestTimes"`
 	CreatedAt       time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt       time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
 
 type Request struct {
-	ID         string         `gorm:"column:id;type:uuid;primaryKey"`
-	AppID      string         `gorm:"column:appId;not null;index"`
-	StatusCode int            `gorm:"column:statusCode;not null"`
-	Duration   int            `gorm:"column:duration;not null"`
-	CreatedAt  time.Time      `gorm:"column:createdAt"`
-	UpdatedAt  time.Time      `gorm:"column:updatedAt"`
-	DeletedAt  gorm.DeletedAt `gorm:"column:deletedAt;index"`
+	ID         string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	AppID      string         `gorm:"column:appId;not null;index" json:"appId"`
+	StatusCode int            `gorm:"column:statusCode;not null" json:"statusCode"`
+	Duration   int            `gorm:"column:duration;not null" json:"duration"`
+	CreatedAt  time.Time      `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt  time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
+	DeletedAt  gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
 
 type RequestTime struct {
-	ID        string         `gorm:"column:id;type:uuid;primaryKey"`
-	AppID     string         `gorm:"column:appId;not null;index"`
-	Start     string         `gorm:"column:start;not null"`
-	End       string         `gorm:"column:end;not null"`
-	CreatedAt time.Time      `gorm:"column:createdAt"`
-	UpdatedAt time.Time      `gorm:"column:updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index"`
+	ID        string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	AppID     string         `gorm:"column:appId;not null;index" json:"appId"`
+	Start     string         `gorm:"column:start;not null" json:"start"`
+	End       string         `gorm:"column:end;not null" json:"end"`
+	CreatedAt time.Time      `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
