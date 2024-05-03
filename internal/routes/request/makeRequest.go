@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
+	"github.com/Tibz-Dankan/keep-active/internal/pubsub"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 )
 
@@ -53,6 +54,12 @@ func makeAllRequests(apps []models.App) {
 }
 
 func makeRequest(app models.App) {
+	psub := pubsub.PubSub{}
+
+	if err := psub.Publish(app.ID, app); err != nil {
+		log.Println("Error publishing:", err)
+	}
+
 	response, err := services.MakeHTTPRequest(app.URL)
 	if err != nil {
 		log.Println("Request error:", err)
@@ -65,8 +72,16 @@ func makeRequest(app models.App) {
 		Duration:   response.RequestTimeMS,
 	}
 
-	_, err = request.Create(request)
+	requestId, err := request.Create(request)
 	if err != nil {
 		log.Println("Error saving request:", err)
+	}
+
+	request.ID = requestId
+
+	app.Request[0] = request
+
+	if err := psub.Publish(app.ID, app); err != nil {
+		log.Println("Error publishing:", err)
 	}
 }
