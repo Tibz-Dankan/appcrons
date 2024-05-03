@@ -79,7 +79,7 @@ func makeRequest(app models.App) {
 
 	request.ID = requestId
 
-	app.Request[0] = request
+	app.Request = []models.Request{request}
 
 	if err := psub.Publish(app.ID, app); err != nil {
 		log.Println("Error publishing:", err)
