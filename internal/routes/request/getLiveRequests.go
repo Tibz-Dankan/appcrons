@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
@@ -23,6 +22,7 @@ func sendMessage(w http.ResponseWriter, message, userId string) {
 }
 
 func getLiveRequests(w http.ResponseWriter, r *http.Request) {
+	log.Println("getting live request...")
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -41,11 +41,11 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 	sendMessage(w, "warmup", userId)
 
 	// Setting up interval for heartbeat message
-	ticker := time.NewTicker(30 * time.Second)
-	defer ticker.Stop()
-	for range ticker.C {
-		sendMessage(w, "heartbeat", userId)
-	}
+	// ticker := time.NewTicker(30 * time.Second)
+	// defer ticker.Stop()
+	// for range ticker.C {
+	// 	sendMessage(w, "heartbeat", userId)
+	// }
 
 	psub := pubsub.PubSub{}
 	app := models.App{}
@@ -55,6 +55,8 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 		services.AppError(err.Error(), 500, w)
 		return
 	}
+
+	log.Println("About to tackle subscriptions")
 
 	for _, app := range userApps {
 		sub, err := psub.Subscribe(app.ID)
