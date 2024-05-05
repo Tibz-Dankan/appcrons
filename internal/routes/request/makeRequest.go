@@ -6,8 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
-	"github.com/Tibz-Dankan/keep-active/internal/pubsub"
+
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 )
 
@@ -54,11 +55,7 @@ func makeAllRequests(apps []models.App) {
 }
 
 func makeRequest(app models.App) {
-	psub := pubsub.PubSub{}
-
-	if err := psub.Publish(app.ID, app); err != nil {
-		log.Println("Error publishing:", err)
-	}
+	event.EB.Publish("app", app)
 
 	response, err := services.MakeHTTPRequest(app.URL)
 	if err != nil {
@@ -81,7 +78,5 @@ func makeRequest(app models.App) {
 
 	app.Request = []models.Request{request}
 
-	if err := psub.Publish(app.ID, app); err != nil {
-		log.Println("Error publishing:", err)
-	}
+	event.EB.Publish("app", app)
 }
