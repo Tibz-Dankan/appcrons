@@ -5,9 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
-	"github.com/Tibz-Dankan/keep-active/internal/models"
-	"github.com/Tibz-Dankan/keep-active/internal/pubsub"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
 )
@@ -33,57 +32,40 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	clientManager := services.NewClientManager()
-
-	// Add the client to the manager
 	clientManager.AddClient(userId, w)
 
 	// Writing warmup message
 	sendMessage(w, "warmup", userId)
 
-	// Setting up interval for heartbeat message
-	// ticker := time.NewTicker(30 * time.Second)
-	// defer ticker.Stop()
-	// for range ticker.C {
-	// 	sendMessage(w, "heartbeat", userId)
-	// }
+	appCh := make(chan event.DataEvent)
 
-	psub := pubsub.PubSub{}
-	app := models.App{}
+	event.EB.Subscribe("app", appCh)
 
-	userApps, err := app.FindByUser(userId)
-	if err != nil {
-		services.AppError(err.Error(), 500, w)
-		return
-	}
+	// type App = models.App
 
-	log.Println("About to tackle subscriptions")
-
-	for _, app := range userApps {
-		sub, err := psub.Subscribe(app.ID)
-		if err != nil {
-			log.Println("Error while getting pubsub:", err)
-			services.AppError(err.Error(), 500, w)
+	// Start listening for events
+	go func() {
+		for {
+			// event := <-listener
+			app := <-appCh
+			log.Println("Received subscription  app data from event:::", app)
+			// var userApp App  = App{app.Data}
+			// send request to the client
 		}
+	}()
+	// 	client, ok := clientManager.GetClient(app.UserID)
+	// 	if !ok {
+	// 		log.Println("Client not found")
+	// 		return
+	// 	}
 
-		client, ok := clientManager.GetClient(app.UserID)
-		if !ok {
-			log.Println("Client not found")
-			return
-		}
+	// 	_, err = client.Write([]byte("data: " + string(subPayload) + "\n\n"))
+	// 	if err != nil {
+	// 		log.Println("Error sending event:", err)
+	// 		services.AppError(err.Error(), 500, w)
+	// 	}
+	// 	client.(http.Flusher).Flush()
 
-		subPayload, err := json.Marshal(sub)
-		if err != nil {
-			log.Println("Error converting sub payload to json:", err)
-			services.AppError(err.Error(), 500, w)
-		}
-
-		_, err = client.Write([]byte("data: " + string(subPayload) + "\n\n"))
-		if err != nil {
-			log.Println("Error sending event:", err)
-			services.AppError(err.Error(), 500, w)
-		}
-		client.(http.Flusher).Flush() // Flush the response writer to send data immediately
-	}
 }
 
 func GetLiveRequestsRoute(router *mux.Router) {
