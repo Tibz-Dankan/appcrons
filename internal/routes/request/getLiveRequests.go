@@ -7,6 +7,7 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
+	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
 )
@@ -18,6 +19,32 @@ func sendMessage(w http.ResponseWriter, message, userId string) {
 	})
 
 	w.Write([]byte("data: " + string(data) + "\n\n"))
+	w.(http.Flusher).Flush()
+}
+
+func sendAppToClient(app models.App, clientManager *services.ClientManager) error {
+	client, ok := clientManager.GetClient(app.UserID)
+	if !ok {
+		log.Println("Client not found")
+		return nil
+	}
+
+	log.Println("client:::", client)
+
+	appJson, err := json.Marshal(&app)
+	if err != nil {
+		log.Println("Error marshalling JSON:", err)
+		return err
+	}
+
+	_, err = client.Write([]byte("data: " + string(appJson) + "\n\n"))
+	if err != nil {
+		log.Println("Error sending event:", err)
+		return err
+	}
+	// client.(http.Flusher).Flush()
+
+	return nil
 }
 
 func getLiveRequests(w http.ResponseWriter, r *http.Request) {
@@ -41,30 +68,30 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 
 	event.EB.Subscribe("app", appCh)
 
-	// type App = models.App
+	type App = models.App
 
 	// Start listening for events
 	go func() {
 		for {
-			// event := <-listener
-			app := <-appCh
-			log.Println("Received subscription  app data from event:::", app)
-			// var userApp App  = App{app.Data}
-			// send request to the client
+			appEvent := <-appCh
+			log.Println("Received subscription app data from event:::", appEvent)
+
+			app, ok := appEvent.Data.(App)
+			if !ok {
+				log.Println("Interface does not hold type App")
+				return
+			}
+
+			log.Println("Received app data:::", app)
+
+			err := sendAppToClient(app, clientManager)
+			if err != nil {
+				services.AppError(err.Error(), 500, w)
+				return
+			}
+
 		}
 	}()
-	// 	client, ok := clientManager.GetClient(app.UserID)
-	// 	if !ok {
-	// 		log.Println("Client not found")
-	// 		return
-	// 	}
-
-	// 	_, err = client.Write([]byte("data: " + string(subPayload) + "\n\n"))
-	// 	if err != nil {
-	// 		log.Println("Error sending event:", err)
-	// 		services.AppError(err.Error(), 500, w)
-	// 	}
-	// 	client.(http.Flusher).Flush()
 
 }
 
