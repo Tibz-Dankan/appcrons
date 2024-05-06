@@ -19,7 +19,7 @@ func StartRequestScheduler() {
 func MakeRequestScheduler() {
 	for {
 		MakeRequest()
-		time.Sleep(5 * time.Minute)
+		time.Sleep(1 * time.Minute)
 	}
 }
 
