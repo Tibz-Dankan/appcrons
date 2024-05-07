@@ -19,7 +19,6 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
 
-	// TODO: To add redis start request publication here
 	req, err := http.NewRequest(http.MethodGet, URL, nil)
 	if err != nil {
 		return response, err
@@ -48,7 +47,6 @@ func MakeHTTPRequest(URL string) (Response, error) {
 
 	fmt.Printf("Request status code: %d\n", res.StatusCode)
 	fmt.Printf("Response body: %s\n", resBody)
-	// TODO: To add redis end request publication here
 
 	return response, nil
 }
