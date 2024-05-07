@@ -1,7 +1,6 @@
 package request
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -25,11 +24,10 @@ func MakeRequestScheduler() {
 
 func MakeRequest() {
 	app := models.App{}
-	fmt.Println("In the MakeRequest fn")
 
 	apps, err := app.FindAll()
 	if err != nil {
-		fmt.Println("Error fetching apps:", err)
+		log.Println("Error fetching apps:", err)
 		return
 	}
 

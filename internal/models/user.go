@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -22,7 +21,7 @@ func DBAutoMigrate() {
 	if err != nil {
 		log.Fatal("Failed to make auto migration", err)
 	}
-	fmt.Println("Auto Migration successful")
+	log.Println("Auto Migration successful")
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {

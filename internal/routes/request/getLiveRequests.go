@@ -46,7 +46,6 @@ func sendAppToClient(app models.App, clientManager *services.ClientManager) erro
 }
 
 func getLiveRequests(w http.ResponseWriter, r *http.Request) {
-	log.Println("getting live request...")
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")

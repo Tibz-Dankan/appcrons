@@ -62,7 +62,6 @@ func Auth(next http.Handler) http.Handler {
 		User := models.User{}
 
 		user, err := User.FindOne(userId)
-		// TODO: To add redis read functionality here
 		if err != nil {
 			services.AppError(err.Error(), 500, w)
 			return

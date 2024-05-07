@@ -2,7 +2,7 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -85,8 +85,8 @@ func AppError(message string, statusCode int, w http.ResponseWriter) {
 	exists := statusCodeExists(statusCodeStr, statusCodes)
 
 	if !exists {
-		fmt.Println("Key does not exist")
-		//    err:= errors.New(fmt.Sprintf("Invalid status code: %s", statusCodeStr))
+		log.Println("Key does not exist")
+		//    err:= errors.New(log.Sprintf("Invalid status code: %s", statusCodeStr))
 		//    log.Println(err)
 		return
 	}

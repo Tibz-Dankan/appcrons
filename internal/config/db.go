@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -27,7 +26,7 @@ func Db() *gorm.DB {
 		log.Fatal("Failed to connect to the database", err)
 	}
 
-	fmt.Println("Connected to database successfully")
+	log.Println("Connected to database successfully")
 	return db
 }
 

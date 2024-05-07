@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -13,7 +13,7 @@ func Logger(next http.Handler) http.Handler {
 		// Call the next handler in the chain
 		next.ServeHTTP(w, r)
 
-		fmt.Printf(
+		log.Printf(
 			"%s %s %s\n",
 			r.Method,
 			r.RequestURI,
