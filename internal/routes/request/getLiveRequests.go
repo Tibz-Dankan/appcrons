@@ -29,8 +29,6 @@ func sendAppToClient(app models.App, clientManager *services.ClientManager) erro
 		return nil
 	}
 
-	log.Println("client:::", client)
-
 	appJson, err := json.Marshal(&app)
 	if err != nil {
 		log.Println("Error marshalling JSON:", err)
@@ -42,7 +40,7 @@ func sendAppToClient(app models.App, clientManager *services.ClientManager) erro
 		log.Println("Error sending event:", err)
 		return err
 	}
-	// client.(http.Flusher).Flush()
+	client.(http.Flusher).Flush()
 
 	return nil
 }
@@ -52,6 +50,7 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
+	w.(http.Flusher).Flush()
 
 	userId, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
@@ -63,6 +62,7 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 
 	// Writing warmup message
 	sendMessage(w, "warmup", userId)
+	// TODO: send message to client every 30 seconds
 
 	appCh := make(chan event.DataEvent)
 
@@ -70,29 +70,22 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 
 	type App = models.App
 
-	// Start listening for events
-	go func() {
-		for {
-			appEvent := <-appCh
-			log.Println("Received subscription app data from event:::", appEvent)
+	// Listening for events
+	for {
+		appEvent := <-appCh
 
-			app, ok := appEvent.Data.(App)
-			if !ok {
-				log.Println("Interface does not hold type App")
-				return
-			}
-
-			log.Println("Received app data:::", app)
-
-			err := sendAppToClient(app, clientManager)
-			if err != nil {
-				services.AppError(err.Error(), 500, w)
-				return
-			}
-
+		app, ok := appEvent.Data.(App)
+		if !ok {
+			log.Println("Interface does not hold type App")
+			return
 		}
-	}()
 
+		err := sendAppToClient(app, clientManager)
+		if err != nil {
+			services.AppError(err.Error(), 500, w)
+			return
+		}
+	}
 }
 
 func GetLiveRequestsRoute(router *mux.Router) {
