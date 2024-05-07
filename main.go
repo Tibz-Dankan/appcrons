@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
@@ -28,7 +28,7 @@ func main() {
 
 	models.DBAutoMigrate()
 
-	fmt.Println("Starting http server up on 8000")
+	log.Println("Starting http server up on 8000")
 	go http.ListenAndServe(":8000", nil)
 
 	// Call StartRequestScheduler after server is started
@@ -36,5 +36,3 @@ func main() {
 
 	select {}
 }
-
-// TO switch to net/http for routing and redis for cache

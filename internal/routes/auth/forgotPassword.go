@@ -2,7 +2,7 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
@@ -38,7 +38,7 @@ func forgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resetURL := "http//localhost:5173/reset-password/" + resetToken
-	fmt.Println("Password resetURL  ==> ", resetURL)
+	log.Println("Password resetURL  ==> ", resetURL)
 
 	// email := services.Email{Recipient: user.Email, UserName: user.Name}
 

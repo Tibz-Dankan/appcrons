@@ -21,7 +21,6 @@ type EventBus struct {
 
 func (eb *EventBus) Publish(topic string, data interface{}) {
 	eb.rm.RLock()
-	log.Println("publish data:::", data)
 
 	if chans, found := eb.subscribers[topic]; found {
 

@@ -2,8 +2,8 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -45,8 +45,8 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response.Message = body.Message
 	response.RequestTimeMS = requestTimeMS
 
-	fmt.Printf("Request status code: %d\n", res.StatusCode)
-	fmt.Printf("Response body: %s\n", resBody)
+	log.Printf("Request status code: %d\n", res.StatusCode)
+	log.Printf("Response body: %s\n", resBody)
 
 	return response, nil
 }

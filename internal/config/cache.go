@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -18,14 +17,13 @@ func RedisClient() *redis.Client {
 
 	REDIS_URL := os.Getenv("REDIS_URL")
 
-	fmt.Println("REDIS_URL==>", REDIS_URL)
-
 	opt, err := redis.ParseURL(REDIS_URL)
 	if err != nil {
 		log.Fatal("Failed to connect to redis", err)
 	}
 
 	client := redis.NewClient(opt)
+	log.Println("Connected to redis successfully")
 
 	return client
 }
