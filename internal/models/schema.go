@@ -51,7 +51,7 @@ type Request struct {
 	AppID      string         `gorm:"column:appId;not null;index" json:"appId"`
 	StatusCode int            `gorm:"column:statusCode;not null" json:"statusCode"`
 	Duration   int            `gorm:"column:duration;not null" json:"duration"`
-	CreatedAt  time.Time      `gorm:"column:createdAt" json:"createdAt"`
+	CreatedAt  time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt  time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt  gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }

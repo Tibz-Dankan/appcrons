@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -60,7 +62,22 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return apps, nil
 	}
 
-	db.Find(&apps, "\"userId\" = ?", userId)
+	log.Println("Fetching apps  from db")
+
+	// db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
+	// 	return db.Order("\"createdAt\" DESC").Limit(1)
+	// }).Find(&apps, "\"userId\" = ?", userId)
+
+	result := db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
+		subQuery := db.Table("requests").
+			Select("MAX(\"requests\".\"createdAt\")").
+			Where("\"requests\".\"appId\" = apps.id").
+			Group("\"requests\".\"appId\"")
+		return db.Where("\"requests\".\"createdAt\" IN (?)", subQuery).Joins("JOIN apps ON apps.id = \"requests\".\"appId\"")
+	}).Where("\"userId\" = ?", userId).Find(&apps)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
 	if err = appCache.WriteByUser(userId, apps); err != nil {
 		return apps, err
