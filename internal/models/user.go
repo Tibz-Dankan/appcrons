@@ -13,15 +13,6 @@ import (
 
 var userCache = UserCache{}
 
-// var db = config.Db()
-// func DBAutoMigrate() {
-// 	err := db.AutoMigrate(&User{}, &App{}, &Request{})
-// 	if err != nil {
-// 		log.Fatal("Failed to make auto migration", err)
-// 	}
-// 	log.Println("Auto Migration successful")
-// }
-
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
 	if err != nil {
