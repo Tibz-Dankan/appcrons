@@ -1,10 +1,22 @@
 package models
 
 import (
+	"log"
 	"time"
 
+	"github.com/Tibz-Dankan/keep-active/internal/config"
 	"gorm.io/gorm"
 )
+
+var db = config.Db()
+
+func DBAutoMigrate() {
+	err := db.AutoMigrate(&User{}, &App{}, &Request{}, &RequestTime{})
+	if err != nil {
+		log.Fatal("Failed to make auto migration", err)
+	}
+	log.Println("Auto Migration successful")
+}
 
 type User struct {
 	ID                     string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
@@ -26,6 +38,7 @@ type App struct {
 	Name            string         `gorm:"column:name;unique;not null;index" json:"name"`
 	URL             string         `gorm:"column:url;unique;not null;index" json:"url"`
 	RequestInterval string         `gorm:"column:requestInterval;not null" json:"requestInterval"`
+	IsDisabled      bool           `gorm:"column:isDisabled" json:"isDisabled"`
 	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requests"`
 	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestTimes"`
 	CreatedAt       time.Time      `gorm:"column:createdAt" json:"createdAt"`
@@ -48,6 +61,7 @@ type RequestTime struct {
 	AppID     string         `gorm:"column:appId;not null;index" json:"appId"`
 	Start     string         `gorm:"column:start;not null" json:"start"`
 	End       string         `gorm:"column:end;not null" json:"end"`
+	TimeZone  string         `gorm:"column:timeZone;not null" json:"timeZone"`
 	CreatedAt time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`

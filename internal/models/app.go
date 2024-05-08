@@ -10,6 +10,7 @@ var appCache = AppCache{}
 func (a *App) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
+	tx.Statement.SetColumn("IsDisabled", false)
 	return nil
 }
 
