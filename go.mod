@@ -12,7 +12,7 @@ require (
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/rs/cors v1.10.1
 	golang.org/x/crypto v0.14.0
-	gorm.io/gorm v1.25.6
+	gorm.io/gorm v1.25.10
 )
 
 require (
