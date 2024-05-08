@@ -104,8 +104,20 @@ func (a *App) FindByURL(url string) (App, error) {
 
 func (a *App) FindAll() ([]App, error) {
 	var apps []App
-	db.Find(&apps)
+	// db.Find(&apps)
 	// TODO: To add redis read and write
+
+	log.Println("Fetching all apps")
+	result := db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
+		subQuery := db.Table("requests").
+			Select("MAX(\"requests\".\"createdAt\")").
+			Where("\"requests\".\"appId\" = apps.id").
+			Group("\"requests\".\"appId\"")
+		return db.Where("\"requests\".\"createdAt\" IN (?)", subQuery).Joins("JOIN apps ON apps.id = \"requests\".\"appId\"")
+	}).Find(&apps)
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
 	return apps, nil
 }
