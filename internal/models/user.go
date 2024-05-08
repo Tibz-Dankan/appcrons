@@ -4,25 +4,23 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"log"
 	"time"
 
-	"github.com/Tibz-Dankan/keep-active/internal/config"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-var db = config.Db()
 var userCache = UserCache{}
 
-func DBAutoMigrate() {
-	err := db.AutoMigrate(&User{}, &App{}, &Request{})
-	if err != nil {
-		log.Fatal("Failed to make auto migration", err)
-	}
-	log.Println("Auto Migration successful")
-}
+// var db = config.Db()
+// func DBAutoMigrate() {
+// 	err := db.AutoMigrate(&User{}, &App{}, &Request{})
+// 	if err != nil {
+// 		log.Fatal("Failed to make auto migration", err)
+// 	}
+// 	log.Println("Auto Migration successful")
+// }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
