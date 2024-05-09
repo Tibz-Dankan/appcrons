@@ -42,7 +42,9 @@ func (rt *RequestTime) Update() (RequestTime, error) {
 }
 
 func (r *RequestTime) Delete(id string) error {
-	db.Delete(&Request{}, id)
+	if err := db.Delete(&RequestTime{}, id).Error; err != nil {
+		return err
+	}
 
 	return nil
 }
