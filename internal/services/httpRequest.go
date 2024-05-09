@@ -45,7 +45,7 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response.Message = body.Message
 	response.RequestTimeMS = requestTimeMS
 
-	log.Printf("Request status code: %d\n", res.StatusCode)
+	log.Printf("Request statusCode: %d Duration: %d URL: %s\n", res.StatusCode, requestTimeMS, URL)
 	log.Printf("Response body: %s\n", resBody)
 
 	return response, nil
