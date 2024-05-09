@@ -28,6 +28,7 @@ func AppRouter() *mux.Router {
 	request.GetRequestByUserRoute(requestRouter)
 	request.GetRequestRoute(requestRouter)
 	request.GetLiveRequestsRoute(requestRouter)
+	request.PostRequestTimeRoute(requestRouter)
 
 	// Auth routes
 	authRouter := router.PathPrefix("/api/v1/auth").Subrouter()
