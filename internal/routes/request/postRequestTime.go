@@ -3,7 +3,7 @@ package request
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,6 +11,68 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
 )
+
+var timeLayout string = "2006-Jan-02 15:04:05"
+
+func timeValue(timeArg string) string {
+	currentTime := time.Now()
+
+	var currentTimeDay string
+	day := currentTime.Day()
+	if day < 10 {
+		currentTimeDay = "0" + fmt.Sprint(day)
+	}
+	currentTimeYear := fmt.Sprint(currentTime.Year())
+	currentTimeMonth := fmt.Sprint(currentTime.Month())
+
+	date := currentTimeYear + "-" + currentTimeMonth + "-" + currentTimeDay
+	dateValueStr := date + " " + timeArg
+
+	return dateValueStr
+}
+
+func validateRequestTime(startTime, endTime time.Time, savedRequestTimes []models.RequestTime) error {
+	// timeLayout -> "2006-Jan-02 15:04:05"
+
+	for _, rt := range savedRequestTimes {
+		savedEndTime, err := time.Parse(timeLayout, timeValue(rt.End))
+		if err != nil {
+			return err
+		}
+
+		savedStartTime, err := time.Parse(timeLayout, timeValue(rt.Start))
+		if err != nil {
+			return err
+		}
+
+		if savedStartTime.Equal(startTime) || savedEndTime.Equal(endTime) {
+			return errors.New("time intervals can't be equal to existing ones")
+		}
+
+		// Check for upcoming interval top
+		if savedStartTime.Equal(endTime) {
+			return errors.New("end time can't be equal to any existing interval")
+		}
+
+		if savedStartTime.After(endTime) {
+			if !savedStartTime.After(startTime) {
+				return errors.New("start time can't be greater than existing start time")
+			}
+		}
+
+		// Check for upcoming interval down
+		if savedEndTime.Equal(startTime) {
+			return errors.New("start time can't be equal to any existing interval")
+		}
+
+		if savedEndTime.Before(startTime) {
+			if !savedEndTime.Before(endTime) {
+				return errors.New("end time can't be greater than existing end time")
+			}
+		}
+	}
+	return nil
+}
 
 func postRequestTime(w http.ResponseWriter, r *http.Request) {
 
@@ -26,18 +88,14 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		services.AppError("Please fill out all fields!", 400, w)
 		return
 	}
-	// TODO: ensure upcoming End time is greater upcoming start time
-	currentTime := time.Now()
-	timeLayout := currentTime.Format("14:30")
-	log.Println("timeLayout::::", timeLayout)
 
-	parsedStartTime, err := time.Parse(timeLayout, requestTime.Start)
+	parsedStartTime, err := time.Parse(timeLayout, timeValue(requestTime.Start))
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
 	}
 
-	parsedEndTime, err := time.Parse(timeLayout, requestTime.End)
+	parsedEndTime, err := time.Parse(timeLayout, timeValue(requestTime.End))
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
@@ -54,23 +112,10 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: add functionality to ensure upcoming time
-	// Interval doesn't fall in any existing interval
-
-	for _, rt := range savedRequestTimes {
-		parsedSavedRequestTime, err := time.Parse(timeLayout, rt.End)
-		if err != nil {
-			services.AppError(err.Error(), 400, w)
-			return
-		}
-
-		if parsedSavedRequestTime.Before(parsedStartTime) {
-			services.AppError(errors.New("start time can't be greater than existing end time").Error(), 400, w)
-			return
-		}
+	if err := validateRequestTime(parsedStartTime, parsedEndTime, savedRequestTimes); err != nil {
+		services.AppError(err.Error(), 400, w)
+		return
 	}
-
-	log.Println("savedRequestTimes:::: ", savedRequestTimes)
 
 	createdRequestTime, err := requestTime.Create(requestTime)
 	if err != nil {
