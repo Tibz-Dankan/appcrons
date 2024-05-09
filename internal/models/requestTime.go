@@ -5,13 +5,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func (r *RequestTime) BeforeCreate(tx *gorm.DB) error {
+func (rt *RequestTime) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
 	return nil
 }
 
-func (r *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
+func (rt *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
 	result := db.Create(&requestTime)
 
 	if result.Error != nil {
@@ -20,19 +20,25 @@ func (r *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
 	return requestTime, nil
 }
 
-func (r *RequestTime) FindOne(id string) (RequestTime, error) {
+func (rt *RequestTime) FindOne(id string) (RequestTime, error) {
 	var request RequestTime
 	db.First(&request, "id = ?", id)
 
 	return request, nil
 }
 
-func (r *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
+func (rt *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
 	var requestTimes []RequestTime
 
 	db.Find(&requestTimes, "\"appId\" = ?", appId)
 
 	return requestTimes, nil
+}
+
+func (rt *RequestTime) Update() (RequestTime, error) {
+	db.Save(&rt)
+
+	return *rt, nil
 }
 
 func (r *RequestTime) Delete(id string) error {
