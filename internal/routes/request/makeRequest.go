@@ -2,6 +2,7 @@ package request
 
 import (
 	"log"
+	"strconv"
 	"sync"
 	"time"
 
@@ -18,7 +19,8 @@ func StartRequestScheduler() {
 func MakeRequestScheduler() {
 	for {
 		MakeRequest()
-		time.Sleep(5 * time.Minute)
+		// time.Sleep(5 * time.Minute)
+		time.Sleep(1 * time.Minute)
 	}
 }
 
@@ -53,6 +55,15 @@ func makeAllRequests(apps []models.App) {
 }
 
 func makeRequest(app models.App) {
+	ok, err := validateApp(app)
+	if err != nil {
+		log.Println("Error validating the app: ", err)
+	}
+	if !ok {
+		log.Println("couldn't make requests to app: ", app.Name)
+		return
+	}
+
 	event.EB.Publish("app", app)
 
 	response, err := services.MakeHTTPRequest(app.URL)
@@ -77,4 +88,65 @@ func makeRequest(app models.App) {
 	app.Request = []models.Request{request}
 
 	event.EB.Publish("app", app)
+}
+
+func validateApp(app models.App) (bool, error) {
+	if app.IsDisabled {
+		return false, nil
+	}
+	if app.RequestTime[0].ID == "" {
+		// Check and validate requestInterval
+		log.Println("App doesn't have requestTime")
+		currentTime := time.Now()
+		location := currentTime.Location().String()
+		appDate := services.Date{TimeZone: location, ISOStringDate: app.Request[0].CreatedAt.String()}
+
+		currentAppTime, _ := appDate.CurrentTime()
+		lastRequestCreatedAt, _ := appDate.ISOTime()
+		timeDiff := currentAppTime.Sub(lastRequestCreatedAt).Minutes()
+		requestInterval, err := strconv.Atoi(app.RequestInterval)
+		if err != nil {
+			log.Println("Error converting string to integer:", err)
+		}
+
+		if int(timeDiff) >= requestInterval {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	for _, rt := range app.RequestTime {
+		// Check and validate requestTime slot
+		log.Println("App has requestTime")
+		appDateStart := services.Date{TimeZone: rt.TimeZone, ISOStringDate: app.Request[0].CreatedAt.String(), HourMinSec: rt.Start}
+		appDateEnd := services.Date{TimeZone: rt.TimeZone, ISOStringDate: app.Request[0].CreatedAt.String(), HourMinSec: rt.End}
+
+		startTime, _ := appDateStart.HourMinSecTime()
+		endTime, _ := appDateEnd.HourMinSecTime()
+		currentTimeStart, _ := appDateStart.CurrentTime()
+		currentTimeEnd, _ := appDateEnd.CurrentTime()
+
+		isEqualToStartTime := currentTimeStart.Equal(startTime)
+		isEqualToEndTime := currentTimeEnd.Equal(endTime)
+		isGreaterThanStartTime := currentTimeStart.After(startTime)
+		isLessThanEndTime := currentTimeEnd.Before(endTime)
+
+		isWithinRequestTimeRange := isGreaterThanStartTime && isLessThanEndTime
+
+		if isEqualToStartTime || isEqualToEndTime || isWithinRequestTimeRange {
+			// Check and validate requestInterval
+			lastRequestCreatedAt, _ := appDateStart.ISOTime()
+			timeDiff := currentTimeStart.Sub(lastRequestCreatedAt).Minutes()
+			requestInterval, err := strconv.Atoi(app.RequestInterval)
+			if err != nil {
+				log.Println("Error converting string to integer:::", err)
+			}
+
+			if int(timeDiff) >= requestInterval {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
 }
