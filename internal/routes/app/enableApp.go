@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func disableApp(w http.ResponseWriter, r *http.Request) {
+func enableApp(w http.ResponseWriter, r *http.Request) {
 
 	appId := mux.Vars(r)["appId"]
 	app := models.App{ID: appId}
@@ -24,13 +24,13 @@ func disableApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if savedApp.IsDisabled {
-		services.AppError("app is already disabled", 400, w)
+	if !savedApp.IsDisabled {
+		services.AppError("app is already enabled", 400, w)
 		return
 	}
 
 	app = savedApp
-	app.IsDisabled = true
+	app.IsDisabled = false
 
 	err = app.Update()
 	if err != nil {
@@ -40,7 +40,7 @@ func disableApp(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string]interface{}{
 		"status":  "success",
-		"message": "App is disabled successfully",
+		"message": "App is enabled successfully",
 		"app":     app,
 	}
 
@@ -49,6 +49,6 @@ func disableApp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func DisableAppRoute(router *mux.Router) {
-	router.HandleFunc("/disable/{appId}", disableApp).Methods("PATCH")
+func EnableAppRoute(router *mux.Router) {
+	router.HandleFunc("/enable/{appId}", enableApp).Methods("PATCH")
 }
