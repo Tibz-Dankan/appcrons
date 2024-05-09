@@ -52,15 +52,15 @@ func (a *App) FindOne(id string) (App, error) {
 
 func (a *App) FindByUser(userId string) ([]App, error) {
 	var apps []App
-	var err error
+	// var err error
 
-	if apps, err = appCache.ReadByUser(userId); err != nil {
-		return apps, err
-	}
+	// if apps, err = appCache.ReadByUser(userId); err != nil {
+	// 	return apps, err
+	// }
 
-	if len(apps) != 0 {
-		return apps, nil
-	}
+	// if len(apps) != 0 {
+	// 	return apps, nil
+	// }
 
 	log.Println("Fetching apps  from db")
 
@@ -79,9 +79,9 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return nil, result.Error
 	}
 
-	if err = appCache.WriteByUser(userId, apps); err != nil {
-		return apps, err
-	}
+	// if err = appCache.WriteByUser(userId, apps); err != nil {
+	// 	return apps, err
+	// }
 
 	return apps, nil
 }
