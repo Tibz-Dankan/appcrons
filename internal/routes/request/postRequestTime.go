@@ -21,6 +21,8 @@ func timeValue(timeArg string) string {
 	day := currentTime.Day()
 	if day < 10 {
 		currentTimeDay = "0" + fmt.Sprint(day)
+	} else {
+		currentTimeDay = fmt.Sprint(day)
 	}
 	currentTimeYear := fmt.Sprint(currentTime.Year())
 	currentTimeMonth := fmt.Sprint(currentTime.Month())
