@@ -67,7 +67,8 @@ func (ac *AppCache) Read(key string) (App, error) {
 func (ac *AppCache) ReadByUser(userId string) ([]App, error) {
 
 	apps := []App{}
-	var key = "user-apps:" + userId
+	userApps := []App{}
+	var key = "apps"
 
 	savedAppsData, err := redisClient.Get(ctx, key).Result()
 	if err != nil {
@@ -82,7 +83,14 @@ func (ac *AppCache) ReadByUser(userId string) ([]App, error) {
 		return apps, nil
 	}
 
-	return apps, nil
+	for _, app := range apps {
+		if app.UserID == userId {
+			userApps = append(userApps, app)
+		}
+	}
+
+	// return apps, nil
+	return userApps, nil
 }
 
 func (ac *AppCache) WriteAll(apps []App) error {

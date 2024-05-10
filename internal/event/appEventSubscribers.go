@@ -43,9 +43,9 @@ func subscribeToUpdateApp() {
 		if err := appCache.WriteOneToAll(latestAppData); err != nil {
 			log.Println("Error writing to all apps:", err)
 		}
-		if err := appCache.WriteOneToUser(latestAppData); err != nil {
-			log.Println("Error writing to all apps to user:", err)
-		}
+		// if err := appCache.WriteOneToUser(latestAppData); err != nil {
+		// 	log.Println("Error writing to all apps to user:", err)
+		// }
 	}
 }
 
@@ -75,8 +75,8 @@ func subscribeToCreateApp() {
 		if err := appCache.WriteOneToAll(app); err != nil {
 			log.Println("Error writing to all apps:", err)
 		}
-		if err := appCache.WriteOneToUser(app); err != nil {
-			log.Println("Error writing to all apps to user:", err)
-		}
+		// if err := appCache.WriteOneToUser(app); err != nil {
+		// 	log.Println("Error writing to all apps to user:", err)
+		// }
 	}
 }
