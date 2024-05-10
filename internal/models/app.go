@@ -32,35 +32,39 @@ func (a *App) Create(app App) (App, error) {
 
 func (a *App) FindOne(id string) (App, error) {
 	var app App
-	var err error
+	// var err error
 
-	if app, err = appCache.Read(id); err != nil {
-		return app, err
-	}
+	// if app, err = appCache.Read(id); err != nil {
+	// 	return app, err
+	// }
 
-	if app.ID != "" {
-		return app, nil
-	}
-	db.First(&app, "id = ?", id)
+	// if app.ID != "" {
+	// 	return app, nil
+	// }
+	// db.First(&app, "id = ?", id)
 
-	if err = appCache.Write(app); err != nil {
-		return app, err
-	}
+	// if err = appCache.Write(app); err != nil {
+	// 	return app, err
+	// }
+
+	db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
+		return db.Order("\"createdAt\" DESC").Limit(1)
+	}).First(&app, "id = ?", id)
 
 	return app, nil
 }
 
 func (a *App) FindByUser(userId string) ([]App, error) {
 	var apps []App
-	// var err error
+	var err error
 
-	// if apps, err = appCache.ReadByUser(userId); err != nil {
-	// 	return apps, err
-	// }
+	if apps, err = appCache.ReadByUser(userId); err != nil {
+		return apps, err
+	}
 
-	// if len(apps) != 0 {
-	// 	return apps, nil
-	// }
+	if len(apps) != 0 {
+		return apps, nil
+	}
 
 	log.Println("Fetching apps  from db")
 
@@ -79,9 +83,9 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return nil, result.Error
 	}
 
-	// if err = appCache.WriteByUser(userId, apps); err != nil {
-	// 	return apps, err
-	// }
+	if err = appCache.WriteByUser(userId, apps); err != nil {
+		return apps, err
+	}
 
 	return apps, nil
 }
@@ -104,8 +108,15 @@ func (a *App) FindByURL(url string) (App, error) {
 
 func (a *App) FindAll() ([]App, error) {
 	var apps []App
-	// db.Find(&apps)
-	// TODO: To add redis read and write
+	var err error
+
+	if apps, err = appCache.ReadAll(); err != nil {
+		return apps, err
+	}
+
+	if len(apps) != 0 {
+		return apps, nil
+	}
 
 	log.Println("Fetching all apps")
 	result := db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
@@ -117,6 +128,10 @@ func (a *App) FindAll() ([]App, error) {
 	}).Find(&apps)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	if err = appCache.WriteAll(apps); err != nil {
+		return apps, err
 	}
 
 	return apps, nil

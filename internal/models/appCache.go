@@ -85,6 +85,110 @@ func (ac *AppCache) ReadByUser(userId string) ([]App, error) {
 	return apps, nil
 }
 
+func (ac *AppCache) WriteAll(apps []App) error {
+	// Convert struct to JSON.
+	appsData, err := json.Marshal(&apps)
+	if err != nil {
+		log.Println("Error marshalling JSON:", err)
+		return err
+	}
+
+	expiration := 3 * time.Hour
+	var key = "apps"
+
+	if err = redisClient.Set(ctx, key, appsData, expiration).Err(); err != nil {
+		log.Println("Error saving data to Redis:", err)
+		return err
+	}
+
+	return nil
+}
+
+func (ac *AppCache) ReadAll() ([]App, error) {
+	apps := []App{}
+	var key = "apps"
+
+	savedAppsData, err := redisClient.Get(ctx, key).Result()
+	if err != nil {
+		log.Println("Error fetching data from Redis:", err)
+		return apps, nil
+	}
+
+	// Convert string into JSON.
+	err = json.Unmarshal([]byte(savedAppsData), &apps)
+	if err != nil {
+		log.Println("Error unmarshalling JSON:", err)
+		return apps, nil
+	}
+
+	return apps, nil
+}
+
+func (ac *AppCache) hasApp(apps []App, id string) bool {
+	for _, app := range apps {
+		if app.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (ac *AppCache) WriteOneToAll(app App) error {
+	apps, err := ac.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	// Update Existing app and cache
+	if appFound := ac.hasApp(apps, app.ID); appFound {
+		for i, a := range apps {
+			if a.ID == app.ID {
+				apps[i] = app
+			}
+		}
+		if err := ac.WriteAll(apps); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Add new app and update cache
+	apps = append(apps, app)
+	if err := ac.WriteAll(apps); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ac *AppCache) WriteOneToUser(app App) error {
+	apps, err := ac.ReadByUser(app.UserID)
+	if err != nil {
+		return err
+	}
+
+	// Update Existing app and cache
+	if appFound := ac.hasApp(apps, app.ID); appFound {
+		for i, a := range apps {
+			if a.ID == app.ID {
+				apps[i] = app
+			}
+		}
+		if err := ac.WriteAll(apps); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Add new app and update cache
+	apps = append(apps, app)
+	if err := ac.WriteByUser(app.UserID, apps); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ac *AppCache) Delete(appID string) error {
 	// Delete data from Redis
 	err := redisClient.Del(ctx, appID).Err()
