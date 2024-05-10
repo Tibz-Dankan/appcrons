@@ -124,44 +124,37 @@ func (ac *AppCache) ReadAll() ([]App, error) {
 	return apps, nil
 }
 
-func (ac *AppCache) WriteOneToAll(app App) error {
-	var apps []App
-	var key = "apps"
-	// get all existing apps in the cache
-	savedApps, err := redisClient.Get(ctx, key).Result()
-	if err != nil {
-		log.Println("Error fetching data from Redis:", err)
-		return err
-	}
-
-	// Convert struct into JSON.
-	err = json.Unmarshal([]byte(savedApps), &apps)
-	if err != nil {
-		log.Println("Error unmarshalling JSON:", err)
-		return err
-	}
-
-	// TODO: check where app exists in the cache
-	// TODO: reuse the code for reading and writing to the cache
-
-	// update the app info in the app array
-	for i, a := range apps {
-		if a.ID == app.ID {
-			apps[i] = app
+func (ac *AppCache) hasApp(apps []App, id string) bool {
+	for _, app := range apps {
+		if app.ID == id {
+			return true
 		}
 	}
+	return false
+}
 
-	// Convert struct to JSON.
-	appsData, err := json.Marshal(&apps)
+func (ac *AppCache) WriteOneToAll(app App) error {
+	apps, err := ac.ReadAll()
 	if err != nil {
-		log.Println("Error marshalling JSON:", err)
 		return err
 	}
 
-	expiration := 3 * time.Hour
-	// save the updated apps
-	if err = redisClient.Set(ctx, key, appsData, expiration).Err(); err != nil {
-		log.Println("Error saving data to Redis:", err)
+	// Update Existing app and cache
+	if appFound := ac.hasApp(apps, app.ID); appFound {
+		for i, a := range apps {
+			if a.ID == app.ID {
+				apps[i] = app
+			}
+		}
+		if err := ac.WriteAll(apps); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Add new app and update cache
+	apps = append(apps, app)
+	if err := ac.WriteAll(apps); err != nil {
 		return err
 	}
 
@@ -169,40 +162,27 @@ func (ac *AppCache) WriteOneToAll(app App) error {
 }
 
 func (ac *AppCache) WriteOneToUser(app App) error {
-	apps := []App{}
-	var key = "user-apps:" + app.UserID
-	// get all existing apps in the cache
-	savedApps, err := redisClient.Get(ctx, key).Result()
+	apps, err := ac.ReadByUser(app.UserID)
 	if err != nil {
-		log.Println("Error fetching data from Redis:", err)
 		return err
 	}
 
-	// Convert struct into JSON.
-	err = json.Unmarshal([]byte(savedApps), &apps)
-	if err != nil {
-		log.Println("Error unmarshalling JSON:", err)
-		return err
-	}
-
-	// update the app info in the app array
-	for i, a := range apps {
-		if a.ID == app.ID {
-			apps[i] = app
+	// Update Existing app and cache
+	if appFound := ac.hasApp(apps, app.ID); appFound {
+		for i, a := range apps {
+			if a.ID == app.ID {
+				apps[i] = app
+			}
 		}
+		if err := ac.WriteAll(apps); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	// Convert struct to JSON.
-	appsData, err := json.Marshal(&apps)
-	if err != nil {
-		log.Println("Error marshalling JSON:", err)
-		return err
-	}
-
-	expiration := 3 * time.Hour
-	// save the updated apps
-	if err = redisClient.Set(ctx, key, appsData, expiration).Err(); err != nil {
-		log.Println("Error saving data to Redis:", err)
+	// Add new app and update cache
+	apps = append(apps, app)
+	if err := ac.WriteByUser(app.UserID, apps); err != nil {
 		return err
 	}
 
