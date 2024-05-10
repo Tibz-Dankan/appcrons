@@ -40,6 +40,7 @@ func (d *Date) ISOTime() (time.Time, error) {
 
 	ISOTime, err := time.Parse(ISOStringLayout, d.ISOStringDate)
 	if err != nil {
+		fmt.Println("Error parsing ISOStringDate:", err)
 		return time.Now(), err
 	}
 
