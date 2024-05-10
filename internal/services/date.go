@@ -12,7 +12,7 @@ type Date struct {
 }
 
 const ISOStringLayout string = "2006-01-02 15:04:05.999999999 -0700 MST"
-const TimeLayout string = "2006-Jan-02 15:04:05"
+const TimeLayout string = "2006-Jan-02 15:04:05 -0700"
 
 // Returns the current  in the
 // provided time zone
@@ -62,9 +62,10 @@ func (d *Date) hourMinSecStr() string {
 	}
 	currentTimeYear := fmt.Sprint(currentTime.Year())
 	currentTimeMonth := fmt.Sprint(currentTime.Month())
+	offset := currentTime.Format("-0700")
 
 	date := currentTimeYear + "-" + currentTimeMonth + "-" + currentTimeDay
-	hourMinSecStr := date + " " + d.HourMinSec
+	hourMinSecStr := date + " " + d.HourMinSec + " " + offset
 
 	return hourMinSecStr
 }
