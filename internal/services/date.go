@@ -56,6 +56,8 @@ func (d *Date) hourMinSecStr() string {
 	day := currentTime.Day()
 	if day < 10 {
 		currentTimeDay = "0" + fmt.Sprint(day)
+	} else {
+		currentTimeDay = fmt.Sprint(day)
 	}
 	currentTimeYear := fmt.Sprint(currentTime.Year())
 	currentTimeMonth := fmt.Sprint(currentTime.Month())
@@ -78,6 +80,7 @@ func (d *Date) HourMinSecTime() (time.Time, error) {
 
 	HourMinSecTime, err := time.Parse(TimeLayout, d.hourMinSecStr())
 	if err != nil {
+		fmt.Println("Error parsing hourMinSecStr:", err)
 		return time.Now(), err
 	}
 
