@@ -89,7 +89,6 @@ func (ac *AppCache) ReadByUser(userId string) ([]App, error) {
 		}
 	}
 
-	// return apps, nil
 	return userApps, nil
 }
 

@@ -13,18 +13,71 @@ import (
 )
 
 func StartRequestScheduler() {
-	go MakeRequestScheduler()
+	// go MakeRequestScheduler()
+	go RequestPublishScheduler()
+	requestEventSubscriber()
 }
 
-func MakeRequestScheduler() {
+// func MakeRequestScheduler() {
+// 	for {
+// 		// MakeRequest()
+// 		RequestPublisher()
+// 		// time.Sleep(5 * time.Minute)
+// 		time.Sleep(1 * time.Minute)
+// 	}
+// }
+
+func RequestPublishScheduler() {
 	for {
-		MakeRequest()
-		// time.Sleep(5 * time.Minute)
+		RequestPublisher()
 		time.Sleep(1 * time.Minute)
 	}
 }
 
-func MakeRequest() {
+// func MakeRequest() {
+// 	app := models.App{}
+
+// 	apps, err := app.FindAll()
+// 	if err != nil {
+// 		log.Println("Error fetching apps:", err)
+// 		return
+// 	}
+
+// 	if len(apps) == 0 {
+// 		return
+// 	}
+
+// 	// makeAllRequests(apps)
+// 	publishRequests(apps)
+// }
+
+func requestEventSubscriber() {
+
+	appCh := make(chan event.DataEvent)
+	event.EB.Subscribe("makeRequest", appCh)
+	type App = models.App
+
+	// Listening for events
+	for {
+		var wg sync.WaitGroup
+		appEvent := <-appCh
+		app, ok := appEvent.Data.(App)
+
+		if !ok {
+			log.Println("Interface does not hold type App")
+			return
+		}
+		wg.Add(1)
+		go func(app models.App) {
+			log.Println("Making request===App: ", app.Name)
+			defer wg.Done()
+			MakeAppRequest(app)
+		}(app)
+		wg.Wait()
+	}
+}
+
+func RequestPublisher() {
 	app := models.App{}
 
 	apps, err := app.FindAll()
@@ -37,30 +90,43 @@ func MakeRequest() {
 		return
 	}
 
-	makeAllRequests(apps)
+	publishRequests(apps)
 }
 
-func makeAllRequests(apps []models.App) {
-	var wg sync.WaitGroup
+// func makeAllRequests(apps []models.App) {
+// 	var wg sync.WaitGroup
 
+// 	// TODO: remove all the goroutines and replace the functionality with publishers
+// 	for _, app := range apps {
+// 		wg.Add(1)
+// 		go func(app models.App) {
+// 			defer wg.Done()
+// 			MakeAppRequest(app)
+// 		}(app)
+// 	}
+
+// 	wg.Wait()
+// }
+
+func publishRequests(apps []models.App) {
+	var wg sync.WaitGroup
 	for _, app := range apps {
 		wg.Add(1)
 		go func(app models.App) {
 			defer wg.Done()
-			makeRequest(app)
+			event.EB.Publish("makeRequest", app)
 		}(app)
 	}
-
 	wg.Wait()
 }
 
-func makeRequest(app models.App) {
+func MakeAppRequest(app models.App) {
 	ok, err := validateApp(app)
 	if err != nil {
 		log.Println("Error validating the app: ", err)
 	}
 	if !ok {
-		log.Println("couldn't make requests to app: ", app.Name)
+		log.Println("Couldn't make request: ", app.Name)
 		return
 	}
 

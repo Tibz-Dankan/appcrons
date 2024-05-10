@@ -83,9 +83,9 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return nil, result.Error
 	}
 
-	if err = appCache.WriteByUser(userId, apps); err != nil {
-		return apps, err
-	}
+	// if err = appCache.WriteByUser(userId, apps); err != nil {
+	// 	return apps, err
+	// }
 
 	return apps, nil
 }
