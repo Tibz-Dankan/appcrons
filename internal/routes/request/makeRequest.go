@@ -117,7 +117,6 @@ func validateApp(app models.App) (bool, error) {
 
 	for _, rt := range app.RequestTime {
 		// Check and validate requestTime slot
-		log.Println("App has requestTime")
 		appDateStart := services.Date{TimeZone: rt.TimeZone, ISOStringDate: app.Request[0].CreatedAt.String(), HourMinSec: rt.Start}
 		appDateEnd := services.Date{TimeZone: rt.TimeZone, ISOStringDate: app.Request[0].CreatedAt.String(), HourMinSec: rt.End}
 
@@ -135,6 +134,7 @@ func validateApp(app models.App) (bool, error) {
 
 		if isEqualToStartTime || isEqualToEndTime || isWithinRequestTimeRange {
 			// Check and validate requestInterval
+			log.Println("App time frame is correct")
 			lastRequestCreatedAt, _ := appDateStart.ISOTime()
 			timeDiff := currentTimeStart.Sub(lastRequestCreatedAt).Minutes()
 			requestInterval, err := strconv.Atoi(app.RequestInterval)
