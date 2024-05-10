@@ -88,6 +88,7 @@ func makeRequest(app models.App) {
 	app.Request = []models.Request{request}
 
 	event.EB.Publish("app", app)
+	event.EB.Publish("updateApp", app)
 }
 
 func validateApp(app models.App) (bool, error) {

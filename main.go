@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
@@ -33,6 +34,8 @@ func main() {
 
 	// Call StartRequestScheduler after server is started
 	request.StartRequestScheduler()
+
+	event.EventSubscribers()
 
 	select {}
 }

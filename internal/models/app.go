@@ -32,20 +32,24 @@ func (a *App) Create(app App) (App, error) {
 
 func (a *App) FindOne(id string) (App, error) {
 	var app App
-	var err error
+	// var err error
 
-	if app, err = appCache.Read(id); err != nil {
-		return app, err
-	}
+	// if app, err = appCache.Read(id); err != nil {
+	// 	return app, err
+	// }
 
-	if app.ID != "" {
-		return app, nil
-	}
-	db.First(&app, "id = ?", id)
+	// if app.ID != "" {
+	// 	return app, nil
+	// }
+	// db.First(&app, "id = ?", id)
 
-	if err = appCache.Write(app); err != nil {
-		return app, err
-	}
+	// if err = appCache.Write(app); err != nil {
+	// 	return app, err
+	// }
+
+	db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
+		return db.Order("\"createdAt\" DESC").Limit(1)
+	}).First(&app, "id = ?", id)
 
 	return app, nil
 }

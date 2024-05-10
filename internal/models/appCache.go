@@ -141,6 +141,9 @@ func (ac *AppCache) WriteOneToAll(app App) error {
 		return err
 	}
 
+	// TODO: check where app exists in the cache
+	// TODO: reuse the code for reading and writing to the cache
+
 	// update the app info in the app array
 	for i, a := range apps {
 		if a.ID == app.ID {
