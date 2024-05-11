@@ -8,6 +8,7 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
+	"github.com/Tibz-Dankan/keep-active/internal/services"
 
 	"github.com/rs/cors"
 )
@@ -28,6 +29,7 @@ func main() {
 	http.Handle("/", handler)
 
 	models.DBAutoMigrate()
+	services.UpdateCacheOnBoot()
 
 	log.Println("Starting http server up on 8000")
 	go http.ListenAndServe(":8000", nil)

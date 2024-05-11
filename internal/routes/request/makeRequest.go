@@ -110,6 +110,7 @@ func MakeAppRequest(app models.App) {
 		AppID:      app.ID,
 		StatusCode: response.StatusCode,
 		Duration:   response.RequestTimeMS,
+		StartedAt:  response.StartedAt,
 	}
 
 	requestId, err := request.Create(request)
@@ -130,16 +131,22 @@ func validateApp(app models.App) (bool, error) {
 	if app.IsDisabled {
 		return false, nil
 	}
-	if app.RequestTime[0].ID == "" {
-		// Check and validate requestInterval
+
+	hasLastRequest := len(app.Request) > 0
+
+	// Check and validate requestInterval
+	if len(app.RequestTime) == 0 {
+		if !hasLastRequest {
+			return true, nil
+		}
 		log.Println("App doesn't have requestTime")
 		currentTime := time.Now()
 		location := currentTime.Location().String()
-		appDate := services.Date{TimeZone: location, ISOStringDate: app.Request[0].CreatedAt.String()}
+		appDate := services.Date{TimeZone: location, ISOStringDate: app.Request[0].StartedAt.String()}
 
 		currentAppTime, _ := appDate.CurrentTime()
-		lastRequestCreatedAt, _ := appDate.ISOTime()
-		timeDiff := currentAppTime.Sub(lastRequestCreatedAt).Minutes()
+		lastRequestStartedAt, _ := appDate.ISOTime()
+		timeDiff := currentAppTime.Sub(lastRequestStartedAt).Minutes()
 		requestInterval, err := strconv.Atoi(app.RequestInterval)
 		if err != nil {
 			log.Println("Error converting string to integer:", err)
@@ -153,8 +160,14 @@ func validateApp(app models.App) (bool, error) {
 
 	for _, rt := range app.RequestTime {
 		// Check and validate requestTime slot
-		appDateStart := services.Date{TimeZone: rt.TimeZone, ISOStringDate: app.Request[0].CreatedAt.String(), HourMinSec: rt.Start}
-		appDateEnd := services.Date{TimeZone: rt.TimeZone, ISOStringDate: app.Request[0].CreatedAt.String(), HourMinSec: rt.End}
+
+		lastReqStartedAtStr := time.Now().String()
+		if hasLastRequest {
+			lastReqStartedAtStr = app.Request[0].StartedAt.String()
+		}
+
+		appDateStart := services.Date{TimeZone: rt.TimeZone, ISOStringDate: lastReqStartedAtStr, HourMinSec: rt.Start}
+		appDateEnd := services.Date{TimeZone: rt.TimeZone, ISOStringDate: lastReqStartedAtStr, HourMinSec: rt.End}
 
 		startTime, _ := appDateStart.HourMinSecTime()
 		endTime, _ := appDateEnd.HourMinSecTime()
@@ -172,8 +185,11 @@ func validateApp(app models.App) (bool, error) {
 		if isEqualToStartTime || isEqualToEndTime || isWithinRequestTimeRange {
 			// Check and validate requestInterval
 			log.Println("App time frame is correct")
-			lastRequestCreatedAt, _ := appDateStart.ISOTime()
-			timeDiff := currentTimeStart.Sub(lastRequestCreatedAt).Minutes()
+			if !hasLastRequest {
+				return true, nil
+			}
+			lastRequestStartedAt, _ := appDateStart.ISOTime()
+			timeDiff := currentTimeStart.Sub(lastRequestStartedAt).Minutes()
 			requestInterval, err := strconv.Atoi(app.RequestInterval)
 			if err != nil {
 				log.Println("Error converting string to integer:::", err)
