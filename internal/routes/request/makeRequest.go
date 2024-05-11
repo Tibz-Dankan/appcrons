@@ -13,23 +13,33 @@ import (
 )
 
 func StartRequestScheduler() {
-	go RequestPublishScheduler()
+	go requestPublishScheduler()
 	go requestEventSubscriber()
 }
 
-func RequestPublishScheduler() {
+// Runs the requestPublisher fn at
+// start of every minute
+func requestPublishScheduler() {
 	for {
-		RequestPublisher()
-		time.Sleep(1 * time.Minute)
+		now := time.Now()
+		nextMinute := now.Truncate(time.Minute).Add(time.Minute)
+		sleepDuration := nextMinute.Sub(now)
+		seconds := now.Second()
+		if seconds == 0 {
+			requestPublisher()
+		}
+
+		time.Sleep(sleepDuration)
 	}
 }
 
+// Subscribes/listens to all published
+// app request events
 func requestEventSubscriber() {
 	appCh := make(chan event.DataEvent)
 	event.EB.Subscribe("makeRequest", appCh)
 	type App = models.App
 
-	// Listening for events
 	for {
 		var wg sync.WaitGroup
 		appEvent := <-appCh
@@ -48,7 +58,7 @@ func requestEventSubscriber() {
 	}
 }
 
-func RequestPublisher() {
+func requestPublisher() {
 	app := models.App{}
 
 	apps, err := app.FindAll()
@@ -64,6 +74,7 @@ func RequestPublisher() {
 	publishRequests(apps)
 }
 
+// publishes all app request events
 func publishRequests(apps []models.App) {
 	var wg sync.WaitGroup
 	for _, app := range apps {
@@ -76,6 +87,7 @@ func publishRequests(apps []models.App) {
 	wg.Wait()
 }
 
+// Makes request for the app
 func MakeAppRequest(app models.App) {
 	ok, err := validateApp(app)
 	if err != nil {
@@ -113,6 +125,7 @@ func MakeAppRequest(app models.App) {
 	event.EB.Publish("updateApp", app)
 }
 
+// Validates the app's eligibility for making requests
 func validateApp(app models.App) (bool, error) {
 	if app.IsDisabled {
 		return false, nil
