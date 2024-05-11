@@ -13,19 +13,9 @@ import (
 )
 
 func StartRequestScheduler() {
-	// go MakeRequestScheduler()
 	go RequestPublishScheduler()
-	requestEventSubscriber()
+	go requestEventSubscriber()
 }
-
-// func MakeRequestScheduler() {
-// 	for {
-// 		// MakeRequest()
-// 		RequestPublisher()
-// 		// time.Sleep(5 * time.Minute)
-// 		time.Sleep(1 * time.Minute)
-// 	}
-// }
 
 func RequestPublishScheduler() {
 	for {
@@ -34,25 +24,7 @@ func RequestPublishScheduler() {
 	}
 }
 
-// func MakeRequest() {
-// 	app := models.App{}
-
-// 	apps, err := app.FindAll()
-// 	if err != nil {
-// 		log.Println("Error fetching apps:", err)
-// 		return
-// 	}
-
-// 	if len(apps) == 0 {
-// 		return
-// 	}
-
-// 	// makeAllRequests(apps)
-// 	publishRequests(apps)
-// }
-
 func requestEventSubscriber() {
-
 	appCh := make(chan event.DataEvent)
 	event.EB.Subscribe("makeRequest", appCh)
 	type App = models.App
@@ -69,7 +41,6 @@ func requestEventSubscriber() {
 		}
 		wg.Add(1)
 		go func(app models.App) {
-			log.Println("Making request===App: ", app.Name)
 			defer wg.Done()
 			MakeAppRequest(app)
 		}(app)
@@ -92,21 +63,6 @@ func RequestPublisher() {
 
 	publishRequests(apps)
 }
-
-// func makeAllRequests(apps []models.App) {
-// 	var wg sync.WaitGroup
-
-// 	// TODO: remove all the goroutines and replace the functionality with publishers
-// 	for _, app := range apps {
-// 		wg.Add(1)
-// 		go func(app models.App) {
-// 			defer wg.Done()
-// 			MakeAppRequest(app)
-// 		}(app)
-// 	}
-
-// 	wg.Wait()
-// }
 
 func publishRequests(apps []models.App) {
 	var wg sync.WaitGroup
