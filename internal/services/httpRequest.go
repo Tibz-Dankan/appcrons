@@ -10,9 +10,10 @@ import (
 )
 
 type Response struct {
-	Message       string `json:"message"`
-	StatusCode    int    `json:"statusCode"`
-	RequestTimeMS int    `json:"requestTimeMS"`
+	Message       string    `json:"message"`
+	StatusCode    int       `json:"statusCode"`
+	RequestTimeMS int       `json:"requestTimeMS"`
+	StartedAt     time.Time `json:"startedAt"`
 }
 
 func MakeHTTPRequest(URL string) (Response, error) {
@@ -44,6 +45,7 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response.StatusCode = res.StatusCode
 	response.Message = body.Message
 	response.RequestTimeMS = requestTimeMS
+	response.StartedAt = startTime
 
 	log.Printf("Request statusCode: %d Duration: %d URL: %s\n", res.StatusCode, requestTimeMS, URL)
 	log.Printf("Response body: %s\n", resBody)

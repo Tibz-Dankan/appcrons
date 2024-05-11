@@ -14,8 +14,8 @@ type Date struct {
 const ISOStringLayout string = "2006-01-02 15:04:05.999999999 -0700 MST"
 const TimeLayout string = "2006-Jan-02 15:04:05 -0700"
 
-// Returns the current  in the
-// provided time zone
+// Returns the current in the provided time zone
+// with seconds set to 00
 func (d *Date) CurrentTime() (time.Time, error) {
 	currentTime := time.Now()
 
@@ -25,11 +25,15 @@ func (d *Date) CurrentTime() (time.Time, error) {
 		return time.Now(), err
 	}
 
-	return currentTime.In(locTimeZone), nil
+	// Setting seconds part to "00"
+	currentTime = currentTime.In(locTimeZone)
+	currentTime = currentTime.Truncate(time.Minute)
+
+	return currentTime, nil
 }
 
 // Returns the ISOStringDate as time in the
-// provided time zone
+// provided time zone with seconds set to 00
 func (d *Date) ISOTime() (time.Time, error) {
 
 	locTimeZone, err := time.LoadLocation(d.TimeZone)
@@ -44,8 +48,11 @@ func (d *Date) ISOTime() (time.Time, error) {
 		return time.Now(), err
 	}
 
-	return ISOTime.In(locTimeZone), nil
+	// Setting seconds part to "00"
+	ISOTime = ISOTime.In(locTimeZone)
+	ISOTime = ISOTime.Truncate(time.Minute)
 
+	return ISOTime, nil
 }
 
 // Return the date string in the format
@@ -71,7 +78,7 @@ func (d *Date) hourMinSecStr() string {
 }
 
 // Returns the HourMinSec as time in the
-// provided time zone
+// provided time zone with seconds set to 00
 func (d *Date) HourMinSecTime() (time.Time, error) {
 
 	locTimeZone, err := time.LoadLocation(d.TimeZone)
@@ -85,6 +92,10 @@ func (d *Date) HourMinSecTime() (time.Time, error) {
 		fmt.Println("Error parsing hourMinSecStr:", err)
 		return time.Now(), err
 	}
+
+	// Setting seconds part to "00"
+	HourMinSecTime = HourMinSecTime.In(locTimeZone)
+	HourMinSecTime = HourMinSecTime.Truncate(time.Minute)
 
 	return HourMinSecTime.In(locTimeZone), nil
 }
