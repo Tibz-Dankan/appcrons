@@ -41,7 +41,6 @@ func requestEventSubscriber() {
 	type App = models.App
 
 	for {
-		var wg sync.WaitGroup
 		appEvent := <-appCh
 		app, ok := appEvent.Data.(App)
 
@@ -49,12 +48,8 @@ func requestEventSubscriber() {
 			log.Println("Interface does not hold type App")
 			return
 		}
-		wg.Add(1)
-		go func(app models.App) {
-			defer wg.Done()
-			MakeAppRequest(app)
-		}(app)
-		wg.Wait()
+
+		go MakeAppRequest(app)
 	}
 }
 
@@ -71,11 +66,6 @@ func requestPublisher() {
 		return
 	}
 
-	publishRequests(apps)
-}
-
-// publishes all app request events
-func publishRequests(apps []models.App) {
 	var wg sync.WaitGroup
 	for _, app := range apps {
 		wg.Add(1)
@@ -112,6 +102,7 @@ func MakeAppRequest(app models.App) {
 		Duration:   response.RequestTimeMS,
 		StartedAt:  response.StartedAt,
 	}
+	log.Printf("Request statusCode: %d Duration: %d URL: %s\n", request.StatusCode, request.Duration, app.URL)
 
 	requestId, err := request.Create(request)
 	if err != nil {

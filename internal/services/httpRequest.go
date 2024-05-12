@@ -1,12 +1,8 @@
 package services
 
 import (
-	"context"
-	"log"
 	"net"
 	"net/http"
-	"os"
-	"os/signal"
 	"time"
 )
 
@@ -21,16 +17,6 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
 
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-	// Create a cancellable context and wire it up to signals from Ctrl-C.
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		<-signals
-		log.Println("Request cancelled with Ctrl-C")
-		cancel()
-	}()
-
 	req, err := http.NewRequest(http.MethodGet, URL, nil)
 	if err != nil {
 		return response, err
@@ -39,7 +25,7 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	req.Header.Set("Content-Type", "application/json")
 	defaultClient := http.DefaultClient
 	defaultClient.Timeout = time.Second * 30
-	res, err := defaultClient.Do(req.WithContext(ctx))
+	res, err := defaultClient.Do(req)
 
 	duration := time.Since(startTime)
 	requestTimeMS := int(duration.Milliseconds())
@@ -58,8 +44,6 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response.StatusCode = res.StatusCode
 	response.RequestTimeMS = requestTimeMS
 	response.StartedAt = startTime
-
-	log.Printf("Request statusCode: %d Duration: %d URL: %s\n", res.StatusCode, requestTimeMS, URL)
 
 	return response, nil
 }
