@@ -1,11 +1,12 @@
 package services
 
 import (
-	"encoding/json"
-	"io"
+	"context"
 	"log"
+	"net"
 	"net/http"
-	"strings"
+	"os"
+	"os/signal"
 	"time"
 )
 
@@ -20,35 +21,50 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
 
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	// Create a cancellable context and wire it up to signals from Ctrl-C.
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		<-signals
+		log.Println("Request cancelled with Ctrl-C")
+		cancel()
+	}()
+
 	req, err := http.NewRequest(http.MethodGet, URL, nil)
 	if err != nil {
 		return response, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return response, err
-	}
+	defaultClient := http.DefaultClient
+	defaultClient.Timeout = time.Second * 30
+	res, err := defaultClient.Do(req.WithContext(ctx))
 
 	duration := time.Since(startTime)
 	requestTimeMS := int(duration.Milliseconds())
 
-	type Body struct {
-		Message string `json:"message"`
+	if err != nil {
+		if isTimeoutError(err) {
+			response.StatusCode = 503
+			response.RequestTimeMS = requestTimeMS
+			response.StartedAt = startTime
+
+			return response, nil
+		}
+		return response, err
 	}
 
-	body := Body{}
-	resBody, _ := io.ReadAll(res.Body)
-	json.NewDecoder(strings.NewReader(string(resBody))).Decode(&body)
-
 	response.StatusCode = res.StatusCode
-	response.Message = body.Message
 	response.RequestTimeMS = requestTimeMS
 	response.StartedAt = startTime
 
 	log.Printf("Request statusCode: %d Duration: %d URL: %s\n", res.StatusCode, requestTimeMS, URL)
-	log.Printf("Response body: %s\n", resBody)
 
 	return response, nil
+}
+
+func isTimeoutError(err error) bool {
+	e, ok := err.(net.Error)
+	return ok && e.Timeout()
 }
