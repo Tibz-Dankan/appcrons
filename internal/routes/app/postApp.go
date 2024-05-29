@@ -42,6 +42,12 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	savedApp, err = app.FindByURL(app.URL)
+	if err != nil {
+		services.AppError(err.Error(), 400, w)
+		return
+	}
+
 	if savedApp.URL != "" {
 		services.AppError("App URL already exists!", 400, w)
 		return
