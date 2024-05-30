@@ -2,7 +2,9 @@ package request
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
@@ -13,13 +15,38 @@ func getRequestByUser(w http.ResponseWriter, r *http.Request) {
 	request := models.Request{}
 
 	appId := r.URL.Query().Get("appId")
+	before := r.URL.Query().Get("before")
+
+	var createdAtBefore time.Time
+
+	if before == "" {
+		createdAtBefore = time.Now()
+		log.Println("createdAtBefore: ", createdAtBefore)
+	}
+
+	if before != "" {
+		log.Println("before: ", before)
+
+		log.Println("beforeWithReplaced spaces: ", services.ReplaceSpaces(before))
+
+		date := services.Date{ISOStringDate: services.ReplaceSpaces(before)}
+
+		createdAt, err := date.RFC3339Nano()
+		if err != nil {
+			services.AppError("Something went wrong, please try again later!", 500, w)
+			return
+		}
+		createdAtBefore = createdAt
+		log.Println("before: ", before)
+		log.Println("createdAtBefore: ", createdAtBefore)
+	}
 
 	if appId == "" {
 		services.AppError("Please provide appId", 400, w)
 		return
 	}
 
-	requests, err := request.FindByApp(appId)
+	requests, err := request.FindByApp(appId, createdAtBefore)
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 	}

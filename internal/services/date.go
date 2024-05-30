@@ -13,6 +13,7 @@ type Date struct {
 
 const ISOStringLayout string = "2006-01-02 15:04:05.999999999 -0700 MST"
 const TimeLayout string = "2006-Jan-02 15:04:05 -0700"
+const RFC3339NanoLayout string = "2006-01-02T15:04:05.999999999+03:00"
 
 // Returns the current in the provided time zone
 // with seconds set to 00
@@ -98,4 +99,18 @@ func (d *Date) HourMinSecTime() (time.Time, error) {
 	HourMinSecTime = HourMinSecTime.Truncate(time.Minute)
 
 	return HourMinSecTime.In(locTimeZone), nil
+}
+
+// Returns time in RFC3339Nano(includes nanoseconds) format
+// of the provided IsoStringDate in the format like
+// '2024-05-09T13:42:59.994557+03:00'
+func (d *Date) RFC3339Nano() (time.Time, error) {
+
+	parsedTime, err := time.Parse(RFC3339NanoLayout, d.ISOStringDate)
+	if err != nil {
+		fmt.Println("Error parsing RFC3339NanoInput:", err)
+		return time.Now(), err
+	}
+
+	return parsedTime, nil
 }
