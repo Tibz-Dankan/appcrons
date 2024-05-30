@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -42,22 +44,16 @@ func (r *Request) FindOne(id string) (Request, error) {
 	return request, nil
 }
 
-func (r *Request) FindByApp(appId string) ([]Request, error) {
+func (r *Request) FindByApp(appId string, createdAtBefore time.Time) ([]Request, error) {
+
 	var requests []Request
-	var err error
 
-	if requests, err = requestCache.ReadByApp(appId); err != nil {
-		return requests, err
-	}
-
-	if len(requests) != 0 {
-		return requests, nil
-	}
-
-	db.Find(&requests, "\"appId\" = ?", appId)
-
-	if err = requestCache.WriteByApp(appId, requests); err != nil {
-		return requests, err
+	result := db.Where("\"appId\" = ? AND \"createdAt\" < ?", appId, createdAtBefore).
+		Order("\"createdAt\" desc").
+		Limit(10).
+		Find(&requests)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return requests, nil
