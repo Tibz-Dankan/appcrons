@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
@@ -20,6 +21,13 @@ func sendMessage(w http.ResponseWriter, message, userId string) {
 
 	w.Write([]byte("data: " + string(data) + "\n\n"))
 	w.(http.Flusher).Flush()
+}
+
+func sendHeartMessage(w http.ResponseWriter, userId string) {
+	for {
+		time.Sleep(30 * time.Second)
+		sendMessage(w, "heartbeat", userId)
+	}
 }
 
 func sendAppToClient(app models.App, clientManager *services.ClientManager) error {
@@ -61,7 +69,9 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 
 	// Writing warmup message
 	sendMessage(w, "warmup", userId)
-	// TODO: send message to client every 30 seconds
+
+	// Start the heartbeat message goroutine
+	go sendHeartMessage(w, userId)
 
 	appCh := make(chan event.DataEvent)
 
