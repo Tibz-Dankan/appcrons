@@ -61,19 +61,10 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 
 	event.EB.Publish("createApp", app)
 
-	newApp := map[string]interface{}{
-		"id":              createdApp.ID,
-		"name":            createdApp.Name,
-		"url":             createdApp.URL,
-		"requestInterval": createdApp.RequestInterval,
-		"updatedAt":       createdApp.UpdatedAt,
-		"createdAt":       createdApp.CreatedAt,
-	}
-
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": "Created successfully",
-		"app":     newApp,
+		"app":     createdApp,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
