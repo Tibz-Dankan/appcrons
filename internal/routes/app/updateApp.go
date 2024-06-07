@@ -61,26 +61,22 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = app.Update()
+	updatedApp := savedApp
+	updatedApp.Name = app.Name
+	updatedApp.URL = app.URL
+	updatedApp.RequestInterval = app.RequestInterval
+
+	err = updatedApp.Update()
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
 	}
 
-	event.EB.Publish("updateApp", app)
-
-	updatedApp := map[string]interface{}{
-		"id":              app.ID,
-		"name":            app.Name,
-		"url":             app.URL,
-		"requestInterval": app.RequestInterval,
-		"updatedAt":       savedApp.UpdatedAt,
-		"createdAt":       savedApp.CreatedAt,
-	}
+	event.EB.Publish("updateApp", updatedApp)
 
 	response := map[string]interface{}{
 		"status":  "success",
-		"message": "Created successfully",
+		"message": "Updated successfully",
 		"app":     updatedApp,
 	}
 
