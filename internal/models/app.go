@@ -78,7 +78,7 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 			Where("\"requests\".\"appId\" = apps.id").
 			Group("\"requests\".\"appId\"")
 		return db.Where("\"requests\".\"createdAt\" IN (?)", subQuery).Joins("JOIN apps ON apps.id = \"requests\".\"appId\"")
-	}).Where("\"userId\" = ?", userId).Find(&apps)
+	}).Where("\"userId\" = ?", userId).Order("\"updatedAt\" desc").Find(&apps)
 	if result.Error != nil {
 		return nil, result.Error
 	}
