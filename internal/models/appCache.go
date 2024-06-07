@@ -64,6 +64,7 @@ func (ac *AppCache) Read(key string) (App, error) {
 	return app, nil
 }
 
+// TODO: sort user apps by updatedAt in desc order
 func (ac *AppCache) ReadByUser(userId string) ([]App, error) {
 
 	apps := []App{}
