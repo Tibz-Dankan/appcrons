@@ -2,11 +2,12 @@ package request
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
+	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -33,49 +34,6 @@ func timeValue(timeArg string) string {
 	return dateValueStr
 }
 
-func validateRequestTime(startTime, endTime time.Time, savedRequestTimes []models.RequestTime) error {
-	// timeLayout -> "2006-Jan-02 15:04:05"
-
-	for _, rt := range savedRequestTimes {
-		savedEndTime, err := time.Parse(timeLayout, timeValue(rt.End))
-		if err != nil {
-			return err
-		}
-
-		savedStartTime, err := time.Parse(timeLayout, timeValue(rt.Start))
-		if err != nil {
-			return err
-		}
-
-		if savedStartTime.Equal(startTime) || savedEndTime.Equal(endTime) {
-			return errors.New("time intervals can't be equal to existing ones")
-		}
-
-		// Check for upcoming interval top
-		if savedStartTime.Equal(endTime) {
-			return errors.New("end time can't be equal to any existing interval")
-		}
-
-		if savedStartTime.After(endTime) {
-			if !savedStartTime.After(startTime) {
-				return errors.New("start time can't be greater than existing start time")
-			}
-		}
-
-		// Check for upcoming interval down
-		if savedEndTime.Equal(startTime) {
-			return errors.New("start time can't be equal to any existing interval")
-		}
-
-		if savedEndTime.Before(startTime) {
-			if !savedEndTime.Before(endTime) {
-				return errors.New("end time can't be greater than existing end time")
-			}
-		}
-	}
-	return nil
-}
-
 func postRequestTime(w http.ResponseWriter, r *http.Request) {
 
 	requestTime := models.RequestTime{}
@@ -91,33 +49,19 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parsedStartTime, err := time.Parse(timeLayout, timeValue(requestTime.Start))
+	currentTime := time.Now()
+	location := currentTime.Location().String()
+
+	appDate := services.Date{TimeZone: location, ISOStringDate: currentTime.String(), HourMinSec: requestTime.Start}
+
+	parsedStartTime, err := appDate.HourMinSecTime()
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
 	}
+	log.Println("parsedStartTime:::: ", parsedStartTime)
 
-	parsedEndTime, err := time.Parse(timeLayout, timeValue(requestTime.End))
-	if err != nil {
-		services.AppError(err.Error(), 400, w)
-		return
-	}
-
-	if !parsedStartTime.Before(parsedEndTime) {
-		services.AppError("Start Time can't be greater or equal End Time", 400, w)
-	}
-
-	// Fetch all request time for the app in the database
-	savedRequestTimes, err := requestTime.FindByApp(requestTime.AppID)
-	if err != nil {
-		services.AppError(err.Error(), 400, w)
-		return
-	}
-
-	if err := validateRequestTime(parsedStartTime, parsedEndTime, savedRequestTimes); err != nil {
-		services.AppError(err.Error(), 400, w)
-		return
-	}
+	// TODO: to validate the requestTime being submitted
 
 	createdRequestTime, err := requestTime.Create(requestTime)
 	if err != nil {
@@ -130,6 +74,9 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		"message":     "Request Time Created successfully",
 		"requestTime": createdRequestTime,
 	}
+
+	app := models.App{ID: requestTime.AppID}
+	event.EB.Publish("updateApp", app)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
