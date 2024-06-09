@@ -2,10 +2,10 @@ package services
 
 import (
 	"log"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/config"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
-	"gorm.io/gorm"
 )
 
 // This fn must be called at the start of
@@ -16,23 +16,34 @@ func UpdateCacheOnBoot() {
 
 	appCache := models.AppCache{}
 	apps := []models.App{}
+	savedApps := []models.App{}
+
 	var err error
 	var db = config.Db()
 
-	result := db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
-		subQuery := db.Table("requests").
-			Select("MAX(\"requests\".\"createdAt\")").
-			Where("\"requests\".\"appId\" = apps.id").
-			Group("\"requests\".\"appId\"")
-		return db.Where("\"requests\".\"createdAt\" IN (?)", subQuery).Joins("JOIN apps ON apps.id = \"requests\".\"appId\"")
-	}).Find(&apps)
+	startTime := time.Now()
+	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps)
 	if result.Error != nil {
 		log.Println("Error writing to cache onBootUp: ", err)
 		return
 	}
 
-	if err := appCache.WriteAll(apps); err != nil {
+	for _, app := range apps {
+		var requests []models.Request
+		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		app.Request = requests
+
+		savedApps = append(savedApps, app)
+	}
+
+	duration := time.Since(startTime)
+	queryTimeMS := int(duration.Milliseconds())
+
+	log.Println("queryTimeMS:", queryTimeMS)
+
+	if err := appCache.WriteAll(savedApps); err != nil {
 		log.Println("Error writing to cache onBootUp: ", err)
 		return
 	}
+	log.Println("Cache updated successfully")
 }

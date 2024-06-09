@@ -41,8 +41,8 @@ type App struct {
 	IsDisabled      bool           `gorm:"column:isDisabled" json:"isDisabled"`
 	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requests"`
 	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestTimes"`
-	CreatedAt       time.Time      `gorm:"column:createdAt" json:"createdAt"`
-	UpdatedAt       time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
+	CreatedAt       time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt       time.Time      `gorm:"column:updatedAt;index" json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
 

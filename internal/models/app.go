@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -32,20 +33,6 @@ func (a *App) Create(app App) (App, error) {
 
 func (a *App) FindOne(id string) (App, error) {
 	var app App
-	// var err error
-
-	// if app, err = appCache.Read(id); err != nil {
-	// 	return app, err
-	// }
-
-	// if app.ID != "" {
-	// 	return app, nil
-	// }
-	// db.First(&app, "id = ?", id)
-
-	// if err = appCache.Write(app); err != nil {
-	// 	return app, err
-	// }
 
 	db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
 		return db.Order("\"createdAt\" DESC").Limit(1)
@@ -55,7 +42,7 @@ func (a *App) FindOne(id string) (App, error) {
 }
 
 func (a *App) FindByUser(userId string) ([]App, error) {
-	var apps []App
+	var apps, userApps []App
 	var err error
 
 	if apps, err = appCache.ReadByUser(userId); err != nil {
@@ -66,28 +53,25 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return apps, nil
 	}
 
-	log.Println("Fetching apps  from db")
-
-	// db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
-	// 	return db.Order("\"createdAt\" DESC").Limit(1)
-	// }).Find(&apps, "\"userId\" = ?", userId)
-
-	result := db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
-		subQuery := db.Table("requests").
-			Select("MAX(\"requests\".\"createdAt\")").
-			Where("\"requests\".\"appId\" = apps.id").
-			Group("\"requests\".\"appId\"")
-		return db.Where("\"requests\".\"createdAt\" IN (?)", subQuery).Joins("JOIN apps ON apps.id = \"requests\".\"appId\"")
-	}).Where("\"userId\" = ?", userId).Order("\"updatedAt\" desc").Find(&apps)
+	startTime := time.Now()
+	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps, "\"userId\" = ?", userId)
 	if result.Error != nil {
-		return nil, result.Error
+		return apps, nil
 	}
 
-	// if err = appCache.WriteByUser(userId, apps); err != nil {
-	// 	return apps, err
-	// }
+	for _, app := range apps {
+		var requests []Request
+		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		app.Request = requests
 
-	return apps, nil
+		userApps = append(userApps, app)
+	}
+
+	duration := time.Since(startTime)
+	queryTimeMS := int(duration.Milliseconds())
+	log.Println("queryTimeMS:", queryTimeMS)
+
+	return userApps, nil
 }
 
 func (a *App) FindByName(name string) (App, error) {
@@ -107,7 +91,7 @@ func (a *App) FindByURL(url string) (App, error) {
 }
 
 func (a *App) FindAll() ([]App, error) {
-	var apps []App
+	var apps, savedApps []App
 	var err error
 
 	if apps, err = appCache.ReadAll(); err != nil {
@@ -119,22 +103,31 @@ func (a *App) FindAll() ([]App, error) {
 	}
 
 	log.Println("Fetching all apps")
-	result := db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
-		subQuery := db.Table("requests").
-			Select("MAX(\"requests\".\"createdAt\")").
-			Where("\"requests\".\"appId\" = apps.id").
-			Group("\"requests\".\"appId\"")
-		return db.Where("\"requests\".\"createdAt\" IN (?)", subQuery).Joins("JOIN apps ON apps.id = \"requests\".\"appId\"")
-	}).Find(&apps)
+
+	startTime := time.Now()
+	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps)
 	if result.Error != nil {
-		return nil, result.Error
+		return apps, nil
 	}
 
-	if err = appCache.WriteAll(apps); err != nil {
+	// TODO: to find pagination solution for this part
+	for _, app := range apps {
+		var requests []Request
+		db.Order("\"createdAt\" DESC").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		app.Request = requests
+
+		savedApps = append(savedApps, app)
+	}
+
+	duration := time.Since(startTime)
+	queryTimeMS := int(duration.Milliseconds())
+	log.Println("queryTimeMS:", queryTimeMS)
+
+	if err = appCache.WriteAll(savedApps); err != nil {
 		return apps, err
 	}
 
-	return apps, nil
+	return savedApps, nil
 }
 
 // Update updates one user in the database, using the information
