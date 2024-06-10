@@ -35,10 +35,10 @@ func (rt *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
 	return requestTimes, nil
 }
 
-func (rt *RequestTime) Update() (RequestTime, error) {
+func (rt *RequestTime) Update() error {
 	db.Save(&rt)
 
-	return *rt, nil
+	return nil
 }
 
 func (r *RequestTime) Delete(id string) error {
