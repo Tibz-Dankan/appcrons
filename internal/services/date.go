@@ -14,7 +14,8 @@ type Date struct {
 }
 
 const TimeLayout string = "2006-01-02 15:04:05.999999999 -0700 MST"
-const RFC3339NanoLayout string = "2006-01-02T15:04:05.999999999+03:00"
+
+const RFC3339NanoLayout string = "2006-01-02T15:04:05.999999999-07:00"
 
 // Returns the current in the provided time zone
 // with seconds set to 00
