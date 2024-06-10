@@ -21,10 +21,10 @@ func (rt *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
 }
 
 func (rt *RequestTime) FindOne(id string) (RequestTime, error) {
-	var request RequestTime
-	db.First(&request, "id = ?", id)
+	var requestTime RequestTime
+	db.First(&requestTime, "id = ?", id)
 
-	return request, nil
+	return requestTime, nil
 }
 
 func (rt *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
@@ -42,7 +42,8 @@ func (rt *RequestTime) Update() error {
 }
 
 func (r *RequestTime) Delete(id string) error {
-	if err := db.Delete(&RequestTime{}, id).Error; err != nil {
+
+	if err := db.Unscoped().Where("id = ?", id).Delete(&RequestTime{}).Error; err != nil {
 		return err
 	}
 
