@@ -44,16 +44,20 @@ func (r *Request) FindOne(id string) (Request, error) {
 	return request, nil
 }
 
-func (r *Request) FindByApp(appId string, createdAtBefore time.Time) ([]Request, error) {
-
+func (r *Request) FindByApp(appId string, createdAtBeforeCursor time.Time) ([]Request, error) {
 	var requests []Request
 
-	result := db.Where("\"appId\" = ? AND \"createdAt\" < ?", appId, createdAtBefore).
-		Order("\"createdAt\" desc").
-		Limit(10).
-		Find(&requests)
-	if result.Error != nil {
-		return nil, result.Error
+	// 12-hour threshold
+	threshold := time.Now().Add(-12 * time.Hour)
+
+	query := db.Table("requests").Where("\"appId\" = ?", appId).Where("\"createdAt\" > ?", threshold)
+
+	if !createdAtBeforeCursor.IsZero() {
+		query = query.Where("\"createdAt\" < ?", createdAtBeforeCursor)
+	}
+
+	if err := query.Order("\"createdAt\" desc").Limit(10).Find(&requests).Error; err != nil {
+		return nil, err
 	}
 
 	return requests, nil
