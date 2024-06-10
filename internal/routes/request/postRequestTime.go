@@ -2,7 +2,6 @@ package request
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -12,27 +11,6 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
 )
-
-var timeLayout string = "2006-Jan-02 15:04:05"
-
-func timeValue(timeArg string) string {
-	currentTime := time.Now()
-
-	var currentTimeDay string
-	day := currentTime.Day()
-	if day < 10 {
-		currentTimeDay = "0" + fmt.Sprint(day)
-	} else {
-		currentTimeDay = fmt.Sprint(day)
-	}
-	currentTimeYear := fmt.Sprint(currentTime.Year())
-	currentTimeMonth := fmt.Sprint(currentTime.Month())
-
-	date := currentTimeYear + "-" + currentTimeMonth + "-" + currentTimeDay
-	dateValueStr := date + " " + timeArg
-
-	return dateValueStr
-}
 
 func postRequestTime(w http.ResponseWriter, r *http.Request) {
 
