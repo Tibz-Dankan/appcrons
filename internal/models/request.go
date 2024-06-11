@@ -44,7 +44,7 @@ func (r *Request) FindOne(id string) (Request, error) {
 	return request, nil
 }
 
-func (r *Request) FindByApp(appId string, createdAtBeforeCursor time.Time) ([]Request, error) {
+func (r *Request) FindByApp(appId string, createdAtBeforeCursor time.Time) ([]Request, int64, error) {
 	var requests []Request
 
 	// 12-hour threshold
@@ -52,15 +52,20 @@ func (r *Request) FindByApp(appId string, createdAtBeforeCursor time.Time) ([]Re
 
 	query := db.Table("requests").Where("\"appId\" = ?", appId).Where("\"createdAt\" > ?", threshold)
 
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
 	if !createdAtBeforeCursor.IsZero() {
 		query = query.Where("\"createdAt\" < ?", createdAtBeforeCursor)
 	}
 
 	if err := query.Order("\"createdAt\" desc").Limit(10).Find(&requests).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return requests, nil
+	return requests, count, nil
 }
 
 func (r *Request) FindAll() ([]Request, error) {
