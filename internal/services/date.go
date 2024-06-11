@@ -17,6 +17,8 @@ const TimeLayout string = "2006-01-02 15:04:05.999999999 -0700 MST"
 
 const RFC3339NanoLayout string = "2006-01-02T15:04:05.999999999-07:00"
 
+const UTCLayout string = "2006-01-02T15:04:05.999999999Z"
+
 // Returns the current in the provided time zone
 // with seconds set to 00
 func (d *Date) CurrentTime() (time.Time, error) {
@@ -107,6 +109,20 @@ func (d *Date) RFC3339Nano() (time.Time, error) {
 	parsedTime, err := time.Parse(RFC3339NanoLayout, d.ISOStringDate)
 	if err != nil {
 		fmt.Println("Error parsing RFC3339NanoInput:", err)
+		return time.Now(), err
+	}
+
+	return parsedTime, nil
+}
+
+// Returns time in UTC  format
+// of the provided IsoStringDate in the format like
+// '2024-06-11T19:12:00.114666Z'
+func (d *Date) UTC() (time.Time, error) {
+
+	parsedTime, err := time.Parse(UTCLayout, d.ISOStringDate)
+	if err != nil {
+		fmt.Println("Error parsing UTC Input:", err)
 		return time.Now(), err
 	}
 
