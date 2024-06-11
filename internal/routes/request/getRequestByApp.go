@@ -46,13 +46,14 @@ func getRequestByUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requests, err := request.FindByApp(appId, createdAtBefore)
+	requests, count, err := request.FindByApp(appId, createdAtBefore)
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 	}
 
 	data := map[string]interface{}{
 		"requests": requests,
+		"count":    count,
 	}
 	response := map[string]interface{}{
 		"status":  "success",
