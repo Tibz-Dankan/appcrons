@@ -15,13 +15,13 @@ func (r *Request) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-func (r *Request) Create(request Request) (string, error) {
+func (r *Request) Create(request Request) (Request, error) {
 	result := db.Create(&request)
 
 	if result.Error != nil {
-		return "", result.Error
+		return request, result.Error
 	}
-	return request.ID, nil
+	return request, nil
 }
 
 func (r *Request) FindOne(id string) (Request, error) {

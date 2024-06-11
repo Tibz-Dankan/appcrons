@@ -104,12 +104,10 @@ func MakeAppRequest(app models.App) {
 	}
 	log.Printf("Request statusCode: %d Duration: %d URL: %s\n", request.StatusCode, request.Duration, app.URL)
 
-	requestId, err := request.Create(request)
+	request, err = request.Create(request)
 	if err != nil {
 		log.Println("Error saving request:", err)
 	}
-
-	request.ID = requestId
 
 	app.Request = []models.Request{request}
 
