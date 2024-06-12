@@ -13,11 +13,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func sendMessage(w http.ResponseWriter, message, userId string) {
+func sendMessage(message, userId string, clientManager *services.ClientManager) error {
+	w, ok := clientManager.GetClient(userId)
+	if !ok {
+		log.Println("Client not found")
+		return nil
+	}
+
 	f, ok := w.(http.Flusher)
 	if !ok {
 		log.Println("Response writer does not implement http.Flusher")
-		return
+		return nil
 	}
 
 	data, _ := json.Marshal(map[string]string{
@@ -28,9 +34,10 @@ func sendMessage(w http.ResponseWriter, message, userId string) {
 	_, err := w.Write([]byte("data: " + string(data) + "\n\n"))
 	if err != nil {
 		log.Println("Error writing to response writer:", err)
-		return
+		return err
 	}
 	f.Flush()
+	return nil
 }
 
 func sendAppToClient(app models.App, clientManager *services.ClientManager) error {
@@ -71,11 +78,15 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 		services.AppError("UserID not found in context", 500, w)
 		return
 	}
+	log.Println("User connected:", userId)
+
 	clientManager := services.NewClientManager()
 	clientManager.AddClient(userId, w)
+	defer clientManager.RemoveClient(userId)
 
-	// Writing warmup message
-	sendMessage(w, "warmup", userId)
+	if err := sendMessage("warmup", userId, clientManager); err != nil {
+		return
+	}
 
 	appCh := make(chan event.DataEvent)
 	// defer close(appCh)
@@ -87,7 +98,6 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 	heartbeatTicker := time.NewTicker(30 * time.Second)
 	defer heartbeatTicker.Stop()
 
-	// Listening for events and sending heartbeats
 	for {
 		select {
 		case appEvent := <-appCh:
@@ -101,12 +111,14 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 				services.AppError(err.Error(), 500, w)
 				return
 			}
-		default:
-			select {
-			case <-heartbeatTicker.C:
-				sendMessage(w, "heartbeat", userId)
-				// default:
+		case <-heartbeatTicker.C:
+			err := sendMessage("heartbeat", userId, clientManager)
+			if err != nil {
+				log.Println("Error sending heartbeat: ", err)
+				return
 			}
+		case <-r.Context().Done():
+			log.Println("Client disconnected")
 		}
 	}
 }
