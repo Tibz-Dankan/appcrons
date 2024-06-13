@@ -1,6 +1,7 @@
 package request
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -78,25 +79,25 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 		services.AppError("UserID not found in context", 500, w)
 		return
 	}
-	log.Println("User connected:", userId)
+	log.Println("Client connected:", userId)
 
 	clientManager := services.NewClientManager()
 	clientManager.AddClient(userId, w)
-	defer clientManager.RemoveClient(userId)
 
 	if err := sendMessage("warmup", userId, clientManager); err != nil {
 		return
 	}
 
 	appCh := make(chan event.DataEvent)
-	// defer close(appCh)
-
 	event.EB.Subscribe("app", appCh)
 
 	type App = models.App
 
 	heartbeatTicker := time.NewTicker(30 * time.Second)
-	defer heartbeatTicker.Stop()
+
+	ctx, cancel := context.WithCancel(r.Context())
+	disconnect := ctx.Done()
+	defer cancel()
 
 	for {
 		select {
@@ -117,8 +118,13 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 				log.Println("Error sending heartbeat: ", err)
 				return
 			}
-		case <-r.Context().Done():
-			log.Println("Client disconnected")
+		case <-disconnect:
+			clientManager.RemoveClient(userId)
+			event.EB.Unsubscribe("app", appCh)
+			heartbeatTicker.Stop()
+			cancel()
+			log.Println("Client disconnected:", userId)
+			return
 		}
 	}
 }
