@@ -48,6 +48,23 @@ func (eb *EventBus) Subscribe(topic string, ch DataChannel) {
 	eb.rm.Unlock()
 }
 
+func (eb *EventBus) Unsubscribe(topic string, ch DataChannel) {
+	eb.rm.Lock()
+	if chans, found := eb.subscribers[topic]; found {
+		for i, c := range chans {
+			if c == ch {
+				eb.subscribers[topic] = append(chans[:i], chans[i+1:]...)
+				break
+			}
+		}
+		if len(eb.subscribers[topic]) == 0 {
+			delete(eb.subscribers, topic)
+		}
+		log.Println("unsubscribed from channel :::", &ch)
+	}
+	eb.rm.Unlock()
+}
+
 var EB = &EventBus{
 	subscribers: map[string]DataChannelSlice{},
 }
