@@ -24,8 +24,9 @@ func requestPublishScheduler() {
 		now := time.Now()
 		nextMinute := now.Truncate(time.Minute).Add(time.Minute)
 		sleepDuration := nextMinute.Sub(now)
-		seconds := now.Second()
-		if seconds == 0 {
+		minute := now.Minute()
+
+		if minute%5 == 0 && now.Second() == 0 {
 			requestPublisher()
 		}
 
