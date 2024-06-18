@@ -24,7 +24,8 @@ func (a *App) Create(app App) (App, error) {
 		return app, result.Error
 	}
 
-	if err := db.First(&app, "id = ?", app.ID).Error; err != nil {
+	app, err := a.FindOne(app.ID)
+	if err != nil {
 		return app, err
 	}
 
@@ -135,7 +136,7 @@ func (a *App) FindAll() ([]App, error) {
 func (a *App) Update() error {
 	db.Save(&a)
 
-	if err := appCache.Write(*a); err != nil {
+	if _, err := a.FindOne(a.ID); err != nil {
 		return err
 	}
 
