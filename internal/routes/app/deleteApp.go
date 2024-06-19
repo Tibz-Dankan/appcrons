@@ -14,7 +14,7 @@ func deleteApp(w http.ResponseWriter, r *http.Request) {
 	app := models.App{ID: appId}
 
 	if app.ID == "" {
-		services.AppError("Please provide requestTimeId", 400, w)
+		services.AppError("Please provide appId", 400, w)
 		return
 	}
 
@@ -41,6 +41,7 @@ func deleteApp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// event.EB.Publish("delete", app)
+	// TODO: to delete app from cache
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
