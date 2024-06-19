@@ -76,8 +76,16 @@ func (r *Request) FindAll() ([]Request, error) {
 }
 
 func (r *Request) Delete(id string) error {
-	db.Delete(&Request{}, id)
-	if err := requestCache.Delete(id); err != nil {
+
+	if err := db.Unscoped().Where("id = ?", id).Delete(&Request{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Request) DeleteByApp(appId string) error {
+
+	if err := db.Unscoped().Where("\"appId\" = ?", appId).Delete(&Request{}).Error; err != nil {
 		return err
 	}
 

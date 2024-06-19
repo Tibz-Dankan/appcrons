@@ -144,9 +144,18 @@ func (a *App) Update() error {
 }
 
 func (a *App) Delete(id string) error {
-	db.Delete(&App{}, id)
 
-	if err := appCache.Delete(id); err != nil {
+	request := Request{AppID: id}
+	requestTime := RequestTime{AppID: id}
+
+	if err := db.Unscoped().Where("id = ?", id).Delete(&App{}).Error; err != nil {
+		return err
+	}
+
+	if err := requestTime.DeleteByApp(id); err != nil {
+		return err
+	}
+	if err := request.DeleteByApp(id); err != nil {
 		return err
 	}
 
