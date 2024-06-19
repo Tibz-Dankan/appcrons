@@ -95,13 +95,13 @@ func (a *App) FindAll() ([]App, error) {
 	var apps, savedApps []App
 	var err error
 
-	if apps, err = appCache.ReadAll(); err != nil {
-		return apps, err
-	}
+	// if apps, err = appCache.ReadAll(); err != nil {
+	// 	return apps, err
+	// }
 
-	if len(apps) != 0 {
-		return apps, nil
-	}
+	// if len(apps) != 0 {
+	// 	return apps, nil
+	// }
 
 	log.Println("Fetching all apps")
 
@@ -144,9 +144,17 @@ func (a *App) Update() error {
 }
 
 func (a *App) Delete(id string) error {
-	db.Delete(&App{}, id)
 
-	if err := appCache.Delete(id); err != nil {
+	request := Request{AppID: id}
+	requestTime := RequestTime{AppID: id}
+
+	if err := requestTime.DeleteByApp(id); err != nil {
+		return err
+	}
+	if err := request.DeleteByApp(id); err != nil {
+		return err
+	}
+	if err := db.Unscoped().Where("id = ?", id).Delete(&App{}).Error; err != nil {
 		return err
 	}
 

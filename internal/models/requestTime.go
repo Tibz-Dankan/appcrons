@@ -49,3 +49,12 @@ func (r *RequestTime) Delete(id string) error {
 
 	return nil
 }
+
+func (r *RequestTime) DeleteByApp(appId string) error {
+
+	if err := db.Unscoped().Where("\"appId\" = ?", appId).Delete(&RequestTime{}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
