@@ -95,13 +95,13 @@ func (a *App) FindAll() ([]App, error) {
 	var apps, savedApps []App
 	var err error
 
-	if apps, err = appCache.ReadAll(); err != nil {
-		return apps, err
-	}
+	// if apps, err = appCache.ReadAll(); err != nil {
+	// 	return apps, err
+	// }
 
-	if len(apps) != 0 {
-		return apps, nil
-	}
+	// if len(apps) != 0 {
+	// 	return apps, nil
+	// }
 
 	log.Println("Fetching all apps")
 

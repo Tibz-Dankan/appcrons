@@ -40,9 +40,6 @@ func deleteApp(w http.ResponseWriter, r *http.Request) {
 		"message": savedApp.Name + " deleted successfully",
 	}
 
-	// event.EB.Publish("delete", app)
-	// TODO: to delete app from cache
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
