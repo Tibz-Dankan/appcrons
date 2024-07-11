@@ -19,7 +19,7 @@ func enableApp(w http.ResponseWriter, r *http.Request) {
 		services.AppError("Please provide appId", 500, w)
 	}
 
-	savedApp, err := app.FindOne(appId)
+	savedApp, err := app.FindAppDetails(appId)
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
