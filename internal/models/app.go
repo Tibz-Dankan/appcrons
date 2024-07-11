@@ -32,6 +32,18 @@ func (a *App) Create(app App) (App, error) {
 	return app, nil
 }
 
+// Fetches application details without
+// including its requestTime and last request.
+func (a *App) FindAppDetails(id string) (App, error) {
+	var app App
+
+	db.First(&app, "id = ?", id)
+
+	return app, nil
+}
+
+// Fetches application details and includes its
+// requestTime and last request.
 func (a *App) FindOne(id string) (App, error) {
 	var app App
 
