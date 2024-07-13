@@ -30,7 +30,7 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	savedApp, err := app.FindOne(appId)
+	savedApp, err := app.FindAppDetails(appId)
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
