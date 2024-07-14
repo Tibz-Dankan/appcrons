@@ -33,7 +33,7 @@ func enableApp(w http.ResponseWriter, r *http.Request) {
 	app = savedApp
 	app.IsDisabled = false
 
-	err = app.Update()
+	app, err = app.Update()
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
