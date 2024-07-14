@@ -145,14 +145,16 @@ func (a *App) FindAll() ([]App, error) {
 
 // Update updates one user in the database, using the information
 // stored in the receiver u
-func (a *App) Update() error {
+func (a *App) Update() (App, error) {
 	db.Save(&a)
 
-	if _, err := a.FindOne(a.ID); err != nil {
-		return err
+	// if _, err := a.FindOne(a.ID); err != nil {
+	app, err := a.FindOne(a.ID)
+	if err != nil {
+		return app, err
 	}
 
-	return nil
+	return app, err
 }
 
 func (a *App) Delete(id string) error {

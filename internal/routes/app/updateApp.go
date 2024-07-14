@@ -66,7 +66,7 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 	updatedApp.URL = app.URL
 	updatedApp.RequestInterval = app.RequestInterval
 
-	err = updatedApp.Update()
+	app, err = app.Update()
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
