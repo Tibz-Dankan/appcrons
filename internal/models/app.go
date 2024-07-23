@@ -143,12 +143,11 @@ func (a *App) FindAll() ([]App, error) {
 	return savedApps, nil
 }
 
-// Update updates one user in the database, using the information
-// stored in the receiver u
+// Update updates one app in the database, using the information
+// stored in the receiver a
 func (a *App) Update() (App, error) {
 	db.Save(&a)
 
-	// if _, err := a.FindOne(a.ID); err != nil {
 	app, err := a.FindOne(a.ID)
 	if err != nil {
 		return app, err
