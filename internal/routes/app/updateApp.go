@@ -72,12 +72,12 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event.EB.Publish("updateApp", updatedApp)
+	event.EB.Publish("updateApp", app)
 
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": "Updated successfully",
-		"app":     updatedApp,
+		"app":     app,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
