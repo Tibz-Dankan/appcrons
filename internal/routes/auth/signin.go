@@ -28,7 +28,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.ID == "" {
-		services.AppError("Email is not registered!", 400, w)
+		services.AppError("Invalid email/password!", 400, w)
 		return
 	}
 
@@ -39,7 +39,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !passwordMatches {
-		services.AppError("Invalid password!", 400, w)
+		services.AppError("Invalid email/password!", 400, w)
 		return
 	}
 
