@@ -24,6 +24,7 @@ func AppRouter() *mux.Router {
 	app.DisableAppRoute(appRouter)
 	app.EnableAppRoute(appRouter)
 	app.DeleteAppRoute(appRouter)
+	app.SearchAppsRoute(appRouter)
 
 	// Request routes
 	requestRouter := router.PathPrefix("/api/v1/requests").Subrouter()
