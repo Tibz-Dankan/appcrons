@@ -14,11 +14,11 @@ import (
 var userCache = UserCache{}
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
+	hashedPassword, err := u.HashPassword(u.Password)
 	if err != nil {
 		return err
 	}
-	u.Password = string(hashedPassword)
+	u.Password = hashedPassword
 
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
@@ -78,13 +78,12 @@ func (u *User) Delete(id string) error {
 
 // ResetPassword is the method updates user's password in db
 func (u *User) ResetPassword(password string) error {
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	hashedPassword, err := u.HashPassword(password)
 	if err != nil {
 		return err
 	}
 
-	u.Password = string(hashedPassword)
+	u.Password = hashedPassword
 	u.PasswordResetExpiresAt = time.Now()
 	db.Save(&u)
 
@@ -105,6 +104,7 @@ func (u *User) PasswordMatches(plainTextPassword string) (bool, error) {
 	return true, nil
 }
 
+// Converts plain text password into hashed string
 func (u *User) HashPassword(plainTextPassword string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainTextPassword), 12)
 	if err != nil {
