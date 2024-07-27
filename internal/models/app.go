@@ -143,6 +143,19 @@ func (a *App) FindAll() ([]App, error) {
 	return savedApps, nil
 }
 
+// Search for apps that belong to the given userId
+// and whose name contains the query string
+func (a *App) Search(query, userId string) ([]App, error) {
+	var apps []App
+
+	result := db.Where("\"userId\" = ? AND name ILIKE ?", userId, "%"+query+"%").Find(&apps)
+	if result.Error != nil {
+		return apps, result.Error
+	}
+
+	return apps, nil
+}
+
 // Update updates one app in the database, using the information
 // stored in the receiver a
 func (a *App) Update() (App, error) {

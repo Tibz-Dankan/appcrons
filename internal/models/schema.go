@@ -20,11 +20,11 @@ func DBAutoMigrate() {
 
 type User struct {
 	ID                     string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
-	Name                   string         `gorm:"column:name;not null" json:"name"`
-	Email                  string         `gorm:"column:email;unique;not null" json:"email"`
+	Name                   string         `gorm:"column:name;not null;index" json:"name"`
+	Email                  string         `gorm:"column:email;unique;not null;index" json:"email"`
 	Password               string         `gorm:"column:password;not null" json:"password"`
 	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken"`
-	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt" json:"passwordResetExpiresAt"`
+	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt;index" json:"passwordResetExpiresAt"`
 	Role                   string         `gorm:"column:role;default:'admin';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
