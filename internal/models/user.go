@@ -36,20 +36,7 @@ func (u *User) Create(user User) (string, error) {
 
 func (u *User) FindOne(id string) (User, error) {
 	var user User
-	var err error
-
-	if user, err = userCache.Read(id); err != nil {
-		return user, err
-	}
-
-	if user.ID != "" {
-		return user, nil
-	}
 	db.First(&user, "id = ?", id)
-
-	if err = userCache.Write(user); err != nil {
-		return user, err
-	}
 
 	return user, nil
 }

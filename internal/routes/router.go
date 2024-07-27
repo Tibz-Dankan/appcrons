@@ -41,6 +41,7 @@ func AppRouter() *mux.Router {
 	auth.SignInRoute(authRouter)
 	auth.ForgotPasswordRoute(authRouter)
 	auth.ResetPasswordRoute(authRouter)
+	auth.UpdateUserDetailsRoute(authRouter)
 
 	// Active route
 	GetActiveRoute(router)
