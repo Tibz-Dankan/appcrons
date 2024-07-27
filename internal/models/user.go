@@ -105,6 +105,15 @@ func (u *User) PasswordMatches(plainTextPassword string) (bool, error) {
 	return true, nil
 }
 
+func (u *User) HashPassword(plainTextPassword string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainTextPassword), 12)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hashedPassword), nil
+}
+
 func (u *User) ValidRole(role string) bool {
 	roles := []string{"admin", "client", "staff"}
 
