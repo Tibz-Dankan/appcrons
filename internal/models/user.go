@@ -56,20 +56,7 @@ func (u *User) FindOne(id string) (User, error) {
 
 func (u *User) FindByEMail(email string) (User, error) {
 	var user User
-	var err error
-
-	if user, err = userCache.Read(email); err != nil {
-		return user, err
-	}
-
-	if user.ID != "" {
-		return user, nil
-	}
 	db.First(&user, "email = ?", email)
-
-	if err = userCache.Write(user); err != nil {
-		return user, err
-	}
 
 	return user, nil
 }
@@ -102,7 +89,7 @@ func (u *User) Delete(id string) error {
 	return nil
 }
 
-// ResetPassword is the method we will use to change a user's password.
+// ResetPassword is the method updates user's password in db
 func (u *User) ResetPassword(password string) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -110,8 +97,9 @@ func (u *User) ResetPassword(password string) error {
 		return err
 	}
 
-	db.Model(&User{}).Where("id = ?", u.ID).Update("password", hashedPassword)
-	db.Model(&User{}).Where("id = ?", u.ID).Update("\"passwordResetExpiresAt\"", time.Now())
+	u.Password = string(hashedPassword)
+	u.PasswordResetExpiresAt = time.Now()
+	db.Save(&u)
 
 	return nil
 }

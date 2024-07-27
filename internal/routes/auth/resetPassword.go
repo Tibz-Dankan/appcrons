@@ -22,6 +22,11 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	newPassword := user.Password
 	token := mux.Vars(r)["resetToken"]
 
+	if user.Password == "" {
+		services.AppError("Please provide your new password!", 400, w)
+		return
+	}
+
 	user, err = user.FindByPasswordResetToken(token)
 	if err != nil {
 		services.AppError(err.Error(), 500, w)
@@ -33,7 +38,11 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.ResetPassword(newPassword)
+	err = user.ResetPassword(newPassword)
+	if err != nil {
+		services.AppError(err.Error(), 500, w)
+		return
+	}
 
 	accessToken, err := services.SignJWTToken(user.ID)
 	if err != nil {
