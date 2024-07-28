@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"time"
 )
@@ -234,4 +235,42 @@ func (d *Date) extractOffsetFromRFC3339Nano(timeStr string) (string, error) {
 		return "", errors.New("offset not found in time string")
 	}
 	return offset, nil
+}
+
+// Takes in an input date string such
+// as "2024-07-28T12:05:00.137685Z" coming from clients
+//
+//	e.g browser, postman, curl etc, formats it
+//
+// and returns its time(time.Time)
+func (d *Date) FormatDateString(dateStr string) (time.Time, error) {
+	formattedDateStr := ReplaceSpaces(dateStr)
+
+	log.Println("formattedDateStr: ", formattedDateStr)
+
+	if formattedDateStr == "" {
+		return time.Now(), nil
+	}
+
+	// Check if formattedDateStr contains Z (UTC format)
+	isUTC := ContainsZ(formattedDateStr)
+
+	if isUTC {
+		date := Date{ISOStringDate: formattedDateStr}
+
+		resultingTime, err := date.UTC()
+		if err != nil {
+			return time.Now(), err
+		}
+		return resultingTime, nil
+	}
+
+	date := Date{ISOStringDate: formattedDateStr}
+
+	resultingTime, err := date.RFC3339Nano()
+	if err != nil {
+		return time.Now(), err
+	}
+	return resultingTime, nil
+
 }
