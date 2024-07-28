@@ -53,6 +53,7 @@ func AppRouter() *mux.Router {
 	feedbackRouter := router.PathPrefix("/api/v1/feedback").Subrouter()
 	feedbackRouter.Use(middlewares.Auth)
 	feedback.PostFeedbackRoute(feedbackRouter)
+	feedback.GetFeedbackByUserRoute(feedbackRouter)
 
 	// Active route
 	GetActiveRoute(router)
