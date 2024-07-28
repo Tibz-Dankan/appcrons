@@ -2,9 +2,7 @@ package request
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
@@ -13,50 +11,14 @@ import (
 
 func getRequestByUser(w http.ResponseWriter, r *http.Request) {
 	request := models.Request{}
+	date := services.Date{}
 
 	appId := r.URL.Query().Get("appId")
 	before := r.URL.Query().Get("before")
 
-	var createdAtBefore time.Time
-
-	if before == "" {
-		createdAtBefore = time.Now()
-		log.Println("createdAtBefore: ", createdAtBefore)
-	}
-
-	if before != "" {
-		log.Println("before: ", before)
-
-		log.Println("beforeWithReplaced spaces: ", services.ReplaceSpaces(before))
-
-		// Check if before contains Z (UTC format)
-		isUTC := services.ContainsZ(services.ReplaceSpaces(before))
-
-		if isUTC {
-			date := services.Date{ISOStringDate: services.ReplaceSpaces(before)}
-
-			createdAt, err := date.UTC()
-			if err != nil {
-				services.AppError("Something went wrong, please try again later!", 500, w)
-				return
-			}
-			createdAtBefore = createdAt
-			log.Println("before: ", before)
-			log.Println("createdAtBefore: ", createdAtBefore)
-		}
-
-		if !isUTC {
-			date := services.Date{ISOStringDate: services.ReplaceSpaces(before)}
-
-			createdAt, err := date.RFC3339Nano()
-			if err != nil {
-				services.AppError("Something went wrong, please try again later!", 500, w)
-				return
-			}
-			createdAtBefore = createdAt
-			log.Println("before: ", before)
-			log.Println("createdAtBefore: ", createdAtBefore)
-		}
+	createdAtBefore, err := date.FormatDateString(before)
+	if err != nil {
+		services.AppError(err.Error(), 400, w)
 	}
 
 	if appId == "" {
