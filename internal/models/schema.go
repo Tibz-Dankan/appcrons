@@ -71,6 +71,7 @@ type RequestTime struct {
 type Feedback struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
 	UserID    string    `gorm:"column:userId;not null;index" json:"userId"`
+	User      User      `gorm:"foreignKey:UserID;references:ID" json:"user"`
 	Rating    float32   `gorm:"column:rating;not null" json:"rating"`
 	Message   string    `gorm:"column:message;not null" json:"message"`
 	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
