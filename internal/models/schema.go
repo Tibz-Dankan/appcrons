@@ -11,7 +11,7 @@ import (
 var db = config.Db()
 
 func DBAutoMigrate() {
-	err := db.AutoMigrate(&User{}, &App{}, &Request{}, &RequestTime{})
+	err := db.AutoMigrate(&User{}, &App{}, &Request{}, &RequestTime{}, &Feedback{})
 	if err != nil {
 		log.Fatal("Failed to make auto migration", err)
 	}
@@ -27,6 +27,7 @@ type User struct {
 	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt;index" json:"passwordResetExpiresAt"`
 	Role                   string         `gorm:"column:role;default:'admin';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
+	Feedback               []Feedback     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"feedbacks"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt              time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
@@ -65,4 +66,13 @@ type RequestTime struct {
 	CreatedAt time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
+}
+
+type Feedback struct {
+	ID        string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID    string    `gorm:"column:userId;not null;index" json:"userId"`
+	Rating    float32   `gorm:"column:rating;not null" json:"rating"`
+	Message   string    `gorm:"column:message;not null" json:"message"`
+	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
 }
