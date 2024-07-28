@@ -55,6 +55,7 @@ func AppRouter() *mux.Router {
 	feedback.PostFeedbackRoute(feedbackRouter)
 	feedback.GetFeedbackByUserRoute(feedbackRouter)
 	feedback.GetAllFeedbackRoute(feedbackRouter)
+	feedback.UpdateFeedbackRoute(feedbackRouter)
 
 	// Active route
 	GetActiveRoute(router)

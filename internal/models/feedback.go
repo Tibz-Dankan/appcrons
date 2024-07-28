@@ -28,6 +28,12 @@ func (f *Feedback) Create(feedback Feedback) (Feedback, error) {
 	return feedback, nil
 }
 
+func (f *Feedback) Update() error {
+	db.Save(&f)
+
+	return nil
+}
+
 // Gets feedback by id
 func (f *Feedback) FindOne(id string) (Feedback, error) {
 	var feedback Feedback
