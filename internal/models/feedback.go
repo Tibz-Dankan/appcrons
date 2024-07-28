@@ -61,11 +61,9 @@ func (f *Feedback) FindByUser(userId string, createdAtBeforeCursor time.Time) ([
 
 // Gets paginated feedback for all users
 func (f *Feedback) FindAll(createdAtBeforeCursor time.Time) ([]Feedback, int64, error) {
-	var feedback []Feedback
+	var feedbacks, userFeedback []Feedback
 
-	query := db.Table("feedbacks").Preload("users", func(db *gorm.DB) *gorm.DB {
-		return db.Select("id", "name", "email", "role", "\"createdAt\"", "\"updatedAt\"")
-	})
+	query := db.Table("feedbacks")
 
 	var count int64
 	if err := query.Count(&count).Error; err != nil {
@@ -76,9 +74,17 @@ func (f *Feedback) FindAll(createdAtBeforeCursor time.Time) ([]Feedback, int64, 
 		query = query.Where("\"createdAt\" < ?", createdAtBeforeCursor)
 	}
 
-	if err := query.Order("\"createdAt\" desc").Limit(10).Find(&feedback).Error; err != nil {
+	if err := query.Order("\"createdAt\" desc").Limit(10).Find(&feedbacks).Error; err != nil {
 		return nil, 0, err
 	}
 
-	return feedback, count, nil
+	for _, feedback := range feedbacks {
+		var user User
+		db.Select("id", "name", "email", "role", "\"createdAt\"", "\"updatedAt\"").First(&user, "id = ?", feedback.UserID)
+		feedback.User = user
+
+		userFeedback = append(userFeedback, feedback)
+	}
+
+	return userFeedback, count, nil
 }
