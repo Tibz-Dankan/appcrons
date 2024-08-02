@@ -56,15 +56,8 @@ func (a *App) FindOne(id string) (App, error) {
 
 func (a *App) FindByUser(userId string) ([]App, error) {
 	var apps, userApps []App
-	var err error
-
-	if apps, err = appCache.ReadByUser(userId); err != nil {
-		return apps, err
-	}
-
-	if len(apps) != 0 {
-		return apps, nil
-	}
+	// TODO: To add cursor based pagination for fetching at maximum 10 apps for each user
+	// TODO: To remove the last last request for each on this query
 
 	startTime := time.Now()
 	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps, "\"userId\" = ?", userId)

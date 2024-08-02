@@ -63,8 +63,8 @@ type RequestTime struct {
 	Start     string         `gorm:"column:start;not null" json:"start"`
 	End       string         `gorm:"column:end;not null" json:"end"`
 	TimeZone  string         `gorm:"column:timeZone;not null" json:"timeZone"`
-	CreatedAt time.Time      `gorm:"column:createdAt" json:"createdAt"`
-	UpdatedAt time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
+	CreatedAt time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt time.Time      `gorm:"column:updatedAt;index" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
 }
 
