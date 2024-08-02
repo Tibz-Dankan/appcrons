@@ -9,10 +9,11 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
-	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
 )
+
+type AppRequestProgress = services.AppRequestProgress
 
 func sendMessage(message, userId string, clientManager *services.ClientManager) error {
 	w, ok := clientManager.GetClient(userId)
@@ -41,14 +42,14 @@ func sendMessage(message, userId string, clientManager *services.ClientManager) 
 	return nil
 }
 
-func sendAppToClient(app models.App, clientManager *services.ClientManager) error {
-	client, ok := clientManager.GetClient(app.UserID)
+func sendAppToClient(appRequestProgress AppRequestProgress, clientManager *services.ClientManager) error {
+	client, ok := clientManager.GetClient(appRequestProgress.UserID)
 	if !ok {
 		log.Println("Client not found")
 		return nil
 	}
 
-	appJson, err := json.Marshal(&app)
+	appJson, err := json.Marshal(&appRequestProgress)
 	if err != nil {
 		log.Println("Error marshalling JSON:", err)
 		return err
@@ -88,10 +89,9 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type AppRequestProgress = services.AppRequestProgress
 	appCh := make(chan event.DataEvent)
-	event.EB.Subscribe("app", appCh)
-
-	type App = models.App
+	event.EB.Subscribe("appRequestProgress", appCh)
 
 	heartbeatTicker := time.NewTicker(30 * time.Second)
 
@@ -102,12 +102,12 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case appEvent := <-appCh:
-			app, ok := appEvent.Data.(App)
+			appRequestProgress, ok := appEvent.Data.(AppRequestProgress)
 			if !ok {
 				log.Println("Interface does not hold type App")
 				return
 			}
-			err := sendAppToClient(app, clientManager)
+			err := sendAppToClient(appRequestProgress, clientManager)
 			if err != nil {
 				services.AppError(err.Error(), 500, w)
 				return

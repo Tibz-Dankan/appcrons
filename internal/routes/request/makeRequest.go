@@ -89,7 +89,10 @@ func MakeAppRequest(app models.App) {
 		return
 	}
 
-	event.EB.Publish("app", app)
+	appRequestProgress := services.AppRequestProgress{App: app, InProgress: true}
+	services.UserAppMem.Add(app.UserID, appRequestProgress)
+
+	event.EB.Publish("appRequestProgress", appRequestProgress)
 
 	response, err := services.MakeHTTPRequest(app.URL)
 	if err != nil {
@@ -110,10 +113,11 @@ func MakeAppRequest(app models.App) {
 		log.Println("Error saving request:", err)
 	}
 
-	app.Request = []models.Request{request}
+	appRequestProgress.Request = []models.Request{request}
+	appRequestProgress.InProgress = false
+	services.UserAppMem.Add(app.UserID, appRequestProgress)
 
-	event.EB.Publish("app", app)
-	event.EB.Publish("updateApp", app)
+	event.EB.Publish("appRequestProgress", appRequestProgress)
 }
 
 // Validates the app's eligibility for making requests
