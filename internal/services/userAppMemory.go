@@ -21,16 +21,36 @@ func (uam *UserAppMemory) Add(userId string, app AppRequestProgress) {
 	defer uam.Unlock()
 
 	if prevApps, found := uam.user[userId]; found {
-		uam.user[userId] = append(prevApps, app)
-	} else {
-		uam.user[userId] = append(uam.user[userId], app)
+		replaced := false
+		for i, existingApp := range prevApps {
+			if existingApp.ID == app.ID {
+				prevApps[i] = app
+				replaced = true
+				uam.user[userId] = prevApps
+				break
+			}
+		}
+		if !replaced {
+			uam.user[userId] = append(prevApps, app)
+		}
+		return
 	}
+
+	uam.user[userId] = []AppRequestProgress{app}
 }
 
-func (uam *UserAppMemory) Remove(userId string) {
+func (uam *UserAppMemory) Delete(userId string) {
 	uam.Lock()
 	defer uam.Unlock()
 	delete(uam.user, userId)
+}
+
+func (uam *UserAppMemory) DeleteAll() {
+	uam.Lock()
+	defer uam.Unlock()
+	for userId := range uam.user {
+		delete(uam.user, userId)
+	}
 }
 
 func (uam *UserAppMemory) Get(userId string) ([]AppRequestProgress, bool) {
