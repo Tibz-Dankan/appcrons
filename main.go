@@ -34,6 +34,7 @@ func main() {
 	log.Println("Starting http server up on 8000")
 	go http.ListenAndServe(":8000", nil)
 
+	services.StartClearUserAppMemoryScheduler()
 	// Call StartRequestScheduler after server is started
 	request.StartRequestScheduler()
 
