@@ -146,6 +146,14 @@ func (a *App) Search(query, userId string) ([]App, error) {
 		return apps, result.Error
 	}
 
+	for i, app := range apps {
+		var requests []Request
+		db.Order("\"createdAt\" DESC").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+
+		app.Request = requests
+		apps[i] = app
+	}
+
 	return apps, nil
 }
 
