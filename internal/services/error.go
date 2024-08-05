@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var statusCodes = map[string]int{
@@ -72,7 +73,7 @@ func statusCodeExists(key string, m map[string]int) bool {
 }
 
 func AppError(message string, statusCode int, w http.ResponseWriter) {
-	response := make(map[string]interface{})
+	response := make(map[string]string)
 	response["message"] = message
 
 	statusCodeStr := strconv.Itoa(statusCode)
@@ -91,8 +92,57 @@ func AppError(message string, statusCode int, w http.ResponseWriter) {
 		return
 	}
 
+	jwtError := JWTError{err: message}
+
+	if jwtError.Found() {
+		jwtError.Send(w)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCodes[statusCodeStr])
 
 	json.NewEncoder(w).Encode(response)
+}
+
+type JWTError struct {
+	err string
+}
+
+func (jwt *JWTError) Send(w http.ResponseWriter) {
+	response := make(map[string]string)
+	response["status"] = "error"
+
+	if jwt.expired() {
+		response["message"] = "Your token has expired! please login again."
+	}
+	if jwt.invalid() {
+		response["message"] = "Invalid token. please login again!"
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func (jwt *JWTError) invalid() bool {
+	hasInvalidCharacter := strings.Contains(jwt.err, "invalid character")
+	isIllegal := strings.Contains(jwt.err, "illegal base64 data")
+	invalidSignature := jwt.err == "signature is invalid"
+	invalidSigningMethod := jwt.err == "signing method (alg) is unspecified"
+
+	isInvalidJWT := hasInvalidCharacter || isIllegal || invalidSignature || invalidSigningMethod
+
+	return isInvalidJWT
+}
+
+func (jwt *JWTError) expired() bool {
+	isExpiredJWT := jwt.err == "Token is expired"
+
+	return isExpiredJWT
+}
+
+func (jwt *JWTError) Found() bool {
+	return jwt.expired() || jwt.invalid()
 }
