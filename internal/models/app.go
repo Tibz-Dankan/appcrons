@@ -141,7 +141,7 @@ func (a *App) FindAll() ([]App, error) {
 func (a *App) Search(query, userId string) ([]App, error) {
 	var apps []App
 
-	result := db.Where("\"userId\" = ? AND name ILIKE ?", userId, "%"+query+"%").Find(&apps)
+	result := db.Where("\"userId\" = ? AND name ILIKE ?", userId, "%"+query+"%").Order("\"updatedAt\" desc").Find(&apps)
 	if result.Error != nil {
 		return apps, result.Error
 	}
