@@ -13,27 +13,24 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-// ContextKey is a custom type for context keys
 type ContextKey string
 
-// UserIDKey is the key to access the user ID stored in context
 const UserIDKey ContextKey = "userId"
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authorizationHeader := r.Header.Get("Authorization")
+		authHeader := r.Header.Get("Authorization")
+		var bearerToken string
 
-		if authorizationHeader == "" {
-			services.AppError("Missing Authorization header", 401, w)
+		if authHeader != "" && strings.HasPrefix(authHeader, "Bearer") {
+			headerParts := strings.SplitN(authHeader, " ", 2)
+			bearerToken = headerParts[1]
+		}
+		if bearerToken == "" {
+			services.AppError("You are not logged in! Please to gain access.", 401, w)
 			return
 		}
-		headerParts := strings.SplitN(authorizationHeader, " ", 2)
 
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			services.AppError("Invalid Authorization header", 401, w)
-			return
-		}
-		bearerToken := headerParts[1]
 		secretKey := os.Getenv("JWT_SECRET")
 		var jwtSecretKey = []byte(secretKey)
 
@@ -51,12 +48,14 @@ func Auth(next http.Handler) http.Handler {
 		}
 
 		var userId string
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			userIDClaim, _ := claims["userId"].(string)
-			userId = userIDClaim
-		} else {
-			services.AppError("Invalid Token, please login again", 403, w)
+		claims, validJWTClaim := token.Claims.(jwt.MapClaims)
+		if !validJWTClaim || !token.Valid {
+			services.AppError("Invalid Token. please login again", 403, w)
 			return
+		}
+
+		if userIDClaim, ok := claims["userId"].(string); ok {
+			userId = userIDClaim
 		}
 
 		User := models.User{}
