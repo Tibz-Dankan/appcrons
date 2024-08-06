@@ -116,6 +116,7 @@ func (u *User) HashPassword(plainTextPassword string) (string, error) {
 
 func (u *User) ValidRole(role string) bool {
 	roles := []string{"admin", "client", "staff"}
+	// TODO: TO change roles to "user and sys_admin"
 
 	for _, r := range roles {
 		if r == role {
