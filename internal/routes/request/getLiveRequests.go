@@ -120,7 +120,7 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 			}
 		case <-disconnect:
 			clientManager.RemoveClient(userId)
-			event.EB.Unsubscribe("app", appCh)
+			event.EB.Unsubscribe("appRequestProgress", appCh)
 			heartbeatTicker.Stop()
 			cancel()
 			log.Println("Client disconnected:", userId)
