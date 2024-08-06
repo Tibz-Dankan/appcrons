@@ -91,6 +91,14 @@ func (p *Permissions) Get(userId string) (UserPermissions, error) {
 	return permissions, nil
 }
 
+func (p *Permissions) Delete(userId string) error {
+	if err := p.deleteFromCache(userId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *Permissions) writeToCache(permissions UserPermissions) error {
 	permissionJson, err := json.Marshal(&permissions)
 	if err != nil {
@@ -122,4 +130,14 @@ func (p *Permissions) readFromCache(userId string) (UserPermissions, error) {
 	}
 
 	return permissions, nil
+}
+
+func (p *Permissions) deleteFromCache(userID string) error {
+	err := redisClient.Del(ctx, userID).Err()
+	if err != nil {
+		log.Println("Error deleting data from Redis:", err)
+		return err
+	}
+
+	return nil
 }
