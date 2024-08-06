@@ -136,6 +136,22 @@ func (a *App) FindAll() ([]App, error) {
 	return savedApps, nil
 }
 
+// Fetches all user applications and includes
+// each application's requestTimes.
+func (a *App) FindByUserAndIncludeRequestTimes(userId string) ([]App, error) {
+	var apps []App
+
+	startTime := time.Now()
+	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps, "\"userId\" = ?", userId)
+	if result.Error != nil {
+		return apps, nil
+	}
+
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+
+	return apps, nil
+}
+
 // Search for apps that belong to the given userId
 // and whose name contains the query string
 func (a *App) Search(query, userId string) ([]App, error) {
