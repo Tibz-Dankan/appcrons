@@ -7,8 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var requestCache = RequestCache{}
-
 func (r *Request) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
@@ -26,20 +24,11 @@ func (r *Request) Create(request Request) (Request, error) {
 
 func (r *Request) FindOne(id string) (Request, error) {
 	var request Request
-	var err error
-
-	if request, err = requestCache.Read(id); err != nil {
-		return request, err
-	}
 
 	if request.ID != "" {
 		return request, nil
 	}
 	db.First(&request, "id = ?", id)
-
-	if err = requestCache.Write(request); err != nil {
-		return request, err
-	}
 
 	return request, nil
 }
