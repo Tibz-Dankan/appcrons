@@ -29,7 +29,6 @@ func main() {
 	http.Handle("/", handler)
 
 	models.DBAutoMigrate()
-	services.UpdateCacheOnBoot()
 
 	log.Println("Starting http server up on 8000")
 	go http.ListenAndServe(":8000", nil)

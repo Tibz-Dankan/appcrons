@@ -8,12 +8,6 @@ import (
 )
 
 func RedisClient() *redis.Client {
-
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-
 	REDIS_URL := os.Getenv("REDIS_URL")
 
 	opt, err := redis.ParseURL(REDIS_URL)

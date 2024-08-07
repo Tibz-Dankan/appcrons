@@ -8,8 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var appCache = AppCache{}
-
 func (a *App) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
@@ -48,14 +46,14 @@ func (a *App) FindOne(id string) (App, error) {
 	var app App
 
 	db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
-		return db.Order("\"createdAt\" DESC").Limit(1)
+		return db.Order("\"createdAt\" desc").Limit(1)
 	}).First(&app, "id = ?", id)
 
 	return app, nil
 }
 
 func (a *App) FindByUser(userId string) ([]App, error) {
-	var apps, userApps []App
+	var apps []App
 	// TODO: To add cursor based pagination for fetching at maximum 10 apps for each user
 	// TODO: To remove the last last request for each on this query
 
@@ -65,19 +63,16 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return apps, nil
 	}
 
-	for _, app := range apps {
+	for i, app := range apps {
 		var requests []Request
 		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 		app.Request = requests
-
-		userApps = append(userApps, app)
+		apps[i] = app
 	}
 
-	duration := time.Since(startTime)
-	queryTimeMS := int(duration.Milliseconds())
-	log.Println("queryTimeMS:", queryTimeMS)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
-	return userApps, nil
+	return apps, nil
 }
 
 func (a *App) FindByName(name string) (App, error) {
@@ -97,16 +92,7 @@ func (a *App) FindByURL(url string) (App, error) {
 }
 
 func (a *App) FindAll() ([]App, error) {
-	var apps, savedApps []App
-	var err error
-
-	// if apps, err = appCache.ReadAll(); err != nil {
-	// 	return apps, err
-	// }
-
-	// if len(apps) != 0 {
-	// 	return apps, nil
-	// }
+	var apps []App
 
 	log.Println("Fetching all apps")
 
@@ -117,23 +103,16 @@ func (a *App) FindAll() ([]App, error) {
 	}
 
 	// TODO: to find pagination solution for this part
-	for _, app := range apps {
+	for i, app := range apps {
 		var requests []Request
-		db.Order("\"createdAt\" DESC").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 		app.Request = requests
-
-		savedApps = append(savedApps, app)
+		apps[i] = app
 	}
 
-	duration := time.Since(startTime)
-	queryTimeMS := int(duration.Milliseconds())
-	log.Println("queryTimeMS:", queryTimeMS)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
-	if err = appCache.WriteAll(savedApps); err != nil {
-		return apps, err
-	}
-
-	return savedApps, nil
+	return apps, nil
 }
 
 // Fetches all user applications and includes
@@ -164,7 +143,7 @@ func (a *App) Search(query, userId string) ([]App, error) {
 
 	for i, app := range apps {
 		var requests []Request
-		db.Order("\"createdAt\" DESC").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 
 		app.Request = requests
 		apps[i] = app
