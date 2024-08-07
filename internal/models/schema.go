@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 )
 
 var db = config.Db()
+var redisClient = config.RedisClient()
+var ctx = context.Background()
 
 func DBAutoMigrate() {
 	err := db.AutoMigrate(&User{}, &App{}, &Request{}, &RequestTime{}, &Feedback{})

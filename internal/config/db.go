@@ -10,12 +10,6 @@ import (
 )
 
 func Db() *gorm.DB {
-
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-
 	dsn := os.Getenv("DSN_KEEP_ACTIVE")
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -29,5 +23,3 @@ func Db() *gorm.DB {
 	log.Println("Connected to database successfully")
 	return db
 }
-
-// gorm migrate create -name=create-users
