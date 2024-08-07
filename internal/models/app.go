@@ -53,7 +53,7 @@ func (a *App) FindOne(id string) (App, error) {
 }
 
 func (a *App) FindByUser(userId string) ([]App, error) {
-	var apps, userApps []App
+	var apps []App
 	// TODO: To add cursor based pagination for fetching at maximum 10 apps for each user
 	// TODO: To remove the last last request for each on this query
 
@@ -63,17 +63,16 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return apps, nil
 	}
 
-	for _, app := range apps {
+	for i, app := range apps {
 		var requests []Request
 		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 		app.Request = requests
-
-		userApps = append(userApps, app)
+		apps[i] = app
 	}
 
 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
-	return userApps, nil
+	return apps, nil
 }
 
 func (a *App) FindByName(name string) (App, error) {
@@ -93,7 +92,7 @@ func (a *App) FindByURL(url string) (App, error) {
 }
 
 func (a *App) FindAll() ([]App, error) {
-	var apps, savedApps []App
+	var apps []App
 
 	log.Println("Fetching all apps")
 
@@ -104,17 +103,16 @@ func (a *App) FindAll() ([]App, error) {
 	}
 
 	// TODO: to find pagination solution for this part
-	for _, app := range apps {
+	for i, app := range apps {
 		var requests []Request
 		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 		app.Request = requests
-
-		savedApps = append(savedApps, app)
+		apps[i] = app
 	}
 
 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
-	return savedApps, nil
+	return apps, nil
 }
 
 // Fetches all user applications and includes
