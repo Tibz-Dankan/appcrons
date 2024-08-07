@@ -46,7 +46,7 @@ func (a *App) FindOne(id string) (App, error) {
 	var app App
 
 	db.Preload("RequestTime").Preload("Request", func(db *gorm.DB) *gorm.DB {
-		return db.Order("\"createdAt\" DESC").Limit(1)
+		return db.Order("\"createdAt\" desc").Limit(1)
 	}).First(&app, "id = ?", id)
 
 	return app, nil
@@ -71,9 +71,7 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		userApps = append(userApps, app)
 	}
 
-	duration := time.Since(startTime)
-	queryTimeMS := int(duration.Milliseconds())
-	log.Println("queryTimeMS:", queryTimeMS)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
 	return userApps, nil
 }
@@ -108,15 +106,13 @@ func (a *App) FindAll() ([]App, error) {
 	// TODO: to find pagination solution for this part
 	for _, app := range apps {
 		var requests []Request
-		db.Order("\"createdAt\" DESC").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 		app.Request = requests
 
 		savedApps = append(savedApps, app)
 	}
 
-	duration := time.Since(startTime)
-	queryTimeMS := int(duration.Milliseconds())
-	log.Println("queryTimeMS:", queryTimeMS)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
 	return savedApps, nil
 }
@@ -149,7 +145,7 @@ func (a *App) Search(query, userId string) ([]App, error) {
 
 	for i, app := range apps {
 		var requests []Request
-		db.Order("\"createdAt\" DESC").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
 
 		app.Request = requests
 		apps[i] = app
