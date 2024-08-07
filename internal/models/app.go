@@ -8,8 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var appCache = AppCache{}
-
 func (a *App) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
@@ -98,15 +96,6 @@ func (a *App) FindByURL(url string) (App, error) {
 
 func (a *App) FindAll() ([]App, error) {
 	var apps, savedApps []App
-	var err error
-
-	// if apps, err = appCache.ReadAll(); err != nil {
-	// 	return apps, err
-	// }
-
-	// if len(apps) != 0 {
-	// 	return apps, nil
-	// }
 
 	log.Println("Fetching all apps")
 
@@ -128,10 +117,6 @@ func (a *App) FindAll() ([]App, error) {
 	duration := time.Since(startTime)
 	queryTimeMS := int(duration.Milliseconds())
 	log.Println("queryTimeMS:", queryTimeMS)
-
-	if err = appCache.WriteAll(savedApps); err != nil {
-		return apps, err
-	}
 
 	return savedApps, nil
 }
