@@ -11,8 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var userCache = UserCache{}
-
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	hashedPassword, err := u.HashPassword(u.Password)
 	if err != nil {
@@ -60,18 +58,11 @@ func (u *User) FindAll() ([]User, error) {
 func (u *User) Update() error {
 	db.Save(&u)
 
-	if err := userCache.Write(*u); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (u *User) Delete(id string) error {
 	db.Delete(&User{}, id)
-	if err := userCache.Delete(id); err != nil {
-		return err
-	}
 
 	return nil
 }
