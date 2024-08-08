@@ -13,15 +13,17 @@ import (
 )
 
 type PermissionID struct {
-	ID         string `json:"id"`
-	Type       string `json:"type"`
-	Permission string `json:"permission"`
+	ID         string `json:"id"`         //UUID string of user, app, requestTime and feedback
+	Type       string `json:"type"`       // user, app, requestTime, feedback
+	Permission string `json:"permission"` // READ, WRITE, EDIT, DELETE
 }
 
 type PermissionContextKey string
 
 const UserPermissionsKey PermissionContextKey = "permissionId"
 
+// HasPermissions middleware fn should be called
+// after the auth middleware(one that validates JWT)
 func HasPermissions(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userId, ok := r.Context().Value(UserIDKey).(string)
@@ -51,6 +53,10 @@ func HasPermissions(next http.Handler) http.Handler {
 
 		hasPermission := hasPermissions(permissionID.Permission, userPermissions.Permissions)
 
+		if permissionID.Type == "" || permissionID.ID == "" {
+			services.AppError("You do not have permission to perform this action", 403, w)
+			return
+		}
 		if permissionID.Type == "user" && permissionID.ID != userPermissions.UserID || !hasPermission {
 			services.AppError("You do not have permission to perform this action", 403, w)
 			return
@@ -80,6 +86,23 @@ func HasPermissions(next http.Handler) http.Handler {
 						found = true
 						break
 					}
+				}
+			}
+			if !found {
+				services.AppError("You do not have permission to perform this action", 403, w)
+				return
+			}
+			if !hasPermission {
+				services.AppError("You do not have permission to perform this action", 403, w)
+				return
+			}
+		}
+		if permissionID.Type == "feedback" {
+			var found bool = false
+			for _, feedback := range userPermissions.Feedback {
+				if permissionID.ID == feedback.ID {
+					found = true
+					break
 				}
 			}
 			if !found {
@@ -317,8 +340,6 @@ func getPermissionIDForAuthRoutes(r *http.Request) PermissionID {
 
 	return permissionID
 }
-
-// TODO: to add user feedback in the permission cache
 
 func getPermissionIDForFeedbackRoutes(r *http.Request) PermissionID {
 	permissionID := PermissionID{}

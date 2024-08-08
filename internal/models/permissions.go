@@ -15,11 +15,16 @@ type PermittedApp struct {
 	RequestTimes []PermittedRequestTime `json:"requestTimes"`
 }
 
+type PermittedFeedback struct {
+	ID string `json:"id"`
+}
+
 type UserPermissions struct {
-	UserID      string         `json:"userId"`
-	Permissions []string       `json:"permissions"`
-	Role        string         `json:"role"`
-	Apps        []PermittedApp `json:"apps"`
+	UserID      string              `json:"userId"`
+	Permissions []string            `json:"permissions"`
+	Role        string              `json:"role"`
+	Apps        []PermittedApp      `json:"apps"`
+	Feedback    []PermittedFeedback `json:"feedback"`
 }
 
 type Permissions struct {
@@ -30,6 +35,7 @@ func (p *Permissions) Set(userId string) error {
 	userPermissions := UserPermissions{UserID: userId}
 	app := App{}
 	user := User{}
+	feedback := Feedback{}
 
 	savedUser, err := user.FindOne(userId)
 	if err != nil {
@@ -73,6 +79,17 @@ func (p *Permissions) Set(userId string) error {
 			permittedApp.RequestTimes = append(permittedApp.RequestTimes, permittedRequestTime)
 		}
 		userPermissions.Apps = append(userPermissions.Apps, permittedApp)
+	}
+
+	userFeedback, err := feedback.FindAllByUser(userId)
+	if err != nil {
+		log.Println("Error fetching user feedback:", err)
+	}
+
+	for _, feedback := range userFeedback {
+		permittedFeedback := PermittedFeedback{}
+		permittedFeedback.ID = feedback.ID
+		userPermissions.Feedback = append(userPermissions.Feedback, permittedFeedback)
 	}
 
 	if err := p.writeToCache(userPermissions); err != nil {

@@ -65,6 +65,17 @@ func (f *Feedback) FindByUser(userId string, createdAtBeforeCursor time.Time) ([
 	return feedback, count, nil
 }
 
+// Gets all feedback for a specific user
+func (f *Feedback) FindAllByUser(userId string) ([]Feedback, error) {
+	var feedback []Feedback
+
+	if err := db.Order("\"createdAt\" desc").Find(&feedback, "\"userId\" = ?", userId).Error; err != nil {
+		return feedback, err
+	}
+
+	return feedback, nil
+}
+
 // Gets paginated feedback for all users
 func (f *Feedback) FindAll(createdAtBeforeCursor time.Time) ([]Feedback, int64, error) {
 	var feedbacks, userFeedback []Feedback
