@@ -14,6 +14,8 @@ func AppRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	router.Use(middlewares.Logger)
+	router.Use(middlewares.RateLimit)
+
 	// App routes
 	appRouter := router.PathPrefix("/api/v1/apps").Subrouter()
 	appRouter.Use(middlewares.Auth)
