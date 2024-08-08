@@ -32,6 +32,7 @@ func AppRouter() *mux.Router {
 	// Request routes
 	requestRouter := router.PathPrefix("/api/v1/requests").Subrouter()
 	requestRouter.Use(middlewares.Auth)
+	requestRouter.Use(middlewares.HasPermissions)
 	request.GetRequestByUserRoute(requestRouter)
 	request.GetRequestRoute(requestRouter)
 	request.GetLiveRequestsRoute(requestRouter)
@@ -48,12 +49,14 @@ func AppRouter() *mux.Router {
 	// Authorized Auth routes
 	authorizedAuthRouter := router.PathPrefix("/api/v1/auth").Subrouter()
 	authorizedAuthRouter.Use(middlewares.Auth)
+	authorizedAuthRouter.Use(middlewares.HasPermissions)
 	auth.UpdateUserDetailsRoute(authorizedAuthRouter)
 	auth.ChangePasswordRoute(authorizedAuthRouter)
 
 	// Feedback Routes
 	feedbackRouter := router.PathPrefix("/api/v1/feedback").Subrouter()
 	feedbackRouter.Use(middlewares.Auth)
+	feedbackRouter.Use(middlewares.HasPermissions)
 	feedback.PostFeedbackRoute(feedbackRouter)
 	feedback.GetFeedbackByUserRoute(feedbackRouter)
 	feedback.GetAllFeedbackRoute(feedbackRouter)

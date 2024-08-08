@@ -46,11 +46,11 @@ func (p *Permissions) Set(userId string) error {
 	userPermissions.Role = savedUser.Role
 
 	if userPermissions.Role == "client" {
-		userPermissions.Permissions = []string{"read", "write", "update", "delete"}
+		userPermissions.Permissions = []string{"READ", "WRITE", "EDIT", "DELETE"}
 	}
 
 	if userPermissions.Role == "admin" {
-		userPermissions.Permissions = []string{"read"}
+		userPermissions.Permissions = []string{"READ"}
 	}
 
 	userApps, err := app.FindByUserAndIncludeRequestTimes(userId)
