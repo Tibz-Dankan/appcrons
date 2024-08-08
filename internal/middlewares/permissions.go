@@ -1,8 +1,10 @@
 package middlewares
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -80,11 +82,12 @@ func HasPermissions(next http.Handler) http.Handler {
 		}
 		if permissionID.Type == "requestTime" {
 			var found bool = false
+		permittedAppsLoop:
 			for _, app := range userPermissions.Apps {
 				for _, requestTime := range app.RequestTimes {
 					if permissionID.ID == requestTime.ID {
 						found = true
-						break
+						break permittedAppsLoop
 					}
 				}
 			}
@@ -281,10 +284,16 @@ func getPermissionIDForRequestRoutes(r *http.Request) PermissionID {
 	postRequestTimeRegex := regexp.MustCompile(`^/api/v1/requests/post-request-time$`)
 	postRequestTimeMatchString := postRequestTimeRegex.FindStringSubmatch(r.URL.Path)
 	if len(postRequestTimeMatchString) > 0 {
-		requestTime := models.RequestTime{}
-		err := json.NewDecoder(r.Body).Decode(&requestTime)
+		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.Println("Error decoding appId:", err)
+			log.Println("Unable to read request body:", err)
+		}
+		r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		requestTime := models.RequestTime{}
+		err = json.NewDecoder(bytes.NewBuffer(bodyBytes)).Decode(&requestTime)
+		if err != nil {
+			log.Println("Error decoding r.Body:", err)
 		}
 		permissionID.ID = requestTime.AppID
 		permissionID.Type = "app"
