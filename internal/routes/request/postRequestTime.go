@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/event"
+	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -53,12 +54,13 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		"requestTime": createdRequestTime,
 	}
 
-	app := models.App{ID: requestTime.AppID}
-	event.EB.Publish("updateApp", app)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
+
+	userId, _ := r.Context().Value(middlewares.UserIDKey).(string)
+	user := models.User{ID: userId}
+	event.EB.Publish("permissions", user)
 }
 
 func PostRequestTimeRoute(router *mux.Router) {
