@@ -325,7 +325,7 @@ func getPermissionIDForFeedbackRoutes(r *http.Request) PermissionID {
 
 	postFeedbackRegex := regexp.MustCompile(`^/api/v1/feedback/post$`)
 	postFeedbackMatchString := postFeedbackRegex.FindStringSubmatch(r.URL.Path)
-	if len(postFeedbackMatchString) > 1 {
+	if len(postFeedbackMatchString) > 0 {
 		userId, _ := r.Context().Value(UserIDKey).(string)
 		permissionID.ID = userId
 		permissionID.Type = "user"
@@ -335,7 +335,7 @@ func getPermissionIDForFeedbackRoutes(r *http.Request) PermissionID {
 
 	getFeedByUserRegex := regexp.MustCompile(`^/api/v1/feedback/get-by-user$`)
 	getFeedbackByUserMatchString := getFeedByUserRegex.FindStringSubmatch(r.URL.Path)
-	if len(getFeedbackByUserMatchString) > 1 {
+	if len(getFeedbackByUserMatchString) > 0 {
 		userId := r.URL.Query().Get("userId")
 		permissionID.ID = userId
 		permissionID.Type = "user"
