@@ -59,8 +59,6 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event.EB.Publish("createApp", app)
-
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": "Created successfully",
@@ -70,6 +68,9 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
+
+	user := models.User{ID: userID}
+	event.EB.Publish("permissions", user)
 }
 
 func PostAppRoute(router *mux.Router) {
