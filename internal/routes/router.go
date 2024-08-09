@@ -5,6 +5,7 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/routes/app"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/auth"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/feedback"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/monitor"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
 
 	"github.com/gorilla/mux"
@@ -66,6 +67,9 @@ func AppRouter() *mux.Router {
 
 	// Active route
 	GetActiveRoute(router)
+
+	// Monitor route
+	monitor.GetMetrics(router)
 
 	return router
 }
