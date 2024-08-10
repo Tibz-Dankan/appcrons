@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Tibz-Dankan/keep-active/internal/event"
+	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
@@ -14,6 +15,7 @@ import (
 )
 
 func main() {
+	middlewares.InitRequestDurationPromRegister()
 	router := routes.AppRouter()
 
 	c := cors.New(cors.Options{
