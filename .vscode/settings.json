@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "Appcrons",
     "chans",
     "cronexpr",
     "Dankan",
@@ -10,9 +11,11 @@
     "promhttp",
     "psub",
     "REQUESTINTERVAL",
+    "sendgrid",
     "signin",
     "signup",
     "Subrouter",
-    "Tibz"
+    "Tibz",
+    "tmpl"
   ]
 }
