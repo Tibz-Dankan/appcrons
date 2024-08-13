@@ -37,9 +37,8 @@ func forgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	originURL := services.GetRequestOrigin(r)
-
-	resetURL := originURL + "/auth/reset-password/" + resetToken
+	// resetURL := "http://localhost:3000/auth/reset-password/" + resetToken
+	resetURL := "https://appcrons.netlify.app/auth/reset-password/" + resetToken
 	log.Println("Password resetURL  ==> ", resetURL)
 
 	email := services.Email{Recipient: user.Email}
