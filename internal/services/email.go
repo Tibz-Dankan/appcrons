@@ -11,8 +11,7 @@ import (
 	"time"
 
 	gmail "github.com/go-mail/mail"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"github.com/mailjet/mailjet-apiv3-go/v4"
 )
 
 type Email struct {
@@ -20,7 +19,7 @@ type Email struct {
 }
 
 // sends email to mails that match "@gmail.com" using smtp
-func (e *Email) sendGmailHTML(html, subject string) error {
+func (e *Email) SendGmailHTML(html, subject string) error {
 	senderMail := os.Getenv("GMAIL_SENDER_MAIL")
 	appPassword := os.Getenv("GMAIL_APP_PASSWORD")
 
@@ -43,47 +42,47 @@ func (e *Email) sendGmailHTML(html, subject string) error {
 	return nil
 }
 
-// sends email to mails of all categories using sendgrid-go client
+// sends email to mails of all categories using mailjet wrapper
 func (e *Email) sendMailHTML(html, subject string) error {
-	sendgridSenderMail := os.Getenv("SENDGRID_SENDER_MAIL")
-	sendgridAPIKey := os.Getenv("SENDGRID_API_KEY")
+	publicKey := os.Getenv("MJ_APIKEY_PUBLIC")
+	secretKey := os.Getenv("MJ_APIKEY_PRIVATE")
+	senderMail := os.Getenv("MJ_SENDER_MAIL")
 
-	from := mail.NewEmail("Appcrons", sendgridSenderMail)
-	to := mail.NewEmail("", e.Recipient)
-	plainTextContent := ""
-	htmlContent := html
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	client := sendgrid.NewSendClient(sendgridAPIKey)
-	response, err := client.Send(message)
-	if err != nil {
-		log.Println(err)
+	mailjetClient := mailjet.NewMailjetClient(publicKey, secretKey)
+	messagesInfo := []mailjet.InfoMessagesV31{
+		{
+			From: &mailjet.RecipientV31{
+				Email: senderMail,
+				Name:  "Appcrons",
+			},
+			To: &mailjet.RecipientsV31{
+				mailjet.RecipientV31{
+					Email: e.Recipient,
+					Name:  "User x",
+				},
+			},
+			Subject:  subject,
+			TextPart: "",
+			HTMLPart: html,
+		},
+	}
+	messages := mailjet.MessagesV31{Info: messagesInfo}
+
+	if _, err := mailjetClient.SendMailV31(&messages); err != nil {
 		return err
 	}
-	log.Println("response.StatusCode:", response.StatusCode)
-	log.Println("response.Body:", response.Body)
-	log.Println("response.Headers:", response.Headers)
 
-	log.Println("Mail sent!")
+	log.Println("mail sent!")
 
 	return nil
 }
 
-func (e *Email) isGmail(email string) bool {
+func (e *Email) IsGmail(email string) bool {
 	regex := regexp.MustCompile(`^[\w\.-]+@gmail\.com$`)
 	return regex.MatchString(email)
 }
 
 func (u *Email) send(html, subject string) error {
-	isGmail := u.isGmail(u.Recipient)
-
-	if isGmail {
-		if err := u.sendGmailHTML(html, subject); err != nil {
-			log.Println(err)
-			return err
-		}
-		return nil
-	}
-
 	if err := u.sendMailHTML(html, subject); err != nil {
 		log.Println(err)
 		return err

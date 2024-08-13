@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "APIKEY",
     "Appcrons",
     "chans",
     "cronexpr",
@@ -8,6 +9,7 @@
     "gorhill",
     "gorm",
     "joho",
+    "mailjet",
     "promhttp",
     "psub",
     "REQUESTINTERVAL",
