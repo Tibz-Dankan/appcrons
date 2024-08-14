@@ -20,7 +20,7 @@ const RFC3339NanoLayout string = "2006-01-02T15:04:05.999999999-07:00"
 
 const UTCLayout string = "2006-01-02T15:04:05.999999999Z"
 
-// Returns the current in the provided time zone
+// Returns the current time in the provided time zone
 // with seconds set to 00
 func (d *Date) CurrentTime() (time.Time, error) {
 	currentTime := time.Now()
@@ -64,7 +64,7 @@ func (d *Date) ISOTime() (time.Time, error) {
 // Return the date string in the format
 // "2006-01-02 15:04:05.999999999 -0700 MST"
 func (d *Date) hourMinSecStr() string {
-	currentTime := time.Now()
+	currentTime, _ := d.CurrentTime()
 
 	year := currentTime.Format("2006")
 	month := currentTime.Format("01")
@@ -99,7 +99,7 @@ func (d *Date) HourMinSecTime() (time.Time, error) {
 	HourMinSecTime = HourMinSecTime.In(locTimeZone)
 	HourMinSecTime = HourMinSecTime.Truncate(time.Minute)
 
-	return HourMinSecTime.In(locTimeZone), nil
+	return HourMinSecTime, nil
 }
 
 // Returns time in RFC3339Nano(includes nanoseconds) format
