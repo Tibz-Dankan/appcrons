@@ -167,7 +167,6 @@ func validateApp(app models.App) (bool, error) {
 		endTime, _ := appDateEnd.HourMinSecTime()
 		currentTimeStart, _ := appDateStart.CurrentTime()
 		currentTimeEnd, _ := appDateEnd.CurrentTime()
-		// log.Printf("app:%s rs:%s startTime:%s re:%s endTime: %s\n", app.Name, rt.Start, startTime, rt.End, endTime)
 
 		isEqualToStartTime := currentTimeStart.Equal(startTime)
 		isEqualToEndTime := currentTimeEnd.Equal(endTime)
