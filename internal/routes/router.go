@@ -43,6 +43,7 @@ func AppRouter() *mux.Router {
 	request.PostRequestTimeRoute(requestRouter)
 	request.UpdateRequestTimeRoute(requestRouter)
 	request.DeleteRequestTimeRoute(requestRouter)
+	request.UpdateTimeZoneRoute(requestRouter)
 
 	// Auth routes
 	authRouter := router.PathPrefix("/api/v1/auth").Subrouter()

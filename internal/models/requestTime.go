@@ -41,6 +41,21 @@ func (rt *RequestTime) Update() error {
 	return nil
 }
 
+func (rt *RequestTime) UpdateTimeZone(timeZone string) ([]RequestTime, error) {
+	var requestTimes []RequestTime
+
+	if err := db.Model(&rt).Where("\"appId\" = ?", rt.AppID).Update("timeZone", timeZone).Error; err != nil {
+		return requestTimes, err
+	}
+
+	requestTimes, err := rt.FindByApp(rt.AppID)
+	if err != nil {
+		return requestTimes, err
+	}
+
+	return requestTimes, nil
+}
+
 func (r *RequestTime) Delete(id string) error {
 
 	if err := db.Unscoped().Where("id = ?", id).Delete(&RequestTime{}).Error; err != nil {

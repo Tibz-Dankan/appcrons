@@ -321,6 +321,26 @@ func getPermissionIDForRequestRoutes(r *http.Request) PermissionID {
 		return permissionID
 	}
 
+	updateTimeZoneRegex := regexp.MustCompile(`^/api/v1/requests/update-timezone$`)
+	updateTimeZoneMatchString := updateTimeZoneRegex.FindStringSubmatch(r.URL.Path)
+	if len(updateTimeZoneMatchString) > 0 {
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Println("Unable to read request body:", err)
+		}
+		r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		requestTime := models.RequestTime{}
+		err = json.NewDecoder(bytes.NewBuffer(bodyBytes)).Decode(&requestTime)
+		if err != nil {
+			log.Println("Error decoding r.Body:", err)
+		}
+		permissionID.ID = requestTime.AppID
+		permissionID.Type = "app"
+		permissionID.Permission = "WRITE"
+		return permissionID
+	}
+
 	return permissionID
 }
 
