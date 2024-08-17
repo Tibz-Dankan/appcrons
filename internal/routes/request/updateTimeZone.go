@@ -30,9 +30,9 @@ func updateTimeZone(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]interface{}{
-		"status":      "success",
-		"message":     "Time zone updated successfully",
-		"requestTime": requestTimes,
+		"status":       "success",
+		"message":      "Time zone updated successfully",
+		"requestTimes": requestTimes,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
