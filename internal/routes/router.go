@@ -73,5 +73,8 @@ func AppRouter() *mux.Router {
 	// Monitor route
 	monitor.GetMetrics(router)
 
+	// Not found route
+	NotFoundRoute(router)
+
 	return router
 }
