@@ -3,7 +3,6 @@ package request
 import (
 	"log"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
@@ -11,72 +10,6 @@ import (
 
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 )
-
-func StartRequestScheduler() {
-	go requestPublishScheduler()
-	go requestEventSubscriber()
-}
-
-// Runs the requestPublisher fn at
-// start of every minute
-func requestPublishScheduler() {
-	for {
-		now := time.Now()
-		nextMinute := now.Truncate(time.Minute).Add(time.Minute)
-		sleepDuration := nextMinute.Sub(now)
-		minute := now.Minute()
-
-		if minute%5 == 0 && now.Second() == 0 {
-			requestPublisher()
-		}
-
-		time.Sleep(sleepDuration)
-	}
-}
-
-// Subscribes/listens to all published
-// app request events
-func requestEventSubscriber() {
-	appCh := make(chan events.DataEvent)
-	events.EB.Subscribe("makeRequest", appCh)
-	type App = models.App
-
-	for {
-		appEvent := <-appCh
-		app, ok := appEvent.Data.(App)
-
-		if !ok {
-			log.Println("Interface does not hold type App")
-			return
-		}
-
-		go MakeAppRequest(app)
-	}
-}
-
-func requestPublisher() {
-	app := models.App{}
-
-	apps, err := app.FindAll()
-	if err != nil {
-		log.Println("Error fetching apps:", err)
-		return
-	}
-
-	if len(apps) == 0 {
-		return
-	}
-
-	var wg sync.WaitGroup
-	for _, app := range apps {
-		wg.Add(1)
-		go func(app models.App) {
-			defer wg.Done()
-			events.EB.Publish("makeRequest", app)
-		}(app)
-	}
-	wg.Wait()
-}
 
 // Makes request for the app
 func MakeAppRequest(app models.App) {

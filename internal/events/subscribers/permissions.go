@@ -1,15 +1,16 @@
-package events
+package subscribers
 
 import (
 	"log"
 	"time"
 
+	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 )
 
 func subscribeToPermissions() {
-	permissionCh := make(chan DataEvent)
-	EB.Subscribe("permissions", permissionCh)
+	permissionCh := make(chan events.DataEvent)
+	events.EB.Subscribe("permissions", permissionCh)
 
 	permission := models.Permissions{}
 	type User = models.User

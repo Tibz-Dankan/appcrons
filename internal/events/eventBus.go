@@ -38,12 +38,8 @@ func (eb *EventBus) Subscribe(topic string, ch DataChannel) {
 	eb.rm.Lock()
 	if prev, found := eb.subscribers[topic]; found {
 		eb.subscribers[topic] = append(prev, ch)
-		log.Println("subscribed to channel :::", ch)
-
 	} else {
 		eb.subscribers[topic] = append([]DataChannel{}, ch)
-		log.Println("subscribed to channel :::", ch)
-
 	}
 	eb.rm.Unlock()
 }
