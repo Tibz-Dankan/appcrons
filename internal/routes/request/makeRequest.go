@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
+	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 
 	"github.com/Tibz-Dankan/keep-active/internal/services"
@@ -37,8 +37,8 @@ func requestPublishScheduler() {
 // Subscribes/listens to all published
 // app request events
 func requestEventSubscriber() {
-	appCh := make(chan event.DataEvent)
-	event.EB.Subscribe("makeRequest", appCh)
+	appCh := make(chan events.DataEvent)
+	events.EB.Subscribe("makeRequest", appCh)
 	type App = models.App
 
 	for {
@@ -72,7 +72,7 @@ func requestPublisher() {
 		wg.Add(1)
 		go func(app models.App) {
 			defer wg.Done()
-			event.EB.Publish("makeRequest", app)
+			events.EB.Publish("makeRequest", app)
 		}(app)
 	}
 	wg.Wait()
@@ -92,7 +92,7 @@ func MakeAppRequest(app models.App) {
 	appRequestProgress := services.AppRequestProgress{App: app, InProgress: true}
 	services.UserAppMem.Add(app.UserID, appRequestProgress)
 
-	event.EB.Publish("appRequestProgress", appRequestProgress)
+	events.EB.Publish("appRequestProgress", appRequestProgress)
 
 	response, err := services.MakeHTTPRequest(app.URL)
 	if err != nil {
@@ -117,7 +117,7 @@ func MakeAppRequest(app models.App) {
 	appRequestProgress.InProgress = false
 	services.UserAppMem.Add(app.UserID, appRequestProgress)
 
-	event.EB.Publish("appRequestProgress", appRequestProgress)
+	events.EB.Publish("appRequestProgress", appRequestProgress)
 }
 
 // Validates the app's eligibility for making requests

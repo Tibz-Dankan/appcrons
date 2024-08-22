@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -40,8 +39,6 @@ func deleteRequestTime(w http.ResponseWriter, r *http.Request) {
 		"status":  "success",
 		"message": "Request Time deleted successfully",
 	}
-	app := models.App{ID: savedRequestTime.AppID}
-	event.EB.Publish("updateApp", app)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
