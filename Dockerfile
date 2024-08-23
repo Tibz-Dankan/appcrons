@@ -1,11 +1,11 @@
-FROM golang:1.21-alpine
+FROM golang:1.23.0-alpine
 
 WORKDIR /app
 
 COPY . .
 
-RUN go build -o ./bin/myapp ./
+RUN go build -o ./bin/appcrons ./cmd
 
 EXPOSE 8080
 
-CMD ["./bin/myapp"]
+CMD ["./bin/appcrons"]
