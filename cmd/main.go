@@ -1,31 +1,30 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/Tibz-Dankan/keep-active/internal/events/publishers"
+	"github.com/Tibz-Dankan/keep-active/internal/events/subscribers"
+	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
+	"github.com/Tibz-Dankan/keep-active/internal/schedulers"
 
 	"github.com/rs/cors"
 )
 
 func main() {
+	middlewares.InitRequestDurationPromRegister()
 	router := routes.AppRouter()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "production_url"},
+		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
 		AllowCredentials: true,
 		Debug:            true,
 		AllowedHeaders:   []string{"*"},
 	})
-
-	// err := godotenv.Load("../.env")
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file=> ", err.Error())
-	// }
 
 	handler := c.Handler(router)
 
@@ -33,7 +32,12 @@ func main() {
 
 	models.DBAutoMigrate()
 
-	fmt.Println("Starting http server up on 8000")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Println("Starting http server up on 8080")
+	go http.ListenAndServe(":8080", nil)
 
+	go schedulers.InitSchedulers()
+	go subscribers.InitEventSubscribers()
+	publishers.InitEventPublishers()
+
+	select {}
 }
