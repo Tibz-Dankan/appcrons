@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -56,9 +55,6 @@ func updateRequestTime(w http.ResponseWriter, r *http.Request) {
 		"message":     "Request Time updated successfully",
 		"requestTime": updatedRequestTime,
 	}
-
-	app := models.App{ID: requestTime.AppID}
-	event.EB.Publish("updateApp", app)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
+	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -90,8 +90,8 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type AppRequestProgress = services.AppRequestProgress
-	appCh := make(chan event.DataEvent)
-	event.EB.Subscribe("appRequestProgress", appCh)
+	appCh := make(chan events.DataEvent)
+	events.EB.Subscribe("appRequestProgress", appCh)
 
 	heartbeatTicker := time.NewTicker(30 * time.Second)
 
@@ -120,7 +120,7 @@ func getLiveRequests(w http.ResponseWriter, r *http.Request) {
 			}
 		case <-disconnect:
 			clientManager.RemoveClient(userId)
-			event.EB.Unsubscribe("appRequestProgress", appCh)
+			events.EB.Unsubscribe("appRequestProgress", appCh)
 			heartbeatTicker.Stop()
 			cancel()
 			log.Println("Client disconnected:", userId)

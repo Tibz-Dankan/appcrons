@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
+	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -73,7 +73,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 
 	user.ID = userId
-	event.EB.Publish("permissions", user)
+	events.EB.Publish("permissions", user)
 }
 
 func SignUpRoute(router *mux.Router) {

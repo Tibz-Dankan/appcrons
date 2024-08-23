@@ -1,14 +1,14 @@
-package services
+package schedulers
 
 import (
-	"log"
 	"time"
+
+	"github.com/Tibz-Dankan/keep-active/internal/services"
 )
 
 // deletes all key-value pairs in the user app memory
 // at 35 seconds for every minute that is a multiple of 5
-func clearUserAppMemory() {
-	log.Println("Inside clearUserAppMemory()")
+func cleanUserAppMemory() {
 	for {
 		now := time.Now()
 		minute := now.Minute()
@@ -29,11 +29,7 @@ func clearUserAppMemory() {
 
 		now = time.Now()
 		if now.Minute()%5 == 0 && now.Second() == 35 {
-			UserAppMem.DeleteAll()
+			services.UserAppMem.DeleteAll()
 		}
 	}
-}
-
-func StartClearUserAppMemoryScheduler() {
-	go clearUserAppMemory()
 }

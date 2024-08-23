@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -71,8 +70,6 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 		services.AppError(err.Error(), 400, w)
 		return
 	}
-
-	event.EB.Publish("updateApp", app)
 
 	response := map[string]interface{}{
 		"status":  "success",

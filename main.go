@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Tibz-Dankan/keep-active/internal/event"
+	"github.com/Tibz-Dankan/keep-active/internal/events/publishers"
+	"github.com/Tibz-Dankan/keep-active/internal/events/subscribers"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
-	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
-	"github.com/Tibz-Dankan/keep-active/internal/services"
+	"github.com/Tibz-Dankan/keep-active/internal/schedulers"
 
 	"github.com/rs/cors"
 )
@@ -35,11 +35,9 @@ func main() {
 	log.Println("Starting http server up on 8000")
 	go http.ListenAndServe(":8000", nil)
 
-	services.StartClearUserAppMemoryScheduler()
-	// Call StartRequestScheduler after server is started
-	request.StartRequestScheduler()
-
-	event.EventSubscribers()
+	go schedulers.InitSchedulers()
+	go subscribers.InitEventSubscribers()
+	publishers.InitEventPublishers()
 
 	select {}
 }
