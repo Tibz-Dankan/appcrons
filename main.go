@@ -33,7 +33,7 @@ func main() {
 	models.DBAutoMigrate()
 
 	log.Println("Starting http server up on 8000")
-	go http.ListenAndServe(":8000", nil)
+	go http.ListenAndServe(":8080", nil)
 
 	go schedulers.InitSchedulers()
 	go subscribers.InitEventSubscribers()
