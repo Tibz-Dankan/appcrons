@@ -10,6 +10,7 @@ import (
 )
 
 var db = config.Db()
+var DB = db
 var redisClient = config.RedisClient()
 var ctx = context.Background()
 
@@ -19,6 +20,14 @@ func DBAutoMigrate() {
 		log.Fatal("Failed to make auto migration", err)
 	}
 	log.Println("Auto Migration successful")
+}
+
+func DBDropTables() {
+	err := db.Migrator().DropTable(&User{}, &App{}, &Request{}, &RequestTime{}, &Feedback{})
+	if err != nil {
+		log.Fatal("Failed to drop tables", err)
+	}
+	log.Println("Dropped all tables")
 }
 
 type User struct {

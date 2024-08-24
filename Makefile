@@ -2,7 +2,7 @@
 APP_NAME := Appcrons
 CMD_DIR := ./cmd
 BIN_DIR := ./bin
-TEST_DIR := ./test
+TEST_DIR := ./tests
 
 # Ensure bin directory exists
 $(BIN_DIR):
@@ -16,13 +16,14 @@ all: install run
 .PHONY: run
 run:
 	@echo "Starting development server..."
-	@go run $(CMD_DIR)
+	@ @GO_ENV=development go run $(CMD_DIR)
 
 # Run tests
 .PHONY: test
 test:
-	@echo "Running tests..."
-	@go test $(TEST_DIR) -v
+	@echo "Running tests with GO_ENV=testing..."
+	@GO_ENV=testing go test -v $(TEST_DIR)/...
+
 
 # Install dependencies
 .PHONY: install
