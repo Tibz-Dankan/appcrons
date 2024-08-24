@@ -6,6 +6,8 @@ COPY . .
 
 RUN go build -o ./bin/appcrons ./cmd
 
+ENV GO_ENV=production
+
 EXPOSE 8080
 
 CMD ["./bin/appcrons"]
