@@ -38,7 +38,7 @@ func TestMissingSignUpFields(t *testing.T) {
 	setup.CheckResponseCode(t, label, http.StatusBadRequest, response.Code)
 }
 
-func TestExistingUser(t *testing.T) {
+func TestExistingSignUpUser(t *testing.T) {
 	setup.ClearAllTables()
 
 	var label string

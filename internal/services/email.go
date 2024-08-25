@@ -92,6 +92,9 @@ func (u *Email) send(html, subject string) error {
 }
 
 func (e *Email) SendResetPassword(name, URL, subject string) error {
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		return nil
+	}
 	data := struct {
 		Subject string
 		Name    string
