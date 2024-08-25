@@ -3,6 +3,7 @@ package middlewares
 import (
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -50,6 +51,11 @@ func (rl *RateLimiter) AllowRequest(clientIp string) bool {
 
 func RateLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		clientIP := r.Header.Get("X-Forwarded-For")
 		if clientIP == "" {
 			clientIP = r.Header.Get("X-Real-IP")
