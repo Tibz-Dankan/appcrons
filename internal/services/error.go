@@ -127,12 +127,11 @@ func (jwt *JWTError) Send(w http.ResponseWriter) {
 }
 
 func (jwt *JWTError) invalid() bool {
-	hasInvalidCharacter := strings.Contains(jwt.err, "invalid character")
 	isIllegal := strings.Contains(jwt.err, "illegal base64 data")
 	invalidSignature := jwt.err == "signature is invalid"
 	invalidSigningMethod := jwt.err == "signing method (alg) is unspecified"
 
-	isInvalidJWT := hasInvalidCharacter || isIllegal || invalidSignature || invalidSigningMethod
+	isInvalidJWT := isIllegal || invalidSignature || invalidSigningMethod
 
 	return isInvalidJWT
 }
