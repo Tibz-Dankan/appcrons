@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
+	"github.com/Tibz-Dankan/keep-active/tests/setup"
 )
 
 func TestMain(m *testing.M) {
@@ -12,7 +13,7 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	models.DBDropTables()
+	setup.ClearAllTables()
 
 	os.Exit(code)
 }

@@ -20,7 +20,7 @@ func TestMissingSignUpFields(t *testing.T) {
 	var response *httptest.ResponseRecorder
 
 	label = "Expects 400 with missing username"
-	payload = []byte(`{"name":"","email":"email@gmail.com","password":"password"}`)
+	payload = []byte(`{"name":"","email":"user@gmail.com","password":"password"}`)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signup", bytes.NewBuffer(payload))
 	response = setup.ExecuteRequest(req)
 	setup.CheckResponseCode(t, label, http.StatusBadRequest, response.Code)

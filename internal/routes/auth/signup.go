@@ -15,7 +15,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		services.AppError(err.Error(), 400, w)
+		services.AppError(err.Error(), 500, w)
 		return
 	}
 
