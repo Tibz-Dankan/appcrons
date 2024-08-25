@@ -2,7 +2,9 @@ package auth
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
@@ -50,6 +52,15 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		permission := models.Permissions{}
+		if err := permission.Set(user.ID); err != nil {
+			log.Println("Error setting permissions:", err)
+		}
+	} else {
+		events.EB.Publish("permissions", user)
+	}
+
 	userMap := map[string]interface{}{
 		"id":    user.ID,
 		"name":  user.Name,
@@ -66,8 +77,6 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
-
-	events.EB.Publish("permissions", user)
 }
 
 func SignInRoute(router *mux.Router) {

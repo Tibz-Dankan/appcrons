@@ -2,7 +2,9 @@ package auth
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
@@ -35,8 +37,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: To implement more scalable approach to set user roles
-	err = user.SetRole("client")
+	err = user.SetRole("user")
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return
@@ -55,6 +56,16 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.ID = userId
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		permission := models.Permissions{}
+		if err := permission.Set(user.ID); err != nil {
+			log.Println("Error setting permissions:", err)
+		}
+	} else {
+		events.EB.Publish("permissions", user)
+	}
+
 	newUser := map[string]interface{}{
 		"id":    userId,
 		"name":  user.Name,
@@ -71,9 +82,6 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
-
-	user.ID = userId
-	events.EB.Publish("permissions", user)
 }
 
 func SignUpRoute(router *mux.Router) {

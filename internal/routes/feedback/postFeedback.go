@@ -2,7 +2,9 @@ package feedback
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
@@ -37,6 +39,16 @@ func postFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := models.User{ID: userId}
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		permission := models.Permissions{}
+		if err := permission.Set(user.ID); err != nil {
+			log.Println("Error setting permissions:", err)
+		}
+	} else {
+		events.EB.Publish("permissions", user)
+	}
+
 	response := map[string]interface{}{
 		"status":   "success",
 		"message":  "Thank very much for your feedback",
@@ -46,9 +58,6 @@ func postFeedback(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
-
-	user := models.User{ID: userId}
-	events.EB.Publish("permissions", user)
 }
 
 func PostFeedbackRoute(router *mux.Router) {

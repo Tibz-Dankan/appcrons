@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 )
@@ -45,17 +46,20 @@ func (p *Permissions) Set(userId string) error {
 	}
 
 	if savedUser.ID == "" {
-		log.Println("User does not exist!")
-		return nil //TODO: To return custom error message
+		return errors.New("User does not exist")
 	}
 
 	userPermissions.Role = savedUser.Role
+
+	if userPermissions.Role == "user" {
+		userPermissions.Permissions = []string{"READ", "WRITE", "EDIT", "DELETE"}
+	}
 
 	if userPermissions.Role == "client" {
 		userPermissions.Permissions = []string{"READ", "WRITE", "EDIT", "DELETE"}
 	}
 
-	if userPermissions.Role == "admin" {
+	if userPermissions.Role == "sys_admin" {
 		userPermissions.Permissions = []string{"READ"}
 	}
 
