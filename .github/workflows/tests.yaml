@@ -21,6 +21,7 @@ jobs:
         uses: supercharge/redis-github-action@1.7.0
         with:
           redis-version: ${{ matrix.redis-version }}
+          redis-loglevel: verbose
           redis-remove-container: true
 
       - name: Checkout code
