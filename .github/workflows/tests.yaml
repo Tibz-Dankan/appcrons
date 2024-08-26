@@ -11,6 +11,7 @@ jobs:
 
     env:
       APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
 
     steps:
       - name: Checkout code
