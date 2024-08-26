@@ -8,12 +8,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        redis-version: [6, 7]
 
     env:
       APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
       REDIS_URL: ${{ secrets.REDIS_URL }}
 
     steps:
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.7.0
+        with:
+          redis-version: ${{ matrix.redis-version }}
+          redis-remove-container: true
+
       - name: Checkout code
         uses: actions/checkout@v3
 
