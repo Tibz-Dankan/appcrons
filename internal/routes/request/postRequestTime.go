@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
@@ -48,6 +49,17 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId, _ := r.Context().Value(middlewares.UserIDKey).(string)
+	user := models.User{ID: userId}
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		permission := models.Permissions{}
+		if err := permission.Set(user.ID); err != nil {
+			log.Println("Error setting permissions:", err)
+		}
+	} else {
+		events.EB.Publish("permissions", user)
+	}
+
 	response := map[string]interface{}{
 		"status":      "success",
 		"message":     "Request Time Created successfully",
@@ -58,9 +70,6 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
 
-	userId, _ := r.Context().Value(middlewares.UserIDKey).(string)
-	user := models.User{ID: userId}
-	events.EB.Publish("permissions", user)
 }
 
 func PostRequestTimeRoute(router *mux.Router) {

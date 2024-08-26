@@ -10,6 +10,7 @@ import (
 )
 
 var db = config.Db()
+var DB = db
 var redisClient = config.RedisClient()
 var ctx = context.Background()
 
@@ -21,6 +22,14 @@ func DBAutoMigrate() {
 	log.Println("Auto Migration successful")
 }
 
+func DBDropTables() {
+	err := db.Migrator().DropTable(&User{}, &App{}, &Request{}, &RequestTime{}, &Feedback{})
+	if err != nil {
+		log.Fatal("Failed to drop tables", err)
+	}
+	log.Println("Dropped all tables")
+}
+
 type User struct {
 	ID                     string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
 	Name                   string         `gorm:"column:name;not null;index" json:"name"`
@@ -28,7 +37,7 @@ type User struct {
 	Password               string         `gorm:"column:password;not null" json:"password"`
 	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken"`
 	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt;index" json:"passwordResetExpiresAt"`
-	Role                   string         `gorm:"column:role;default:'admin';not null" json:"role"`
+	Role                   string         `gorm:"column:role;default:'user';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
 	Feedback               []Feedback     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"feedbacks"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
