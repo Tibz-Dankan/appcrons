@@ -6,11 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Tibz-Dankan/keep-active/internal/models"
+	"github.com/Tibz-Dankan/keep-active/internal/config"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
+
+	_ "github.com/lib/pq"
 )
 
-var db = models.DB
+var db = config.Db()
+var DB = db
 
 func ClearAllTables() {
 	tables := []string{"requests", "request_times", "apps", "feedbacks", "users"}

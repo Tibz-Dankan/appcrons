@@ -1,4 +1,4 @@
-package auth_test
+package tests
 
 import (
 	"bytes"
@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/tests/setup"
 )
 
 func TestMissingPasswordsFields(t *testing.T) {
+	time.Sleep(500 * time.Millisecond)
 	setup.ClearAllTables()
 
 	var label string = "Expects 400 with missing passwords"
@@ -29,6 +31,7 @@ func TestMissingPasswordsFields(t *testing.T) {
 		t.Errorf("Expects accessToken. Got %v\n", err)
 		return
 	}
+	user.ID = userId
 
 	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
@@ -73,7 +76,7 @@ func TestSimilarPasswords(t *testing.T) {
 	userId, err := user.Create(user)
 	if err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
 
@@ -114,7 +117,7 @@ func TestNewPasswordSimilarToSavedOne(t *testing.T) {
 	userId, err := user.Create(user)
 	if err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
 
@@ -155,7 +158,7 @@ func TestSuccessfulChangePassword(t *testing.T) {
 	userId, err := user.Create(user)
 	if err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
 
