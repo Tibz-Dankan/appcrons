@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
+	"github.com/Tibz-Dankan/keep-active/tests/data"
 	"github.com/Tibz-Dankan/keep-active/tests/setup"
 )
 
@@ -23,7 +25,12 @@ func TestMissingPasswordsFields(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
@@ -33,7 +40,7 @@ func TestMissingPasswordsFields(t *testing.T) {
 	}
 	user.ID = userId
 
-	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -60,6 +67,8 @@ func TestMissingPasswordsFields(t *testing.T) {
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
 	setup.CheckResponseCode(t, label, http.StatusBadRequest, response.Code)
+
+	log.Printf("name:%s email:%s password:%s", name, email, password)
 }
 
 func TestSimilarPasswords(t *testing.T) {
@@ -71,7 +80,12 @@ func TestSimilarPasswords(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
@@ -80,7 +94,7 @@ func TestSimilarPasswords(t *testing.T) {
 		return
 	}
 
-	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -101,6 +115,7 @@ func TestSimilarPasswords(t *testing.T) {
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
 	setup.CheckResponseCode(t, label, http.StatusBadRequest, response.Code)
+	log.Printf("name:%s email:%s password:%s", name, email, password)
 }
 
 func TestNewPasswordSimilarToSavedOne(t *testing.T) {
@@ -112,7 +127,12 @@ func TestNewPasswordSimilarToSavedOne(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
@@ -121,7 +141,7 @@ func TestNewPasswordSimilarToSavedOne(t *testing.T) {
 		return
 	}
 
-	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -153,7 +173,12 @@ func TestSuccessfulChangePassword(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
@@ -162,7 +187,7 @@ func TestSuccessfulChangePassword(t *testing.T) {
 		return
 	}
 
-	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -178,7 +203,15 @@ func TestSuccessfulChangePassword(t *testing.T) {
 
 	path := fmt.Sprintf("/api/v1/auth/user/update-password/%s", userId)
 
-	payload = []byte(`{"currentPassword":"password","newPassword":"newPassword"}`)
+	passwords := struct {
+		CurrentPassword string `json:"currentPassword"`
+		NewPassword     string `json:"newPassword"`
+	}{
+		CurrentPassword: user.Password,
+		NewPassword:     genData.RandomUniquePassword(8),
+	}
+
+	payload, _ = json.Marshal(passwords)
 	req, _ = http.NewRequest("PATCH", path, bytes.NewBuffer(payload))
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)

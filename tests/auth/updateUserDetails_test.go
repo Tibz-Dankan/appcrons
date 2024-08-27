@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
+	"github.com/Tibz-Dankan/keep-active/tests/data"
 	"github.com/Tibz-Dankan/keep-active/tests/setup"
 )
 
@@ -21,16 +22,21 @@ func TestMissingUpdateUserDetailFields(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
 
-	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -68,23 +74,34 @@ func TestUpdatingToAlreadyExistingEmail(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	userOne := models.User{Name: "username1", Email: "user1@gmail.com", Password: "password"}
-	userTwo := models.User{Name: "username2", Email: "user2@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+
+	userOne := models.User{
+		Name:     genData.RandomUniqueAppName(),
+		Email:    genData.RandomUniqueEmail(),
+		Password: genData.RandomUniquePassword(8),
+	}
+	userTwo := models.User{
+		Name:     genData.RandomUniqueAppName(),
+		Email:    genData.RandomUniqueEmail(),
+		Password: genData.RandomUniquePassword(8),
+	}
 
 	userIdOne, err := userOne.Create(userOne)
 	if err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new user 1. Got %v\n", err)
 		return
 	}
+	userOne.ID = userIdOne
 
 	if _, err := userTwo.Create(userTwo); err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new user 2. Got %v\n", err)
 		return
 	}
 
-	signInPayload := []byte(`{"email":"user1@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(userOne)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -100,7 +117,8 @@ func TestUpdatingToAlreadyExistingEmail(t *testing.T) {
 
 	path := fmt.Sprintf("/api/v1/auth/user/update/%s", userIdOne)
 
-	payload = []byte(`{"name":"username","email":"user2@gmail.com"}`)
+	userOne.Email = userTwo.Email
+	payload, _ = json.Marshal(userOne)
 	req, _ = http.NewRequest("PATCH", path, bytes.NewBuffer(payload))
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
@@ -117,7 +135,12 @@ func TestSuccessfulUserDetailUpdate(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
@@ -125,8 +148,9 @@ func TestSuccessfulUserDetailUpdate(t *testing.T) {
 		t.Errorf("Expects accessToken. Got %v\n", err)
 		return
 	}
+	user.ID = userId
 
-	signInPayload := []byte(`{"email":"user@gmail.com","password":"password"}`)
+	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
 	response = setup.ExecuteRequest(req)
 
@@ -142,7 +166,10 @@ func TestSuccessfulUserDetailUpdate(t *testing.T) {
 
 	path := fmt.Sprintf("/api/v1/auth/user/update/%s", userId)
 
-	payload = []byte(`{"name":"username2","email":"user2@gmail.com"}`)
+	user.Email = genData.RandomUniqueEmail()
+	user.Name = genData.RandomUniqueName()
+
+	payload, _ = json.Marshal(user)
 	req, _ = http.NewRequest("PATCH", path, bytes.NewBuffer(payload))
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
