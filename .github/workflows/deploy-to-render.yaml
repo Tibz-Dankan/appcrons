@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test:
+  test-deploy:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -16,6 +16,8 @@ jobs:
       APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
       REDIS_URL: redis://127.0.0.1:6379
 
+    permissions:
+      deployments: write
     steps:
       - name: Start Redis
         uses: supercharge/redis-github-action@1.7.0
@@ -38,12 +40,6 @@ jobs:
       - name: Run tests
         run: make stage # Runs tests in the staging environment
 
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      deployments: write
-    steps:
-      - uses: actions/checkout@v3
       - uses: JorgeLNJunior/render-deploy@v1.4.4
         with:
           service_id: ${{ secrets.RENDER_SERVICE_ID }}
