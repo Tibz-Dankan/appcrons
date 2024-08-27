@@ -14,7 +14,8 @@ jobs:
 
     env:
       APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
-      REDIS_URL: redis://127.0.0.1:6379
+      # REDIS_URL: redis://127.0.0.1:6379
+      REDIS_URL: ${{ secrets.REDIS_URL }}
 
     permissions:
       deployments: write
