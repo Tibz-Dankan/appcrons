@@ -41,13 +41,7 @@ type Memory struct {
 	sync.RWMutex
 }
 
-// initiates memory for user permission in RAM
-func NewMemory() *Memory {
-	return &Memory{
-		users: make(map[string]interface{}),
-	}
-}
-
+// Initiates memory for user permission in RAM
 var memory = &Memory{
 	users: make(map[string]interface{}),
 }
