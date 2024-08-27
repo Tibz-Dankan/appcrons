@@ -1,4 +1,4 @@
-package auth_test
+package tests
 
 import (
 	"bytes"
@@ -71,7 +71,7 @@ func TestExpiredPasswordResetToken(t *testing.T) {
 	var req *http.Request
 	var response *httptest.ResponseRecorder
 
-	db := models.DB
+	db := setup.DB
 	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
 
 	userId, err := user.Create(user)
