@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"os"
+	"sync"
 	"time"
 )
 
@@ -30,6 +32,24 @@ type UserPermissions struct {
 
 type Permissions struct {
 	User UserPermissions `json:"user"`
+}
+
+// Keeps user permission data in RAM in test environment
+// using a map
+type Memory struct {
+	users map[string]interface{}
+	sync.RWMutex
+}
+
+// initiates memory for user permission in RAM
+func NewMemory() *Memory {
+	return &Memory{
+		users: make(map[string]interface{}),
+	}
+}
+
+var memory = &Memory{
+	users: make(map[string]interface{}),
 }
 
 func (p *Permissions) Set(userId string) error {
@@ -96,6 +116,15 @@ func (p *Permissions) Set(userId string) error {
 		userPermissions.Feedback = append(userPermissions.Feedback, permittedFeedback)
 	}
 
+	isTestingOrStagingEnv := os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging"
+
+	if isTestingOrStagingEnv {
+		if err := memory.write(userPermissions); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	if err := p.writeToCache(userPermissions); err != nil {
 		return err
 	}
@@ -104,6 +133,17 @@ func (p *Permissions) Set(userId string) error {
 }
 
 func (p *Permissions) Get(userId string) (UserPermissions, error) {
+	isTestingOrStagingEnv := os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging"
+
+	if isTestingOrStagingEnv {
+		permissions, err := memory.read(userId)
+
+		if err != nil {
+			return permissions, err
+		}
+		return permissions, err
+	}
+
 	permissions, err := p.readFromCache(userId)
 	if err != nil {
 		return permissions, err
@@ -113,6 +153,15 @@ func (p *Permissions) Get(userId string) (UserPermissions, error) {
 }
 
 func (p *Permissions) Delete(userId string) error {
+	isTestingOrStagingEnv := os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging"
+
+	if isTestingOrStagingEnv {
+		if err := memory.delete(userId); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	if err := p.deleteFromCache(userId); err != nil {
 		return err
 	}
@@ -159,6 +208,46 @@ func (p *Permissions) deleteFromCache(userID string) error {
 		log.Println("Error deleting data from Redis:", err)
 		return err
 	}
+
+	return nil
+}
+
+// Saves user permissions in RAM using a map
+// and should only be used in testing environment
+func (m *Memory) write(permissions UserPermissions) error {
+	m.Lock()
+	defer m.Unlock()
+	m.users[permissions.UserID] = permissions
+
+	return nil
+}
+
+// Gets user permissions in RAM store in a map
+// and should only be used in testing environment
+func (m *Memory) read(userId string) (UserPermissions, error) {
+	type UsrPermissions = UserPermissions
+	m.RLock()
+	defer m.RUnlock()
+
+	permissions, ok := m.users[userId]
+	if !ok {
+		return UserPermissions{}, nil
+	}
+
+	userPermissions, found := permissions.(UsrPermissions)
+	if !found {
+		return UserPermissions{}, nil
+	}
+
+	return userPermissions, nil
+}
+
+// Deletes user permissions in RAM stored in a map
+// and should only be used in testing environment
+func (m *Memory) delete(userId string) error {
+	m.Lock()
+	defer m.Unlock()
+	delete(m.users, userId)
 
 	return nil
 }
