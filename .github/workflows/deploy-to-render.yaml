@@ -34,7 +34,9 @@ jobs:
       - name: Set up SQLite
         uses: actions/setup-sqlite@v1
         with:
-          sqlite-version: ${{ matrix.sqlite }}
+          # sqlite-version: ${{ matrix.sqlite }}
+          sqlite-version: 3.40.0
+          sqlite-year: 2022
       - run: sqlite3 foo "create table foo (a int, b text)"
 
       - name: Set up Go
