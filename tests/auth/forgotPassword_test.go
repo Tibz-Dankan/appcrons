@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/tests/data"
@@ -57,6 +58,7 @@ func TestSuccessfulForgotPasswordInitialization(t *testing.T) {
 		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	emailStruct := struct {
 		Email string `json:"email"`
