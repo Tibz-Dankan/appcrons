@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         redis-version: [6, 7]
-        sqlite: [3.46.0, 3.35.0]
+        sqlite: [3.40.0, 3.35.0]
 
     env:
       APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
