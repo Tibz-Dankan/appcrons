@@ -2,33 +2,15 @@ package models
 
 import (
 	"context"
-	"log"
 	"time"
 
-	"github.com/Tibz-Dankan/keep-active/internal/config"
 	"gorm.io/gorm"
 )
 
-var db = config.Db()
+var db = Db()
 var DB = db
-var redisClient = config.RedisClient()
+var redisClient = RedisClient()
 var ctx = context.Background()
-
-func DBAutoMigrate() {
-	err := db.AutoMigrate(&User{}, &App{}, &Request{}, &RequestTime{}, &Feedback{})
-	if err != nil {
-		log.Fatal("Failed to make auto migration", err)
-	}
-	log.Println("Auto Migration successful")
-}
-
-func DBDropTables() {
-	err := db.Migrator().DropTable(&User{}, &App{}, &Request{}, &RequestTime{}, &Feedback{})
-	if err != nil {
-		log.Fatal("Failed to drop tables", err)
-	}
-	log.Println("Dropped all tables")
-}
 
 type User struct {
 	ID                     string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`

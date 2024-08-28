@@ -80,7 +80,7 @@ func TestExpiredPasswordResetToken(t *testing.T) {
 	var req *http.Request
 	var response *httptest.ResponseRecorder
 
-	db := setup.DB
+	db := models.DB
 
 	genData := data.NewGenTestData()
 	name := genData.RandomUniqueName()

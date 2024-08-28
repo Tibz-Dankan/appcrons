@@ -7,7 +7,6 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/events/publishers"
 	"github.com/Tibz-Dankan/keep-active/internal/events/subscribers"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
-	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/routes"
 	"github.com/Tibz-Dankan/keep-active/internal/schedulers"
 
@@ -29,8 +28,6 @@ func main() {
 	handler := c.Handler(router)
 
 	http.Handle("/", handler)
-
-	models.DBAutoMigrate()
 
 	log.Println("Starting http server up on 8080")
 	go http.ListenAndServe(":8080", nil)
