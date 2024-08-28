@@ -20,14 +20,17 @@ func Db() *gorm.DB {
 		var dsn string
 		env := os.Getenv("GO_ENV")
 		log.Println("GO_ENV:", env)
+		var SkipDefaultTransaction bool = true
 
 		switch env {
 		case "development":
 			dsn = os.Getenv("APPCRONS_DEV_DSN")
 		case "testing":
 			dsn = os.Getenv("APPCRONS_TEST_DSN")
+			SkipDefaultTransaction = false
 		case "staging":
 			dsn = os.Getenv("APPCRONS_STAG_DSN")
+			SkipDefaultTransaction = false
 		case "production":
 			dsn = os.Getenv("APPCRONS_PROD_DSN")
 		default:
@@ -36,7 +39,7 @@ func Db() *gorm.DB {
 
 		var err error
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-			SkipDefaultTransaction: true, PrepareStmt: true,
+			SkipDefaultTransaction: SkipDefaultTransaction, PrepareStmt: true,
 		})
 
 		if err != nil {
