@@ -24,6 +24,11 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 
 	password := user.Password
 
+	if user.Email == "" || user.Password == "" {
+		services.AppError("Missing email/password!", 400, w)
+		return
+	}
+
 	user, err = user.FindByEMail(user.Email)
 	if err != nil {
 		services.AppError(err.Error(), 500, w)

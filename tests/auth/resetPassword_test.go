@@ -57,6 +57,7 @@ func TestMissingNewResetPassword(t *testing.T) {
 		return
 	}
 	user.ID = userId
+	time.Sleep(500 * time.Millisecond)
 
 	resetToken, err := user.CreatePasswordResetToken()
 	if err != nil {
@@ -96,16 +97,17 @@ func TestExpiredPasswordResetToken(t *testing.T) {
 		return
 	}
 	user.ID = userId
+	time.Sleep(500 * time.Millisecond)
 
 	resetToken := uuid.NewString()
 	hashedToken := sha256.New()
 	hashedToken.Write([]byte(resetToken))
 	hashedTokenByteSlice := hashedToken.Sum(nil)
 	hashedTokenString := hex.EncodeToString(hashedTokenByteSlice)
+	passwordResetExpiresAt := time.Now().Add(-20 * time.Minute)
 
-	user.PasswordResetToken = hashedTokenString
-	user.PasswordResetExpiresAt = time.Now().Add(-20 * time.Minute)
-	db.Save(&user)
+	stmt := fmt.Sprintf("UPDATE users SET \"passwordResetToken\" = %s \"passwordResetExpiresAt\" = %v  WHERE id = %s", hashedTokenString, passwordResetExpiresAt, userId)
+	db.Exec(stmt)
 
 	label = "Expects 400 with expired password reset token"
 	payload = []byte(`{"password":"newPassword"}`)
@@ -124,7 +126,6 @@ func TestSuccessfulPasswordReset(t *testing.T) {
 	var response *httptest.ResponseRecorder
 	var body map[string]interface{}
 
-	db := models.DB
 	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
 
 	userId, err := user.Create(user)
@@ -136,15 +137,11 @@ func TestSuccessfulPasswordReset(t *testing.T) {
 	}
 	user.ID = userId
 
-	resetToken := uuid.NewString()
-	hashedToken := sha256.New()
-	hashedToken.Write([]byte(resetToken))
-	hashedTokenByteSlice := hashedToken.Sum(nil)
-	hashedTokenString := hex.EncodeToString(hashedTokenByteSlice)
-
-	user.PasswordResetToken = hashedTokenString
-	user.PasswordResetExpiresAt = time.Now().Add(20 * time.Minute)
-	db.Save(&user)
+	resetToken, err := user.CreatePasswordResetToken()
+	if err != nil {
+		fmt.Printf("=== FAIL: %s\n", label)
+		t.Errorf("Expects resetToken. Got %v\n", err)
+	}
 
 	payload = []byte(`{"password":"newPassword"}`)
 	path := fmt.Sprintf("/api/v1/auth/reset-password/%s", resetToken)

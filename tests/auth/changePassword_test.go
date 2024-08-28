@@ -39,6 +39,7 @@ func TestMissingPasswordsFields(t *testing.T) {
 		return
 	}
 	user.ID = userId
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
@@ -93,6 +94,7 @@ func TestSimilarPasswords(t *testing.T) {
 		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
@@ -140,6 +142,7 @@ func TestNewPasswordSimilarToSavedOne(t *testing.T) {
 		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
@@ -186,6 +189,7 @@ func TestSuccessfulChangePassword(t *testing.T) {
 		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/tests/data"
@@ -62,6 +63,7 @@ func TestExistingSignUpUser(t *testing.T) {
 		return
 	}
 	user.ID = userId
+	time.Sleep(500 * time.Millisecond)
 
 	label = "Expects 400 when user already exists"
 	payload, _ = json.Marshal(user)

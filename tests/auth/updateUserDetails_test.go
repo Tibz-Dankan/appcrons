@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/tests/data"
@@ -35,6 +36,7 @@ func TestMissingUpdateUserDetailFields(t *testing.T) {
 		t.Errorf("Expects new user. Got %v\n", err)
 		return
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
@@ -100,6 +102,7 @@ func TestUpdatingToAlreadyExistingEmail(t *testing.T) {
 		t.Errorf("Expects new user 2. Got %v\n", err)
 		return
 	}
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(userOne)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
@@ -149,6 +152,7 @@ func TestSuccessfulUserDetailUpdate(t *testing.T) {
 		return
 	}
 	user.ID = userId
+	time.Sleep(500 * time.Millisecond)
 
 	signInPayload, _ := json.Marshal(user)
 	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
