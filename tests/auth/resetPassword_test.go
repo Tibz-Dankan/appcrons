@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
+	"github.com/Tibz-Dankan/keep-active/tests/data"
 	"github.com/Tibz-Dankan/keep-active/tests/setup"
 	"github.com/google/uuid"
 )
@@ -24,6 +25,8 @@ func TestMissingResetPasswordToken(t *testing.T) {
 	var payload []byte
 	var req *http.Request
 	var response *httptest.ResponseRecorder
+
+	label = "Expects 400 with missing reset password token"
 
 	payload = []byte(`{"password":"password"}`)
 	req, _ = http.NewRequest("PATCH", "/api/v1/auth/reset-password/''", bytes.NewBuffer(payload))
@@ -39,7 +42,12 @@ func TestMissingNewResetPassword(t *testing.T) {
 	var req *http.Request
 	var response *httptest.ResponseRecorder
 
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
@@ -72,7 +80,13 @@ func TestExpiredPasswordResetToken(t *testing.T) {
 	var response *httptest.ResponseRecorder
 
 	db := setup.DB
-	user := models.User{Name: "username", Email: "user@gmail.com", Password: "password"}
+
+	genData := data.NewGenTestData()
+	name := genData.RandomUniqueName()
+	email := genData.RandomUniqueEmail()
+	password := genData.RandomUniquePassword(8)
+
+	user := models.User{Name: name, Email: email, Password: password}
 
 	userId, err := user.Create(user)
 	if err != nil {
