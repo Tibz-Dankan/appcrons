@@ -15,8 +15,6 @@ import (
 )
 
 func TestNonExistingForgotPasswordUser(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request
@@ -38,8 +36,6 @@ func TestNonExistingForgotPasswordUser(t *testing.T) {
 }
 
 func TestSuccessfulForgotPasswordInitialization(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request

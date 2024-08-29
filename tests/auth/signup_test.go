@@ -15,8 +15,6 @@ import (
 )
 
 func TestMissingSignUpFields(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request
@@ -42,8 +40,6 @@ func TestMissingSignUpFields(t *testing.T) {
 }
 
 func TestExistingSignUpUser(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request
@@ -73,8 +69,6 @@ func TestExistingSignUpUser(t *testing.T) {
 }
 
 func TestSuccessfulSignup(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request

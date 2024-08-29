@@ -60,7 +60,7 @@ func (p *Permissions) Set(userId string) error {
 	}
 
 	if savedUser.ID == "" {
-		return errors.New("User does not exist")
+		return errors.New("user does not exist")
 	}
 
 	userPermissions.Role = savedUser.Role

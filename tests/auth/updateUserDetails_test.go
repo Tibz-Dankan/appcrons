@@ -15,8 +15,6 @@ import (
 )
 
 func TestMissingUpdateUserDetailFields(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 400 with missing name/email"
 	var payload []byte
 	var req *http.Request
@@ -68,8 +66,6 @@ func TestMissingUpdateUserDetailFields(t *testing.T) {
 }
 
 func TestUpdatingToAlreadyExistingEmail(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 400 trying to update to already existing email"
 	var payload []byte
 	var req *http.Request
@@ -130,8 +126,6 @@ func TestUpdatingToAlreadyExistingEmail(t *testing.T) {
 }
 
 func TestSuccessfulUserDetailUpdate(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 200 on successful user details update"
 	var payload []byte
 	var req *http.Request

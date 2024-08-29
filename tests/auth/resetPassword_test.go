@@ -19,8 +19,6 @@ import (
 )
 
 func TestMissingResetPasswordToken(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request
@@ -35,8 +33,6 @@ func TestMissingResetPasswordToken(t *testing.T) {
 }
 
 func TestMissingNewResetPassword(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 400 with expired password reset token"
 	var payload []byte
 	var req *http.Request
@@ -73,8 +69,6 @@ func TestMissingNewResetPassword(t *testing.T) {
 }
 
 func TestExpiredPasswordResetToken(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request
@@ -118,8 +112,6 @@ func TestExpiredPasswordResetToken(t *testing.T) {
 }
 
 func TestSuccessfulPasswordReset(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 200 on successful password reset"
 	var payload []byte
 	var req *http.Request

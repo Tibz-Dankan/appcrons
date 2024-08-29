@@ -17,7 +17,7 @@ import (
 
 func TestMissingPasswordsFields(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
-	setup.ClearAllTables()
+	// setup.ClearAllTables()
 
 	var label string = "Expects 400 with missing passwords"
 	var payload []byte
