@@ -32,7 +32,8 @@ func (g *GenTestData) RandomUniqueName() string {
 	for {
 		firstName := firstNames[g.randGen.Intn(len(firstNames))]
 		lastName := lastNames[g.randGen.Intn(len(lastNames))]
-		name := firstName + lastName
+		nanoSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+		name := fmt.Sprintf("%s%s%s", firstName, lastName, nanoSuffix)
 		if !g.usedNames[name] {
 			g.usedNames[name] = true
 			return name
@@ -45,8 +46,8 @@ func (g *GenTestData) RandomUniqueEmail() string {
 
 	for {
 		name := g.RandomUniqueName()
-		domain := domains[g.randGen.Intn(len(domains))]
-		email := fmt.Sprintf("%s@%s", name, domain)
+		nanoSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+		email := fmt.Sprintf("%s.%s@%s", name, nanoSuffix, domains[g.randGen.Intn(len(domains))])
 		if !g.usedEmails[email] {
 			g.usedEmails[email] = true
 			return email
@@ -62,7 +63,8 @@ func (g *GenTestData) RandomUniquePassword(length int) string {
 		for i := range password {
 			password[i] = chars[g.randGen.Intn(len(chars))]
 		}
-		passStr := string(password)
+		nanoSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+		passStr := fmt.Sprintf("%s%s", string(password), nanoSuffix)
 		if !g.usedPasswords[passStr] {
 			g.usedPasswords[passStr] = true
 			return passStr
@@ -77,7 +79,8 @@ func (g *GenTestData) RandomUniqueAppName() string {
 	for {
 		prefix := prefixes[g.randGen.Intn(len(prefixes))]
 		noun := nouns[g.randGen.Intn(len(nouns))]
-		appName := prefix + noun
+		nanoSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+		appName := fmt.Sprintf("%s%s%s", prefix, noun, nanoSuffix)
 		if !g.usedNames[appName] {
 			g.usedNames[appName] = true
 			return appName
@@ -88,7 +91,8 @@ func (g *GenTestData) RandomUniqueAppName() string {
 func (g *GenTestData) RandomUniqueURL() string {
 	for {
 		appName := g.RandomUniqueAppName()
-		url := fmt.Sprintf("https://%s.onrender.com", appName)
+		nanoSuffix := fmt.Sprintf("%d", time.Now().UnixNano())
+		url := fmt.Sprintf("https://%s.onrender.com/active/%s", appName, nanoSuffix)
 		if !g.usedURLs[url] {
 			g.usedURLs[url] = true
 			return url

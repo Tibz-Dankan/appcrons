@@ -15,7 +15,7 @@ import (
 )
 
 func TestInvalidSignInCredentials(t *testing.T) {
-	setup.ClearAllTables()
+	// setup.ClearAllTables()
 
 	var label string
 	var payload []byte
@@ -36,8 +36,6 @@ func TestInvalidSignInCredentials(t *testing.T) {
 }
 
 func TestSuccessfulSignIn(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string
 	var payload []byte
 	var req *http.Request

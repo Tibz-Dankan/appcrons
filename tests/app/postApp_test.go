@@ -14,42 +14,12 @@ import (
 )
 
 func TestMissingPostAppFields(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 400 with postApp fields"
 	var payload []byte
 	var req *http.Request
 	var response *httptest.ResponseRecorder
-	var body map[string]interface{}
 
-	genData := data.NewGenTestData()
-	name := genData.RandomUniqueName()
-	email := genData.RandomUniqueEmail()
-	password := genData.RandomUniquePassword(8)
-
-	user := models.User{Name: name, Email: email, Password: password}
-
-	userId, err := user.Create(user)
-	if err != nil {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects new user. Got %v\n", err)
-		return
-	}
-	user.ID = userId
-
-	signInPayload, _ := json.Marshal(user)
-	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
-	response = setup.ExecuteRequest(req)
-
-	json.Unmarshal(response.Body.Bytes(), &body)
-
-	token, ok := body["accessToken"]
-	if !ok {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", token)
-	}
-	accessToken, _ := token.(string)
-	bearerToken := fmt.Sprintf("Bearer %s", accessToken)
+	_, _, _, bearerToken := setup.CreateSignInUser()
 
 	label = "Expects 400 with missing app name"
 	payload = []byte(`{"name":"","url":"myapp.onrender.com/active","requestInterval":"5"}`)
@@ -74,52 +44,24 @@ func TestMissingPostAppFields(t *testing.T) {
 }
 
 func TestAlreadyExistingApplicationName(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 400 with already existing application name"
 	var payload []byte
 	var req *http.Request
 	var response *httptest.ResponseRecorder
-	var body map[string]interface{}
 
+	userId, _, _, bearerToken := setup.CreateSignInUser()
 	genData := data.NewGenTestData()
-	name := genData.RandomUniqueName()
-	email := genData.RandomUniqueEmail()
-	password := genData.RandomUniquePassword(8)
 	appURL := genData.RandomUniqueURL()
 	appName := genData.RandomUniqueAppName()
-
-	user := models.User{Name: name, Email: email, Password: password}
-
-	userId, err := user.Create(user)
-	if err != nil {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects new user. Got %v\n", err)
-		return
-	}
 
 	app := models.App{UserID: userId, Name: appName, URL: appURL, RequestInterval: "5"}
 
 	if _, err := app.Create(app); err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new app. Got %v\n", err)
 	}
 
-	signInPayload, _ := json.Marshal(user)
-	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
-	response = setup.ExecuteRequest(req)
-
-	json.Unmarshal(response.Body.Bytes(), &body)
-
-	token, ok := body["accessToken"]
-	if !ok {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", token)
-	}
-	accessToken, _ := token.(string)
-	bearerToken := fmt.Sprintf("Bearer %s", accessToken)
-
-	newApp := struct {
+	appStruct := struct {
 		Name            string `json:"name"`
 		URL             string `json:"url"`
 		RequestInterval string `json:"requestInterval"`
@@ -129,7 +71,7 @@ func TestAlreadyExistingApplicationName(t *testing.T) {
 		RequestInterval: "5",
 	}
 
-	payload, _ = json.Marshal(newApp)
+	payload, _ = json.Marshal(appStruct)
 	req, _ = http.NewRequest("POST", "/api/v1/apps/post", bytes.NewBuffer(payload))
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
@@ -138,52 +80,25 @@ func TestAlreadyExistingApplicationName(t *testing.T) {
 }
 
 func TestAlreadyExistingApplicationURL(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 400 with already existing application URL"
 	var payload []byte
 	var req *http.Request
 	var response *httptest.ResponseRecorder
-	var body map[string]interface{}
+
+	userId, _, _, bearerToken := setup.CreateSignInUser()
 
 	genData := data.NewGenTestData()
-	name := genData.RandomUniqueName()
-	email := genData.RandomUniqueEmail()
-	password := genData.RandomUniquePassword(8)
 	appURL := genData.RandomUniqueURL()
 	appName := genData.RandomUniqueAppName()
-
-	user := models.User{Name: name, Email: email, Password: password}
-
-	userId, err := user.Create(user)
-	if err != nil {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects new user. Got %v\n", err)
-		return
-	}
 
 	app := models.App{UserID: userId, Name: appName, URL: appURL, RequestInterval: "5"}
 
 	if _, err := app.Create(app); err != nil {
 		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", err)
+		t.Errorf("Expects new app. Got %v\n", err)
 	}
 
-	signInPayload, _ := json.Marshal(user)
-	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
-	response = setup.ExecuteRequest(req)
-
-	json.Unmarshal(response.Body.Bytes(), &body)
-
-	token, ok := body["accessToken"]
-	if !ok {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", token)
-	}
-	accessToken, _ := token.(string)
-	bearerToken := fmt.Sprintf("Bearer %s", accessToken)
-
-	newApp := struct {
+	appStruct := struct {
 		Name            string `json:"name"`
 		URL             string `json:"url"`
 		RequestInterval string `json:"requestInterval"`
@@ -193,7 +108,7 @@ func TestAlreadyExistingApplicationURL(t *testing.T) {
 		RequestInterval: "5",
 	}
 
-	payload, _ = json.Marshal(newApp)
+	payload, _ = json.Marshal(appStruct)
 	req, _ = http.NewRequest("POST", "/api/v1/apps/post", bytes.NewBuffer(payload))
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
@@ -202,45 +117,18 @@ func TestAlreadyExistingApplicationURL(t *testing.T) {
 }
 
 func TestSuccessfulApplicationPost(t *testing.T) {
-	setup.ClearAllTables()
-
 	var label string = "Expects 201 on successful post"
 	var payload []byte
 	var req *http.Request
 	var response *httptest.ResponseRecorder
-	var body map[string]interface{}
+
+	_, _, _, bearerToken := setup.CreateSignInUser()
 
 	genData := data.NewGenTestData()
-	name := genData.RandomUniqueName()
-	email := genData.RandomUniqueEmail()
-	password := genData.RandomUniquePassword(8)
 	appURL := genData.RandomUniqueURL()
 	appName := genData.RandomUniqueAppName()
 
-	user := models.User{Name: name, Email: email, Password: password}
-
-	_, err := user.Create(user)
-	if err != nil {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects new user. Got %v\n", err)
-		return
-	}
-
-	signInPayload, _ := json.Marshal(user)
-	req, _ = http.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(signInPayload))
-	response = setup.ExecuteRequest(req)
-
-	json.Unmarshal(response.Body.Bytes(), &body)
-
-	token, ok := body["accessToken"]
-	if !ok {
-		fmt.Printf("=== FAIL: %s\n", label)
-		t.Errorf("Expects accessToken. Got %v\n", token)
-	}
-	accessToken, _ := token.(string)
-	bearerToken := fmt.Sprintf("Bearer %s", accessToken)
-
-	newApp := struct {
+	appStruct := struct {
 		Name            string `json:"name"`
 		URL             string `json:"url"`
 		RequestInterval string `json:"requestInterval"`
@@ -250,7 +138,7 @@ func TestSuccessfulApplicationPost(t *testing.T) {
 		RequestInterval: "5",
 	}
 
-	payload, _ = json.Marshal(newApp)
+	payload, _ = json.Marshal(appStruct)
 	req, _ = http.NewRequest("POST", "/api/v1/apps/post", bytes.NewBuffer(payload))
 	req.Header.Set("Authorization", bearerToken)
 	response = setup.ExecuteRequest(req)
