@@ -16,11 +16,12 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 
 	if appId == "" {
 		services.AppError("Please provide appId", 500, w)
+		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&app)
 	if err != nil {
-		services.AppError(err.Error(), 400, w)
+		services.AppError(err.Error(), 500, w)
 		return
 	}
 
@@ -38,7 +39,7 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 	if savedApp.Name != app.Name {
 		savedApp, err := app.FindByName(app.Name)
 		if err != nil {
-			services.AppError(err.Error(), 400, w)
+			services.AppError(err.Error(), 500, w)
 			return
 		}
 		if savedApp.Name != "" {
@@ -51,7 +52,7 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 	if savedApp.URL != app.URL {
 		savedApp, err := app.FindByURL(app.URL)
 		if err != nil {
-			services.AppError(err.Error(), 400, w)
+			services.AppError(err.Error(), 500, w)
 			return
 		}
 		if savedApp.URL != "" {
@@ -67,7 +68,7 @@ func updateApp(w http.ResponseWriter, r *http.Request) {
 
 	app, err = updatedApp.Update()
 	if err != nil {
-		services.AppError(err.Error(), 400, w)
+		services.AppError(err.Error(), 500, w)
 		return
 	}
 
