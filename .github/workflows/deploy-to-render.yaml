@@ -18,11 +18,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up SQLite
-        uses: actions/setup-sqlite@v1
-        with:
-          sqlite-version: 3.40.0
-          sqlite-year: 2022
+      - name: Check SQLite version
+        run: sqlite3 --version
 
       - name: Set up Go
         uses: actions/setup-go@v4
