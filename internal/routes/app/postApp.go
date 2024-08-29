@@ -2,7 +2,9 @@ package app
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
@@ -11,14 +13,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func PostAdd(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+func PostApp(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok {
 		services.AppError("UserID not found in context", 500, w)
 		return
 	}
 
-	app := models.App{UserID: userID}
+	app := models.App{UserID: userId}
 
 	err := json.NewDecoder(r.Body).Decode(&app)
 	if err != nil {
@@ -59,6 +61,16 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := models.User{ID: userId}
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		permission := models.Permissions{}
+		if err := permission.Set(user.ID); err != nil {
+			log.Println("Error setting permissions:", err)
+		}
+	} else {
+		events.EB.Publish("permissions", user)
+	}
+
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": "Created successfully",
@@ -68,11 +80,8 @@ func PostAdd(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
-
-	user := models.User{ID: userID}
-	events.EB.Publish("permissions", user)
 }
 
 func PostAppRoute(router *mux.Router) {
-	router.HandleFunc("/post", PostAdd).Methods("POST")
+	router.HandleFunc("/post", PostApp).Methods("POST")
 }

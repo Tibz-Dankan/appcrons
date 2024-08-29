@@ -9,7 +9,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var (
@@ -44,7 +43,7 @@ func Db() *gorm.DB {
 		if isTestingOrStagingEnv {
 			gormDB, err = gorm.Open(sqlite.Open("./../../appcrons_test.db"), &gorm.Config{
 				SkipDefaultTransaction: true, PrepareStmt: true,
-				Logger: logger.Default.LogMode(logger.Info),
+				// Logger: logger.Default.LogMode(logger.Info),
 			})
 			if err != nil {
 				log.Fatal("Failed to connect to sqlite db:", err)
