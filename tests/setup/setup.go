@@ -123,13 +123,12 @@ func SignInUser(email, password string) (string, string) {
 
 	log.Println("Body: ", body)
 
-	token, ok := body["accessToken"]
+	accessToken, ok := body["accessToken"].(string)
 	if !ok {
 		fmt.Printf("=== FAIL: %s\n", label)
-		errorMessage := fmt.Errorf("expects accessToken. Got %v", token)
+		errorMessage := fmt.Errorf("expects accessToken. Got %v", accessToken)
 		fmt.Println(errorMessage)
 	}
-	accessToken, _ := token.(string)
 	bearerToken := fmt.Sprintf("Bearer %s", accessToken)
 
 	user, ok := body["user"].(map[string]interface{})
