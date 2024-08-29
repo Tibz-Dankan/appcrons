@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -109,15 +110,20 @@ func TestAlreadyExistingUpdateApplicationName(t *testing.T) {
 	var password string
 
 	userId, email, password, _ = setup.CreateSignInUser()
+	log.Println("created userId:", userId)
+	log.Println("created email:", email)
+	log.Println("created password:", password)
 	genData := data.NewGenTestData()
 
 	app1 := models.App{
-		UserID: userId, Name: genData.RandomUniqueAppName(),
+		UserID:          userId,
+		Name:            genData.RandomUniqueAppName(),
 		URL:             genData.RandomUniqueURL(),
 		RequestInterval: "5",
 	}
 	app2 := models.App{
-		UserID: userId, Name: genData.RandomUniqueAppName(),
+		UserID:          userId,
+		Name:            genData.RandomUniqueAppName(),
 		URL:             genData.RandomUniqueURL(),
 		RequestInterval: "5",
 	}
@@ -168,6 +174,9 @@ func TestAlreadyExistingUpdateApplicationURL(t *testing.T) {
 
 	userId, email, password, _ = setup.CreateSignInUser()
 	genData := data.NewGenTestData()
+	log.Println("created userId:", userId)
+	log.Println("created email:", email)
+	log.Println("created password:", password)
 
 	app1 := models.App{
 		UserID: userId, Name: genData.RandomUniqueAppName(),
