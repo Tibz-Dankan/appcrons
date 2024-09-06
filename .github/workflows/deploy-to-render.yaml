@@ -1,4 +1,4 @@
-name: Test and Deploy To Render
+name: Deploy To Render
 
 on:
   push:
@@ -6,33 +6,12 @@ on:
       - main
 
 jobs:
-  test-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
-    env:
-      APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
-      REDIS_URL: ${{ secrets.REDIS_URL }}
-
     permissions:
       deployments: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Check SQLite version
-        run: sqlite3 --version
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.23"
-
-      - name: Install dependencies
-        run: make install
-
-      - name: Run tests
-        run: make stage # Runs tests in the staging environment
-
+      - uses: actions/checkout@v3
       - uses: JorgeLNJunior/render-deploy@v1.4.4
         with:
           service_id: ${{ secrets.RENDER_SERVICE_ID }}
@@ -42,3 +21,47 @@ jobs:
           github_deployment: true
           deployment_environment: "production"
           github_token: ${{ secrets.ACCESS_TOKEN_GITHUB }}
+# name: Test and Deploy To Render
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   test-deploy:
+#     runs-on: ubuntu-latest
+
+#     env:
+#       APPCRONS_STAG_DSN: ${{ secrets.APPCRONS_STAG_DSN }}
+#       REDIS_URL: ${{ secrets.REDIS_URL }}
+
+#     permissions:
+#       deployments: write
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Check SQLite version
+#         run: sqlite3 --version
+
+#       - name: Set up Go
+#         uses: actions/setup-go@v4
+#         with:
+#           go-version: "1.23"
+
+#       - name: Install dependencies
+#         run: make install
+
+#       - name: Run tests
+#         run: make stage # Runs tests in the staging environment
+
+#       - uses: JorgeLNJunior/render-deploy@v1.4.4
+#         with:
+#           service_id: ${{ secrets.RENDER_SERVICE_ID }}
+#           api_key: ${{ secrets.RENDER_API_KEY }}
+#           clear_cache: true
+#           wait_deploy: true
+#           github_deployment: true
+#           deployment_environment: "production"
+#           github_token: ${{ secrets.ACCESS_TOKEN_GITHUB }}
