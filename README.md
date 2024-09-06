@@ -1,9 +1,8 @@
 <p align="center">
   <a href="https://appcrons.netlify.app" target="_blank" style="background-color:blues; width:auto; height:auto; display:flex; justify-content:center; align-items:end; gap:16px;">
     <picture>
-      <img alt="Appcrons" src="internal/assets/logo.png" width="64" height="60" style="max-width: 100%;">
+      <img alt="Appcrons" src="internal/assets/appcrons-logo.png" width="320" height="85"style="max-width: 100%;">
     </picture>
-    <span style="font-size:48px; color:white; font-weight:bold;">Appcrons<span>
   </a>
 </p>
 
