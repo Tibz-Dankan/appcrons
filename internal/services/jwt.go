@@ -11,7 +11,7 @@ import (
 func SignJWTToken(userId string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
-		"exp":    time.Now().Add(3 * time.Hour).Unix(),
+		"exp":    time.Now().Add(9 * time.Hour).Unix(),
 		"iat":    time.Now().Unix(),
 	})
 
