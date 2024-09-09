@@ -23,7 +23,7 @@ To install the Appcrons backend repo locally, follow these steps:
 ### Prerequisites
 
 - Ensure you have **Golang 1.23** installed. You can download it from [go.dev/doc/install](https://go.dev/doc/install).
-- Ensure you have **Postgresql 15** installed. You can download it from [postgresql.org/download](https://www.postgresql.org/download/).
+- Ensure you have **Postgresql** installed. You can download it from [postgresql.org/download](https://www.postgresql.org/download/).
 - Ensure you have **Redis** installed. You can download it from [redis.io](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
 
 - Ensure your computer system supports **Makefiles** . If you are on windows, follow this guide [Run Makefile on windows](https://medium.com/@samsorrahman/how-to-run-a-makefile-in-windows-b4d115d7c516).
