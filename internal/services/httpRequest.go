@@ -24,7 +24,7 @@ func MakeHTTPRequest(URL string) (Response, error) {
 
 	req.Header.Set("Content-Type", "application/json")
 	defaultClient := http.DefaultClient
-	defaultClient.Timeout = time.Second * 30
+	defaultClient.Timeout = time.Minute * 4
 	res, err := defaultClient.Do(req)
 
 	duration := time.Since(startTime)
