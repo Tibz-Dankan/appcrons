@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"net"
 	"net/http"
 	"time"
@@ -59,6 +60,7 @@ func MakeHTTPRequest(URL string) (Response, error) {
 }
 
 func isTimeoutError(err error) bool {
+	log.Println("Timeout error: ", err)
 	e, ok := err.(net.Error)
 	return ok && e.Timeout()
 }
