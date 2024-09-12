@@ -23,10 +23,21 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	defaultClient := http.DefaultClient
-	defaultClient.Timeout = time.Minute * 4
-	res, err := defaultClient.Do(req)
 
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   time.Minute * 4,
+	}
+
+	res, err := client.Do(req)
 	duration := time.Since(startTime)
 	requestTimeMS := int(duration.Milliseconds())
 
@@ -35,7 +46,6 @@ func MakeHTTPRequest(URL string) (Response, error) {
 			response.StatusCode = 503
 			response.RequestTimeMS = requestTimeMS
 			response.StartedAt = startTime
-
 			return response, nil
 		}
 		return response, err
