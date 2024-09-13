@@ -13,24 +13,34 @@ import (
 
 // Makes request for the app
 func MakeAppRequest(app models.App) {
-	ok, err := validateApp(app)
+	isValid, requiresExternalRequest, err := validateApp(app)
 	if err != nil {
 		log.Println("Error validating the app: ", err)
 	}
-	if !ok {
+	if !isValid {
 		log.Println("Couldn't make request: ", app.Name)
 		return
 	}
-
+	response := services.Response{}
 	appRequestProgress := services.AppRequestProgress{App: app, InProgress: true}
 	services.UserAppMem.Add(app.UserID, appRequestProgress)
 
 	events.EB.Publish("appRequestProgress", appRequestProgress)
 
-	response, err := services.MakeHTTPRequest(app.URL)
-	if err != nil {
-		log.Println("Request error:", err)
-		return
+	if !requiresExternalRequest {
+		response, err = services.MakeHTTPRequest(app.URL)
+		if err != nil {
+			log.Println("Request error:", err)
+			return
+		}
+	}
+
+	if requiresExternalRequest {
+		response, err = services.MakeExternalHTTPRequest(app.URL)
+		if err != nil {
+			log.Println("Request error:", err)
+			return
+		}
 	}
 
 	request := models.Request{
@@ -54,9 +64,15 @@ func MakeAppRequest(app models.App) {
 }
 
 // Validates the app's eligibility for making requests
-func validateApp(app models.App) (bool, error) {
+// It returns isValid, requiresExternalRequest and error
+func validateApp(app models.App) (bool, bool, error) {
 	if app.IsDisabled {
-		return false, nil
+		return false, false, nil
+	}
+
+	requiresExternal, err := appRequiresExternalRequest(app)
+	if err != nil {
+		log.Println("Error getting the external determination", err)
 	}
 
 	hasLastRequest := len(app.Request) > 0
@@ -64,7 +80,7 @@ func validateApp(app models.App) (bool, error) {
 	// Check and validate requestInterval
 	if len(app.RequestTime) == 0 {
 		if !hasLastRequest {
-			return true, nil
+			return true, requiresExternal, nil
 		}
 		log.Println("App doesn't have requestTime")
 		currentTime := time.Now()
@@ -80,9 +96,9 @@ func validateApp(app models.App) (bool, error) {
 		}
 
 		if int(timeDiff) >= requestInterval {
-			return true, nil
+			return true, requiresExternal, nil
 		}
-		return false, nil
+		return false, requiresExternal, nil
 	}
 
 	for _, rt := range app.RequestTime {
@@ -112,7 +128,7 @@ func validateApp(app models.App) (bool, error) {
 			// Check and validate requestInterval
 			log.Println("App time frame is correct")
 			if !hasLastRequest {
-				return true, nil
+				return true, requiresExternal, nil
 			}
 			lastRequestStartedAt, _ := appDateStart.ISOTime()
 			timeDiff := currentTimeStart.Sub(lastRequestStartedAt).Minutes()
@@ -122,8 +138,57 @@ func validateApp(app models.App) (bool, error) {
 			}
 
 			if int(timeDiff) >= requestInterval {
-				return true, nil
+				return true, requiresExternal, nil
 			}
+		}
+	}
+
+	return false, requiresExternal, nil
+}
+
+func appRequiresExternalRequest(app models.App) (bool, error) {
+	hasLastRequest := len(app.Request) > 0
+	hasRequestTime := len(app.RequestTime) > 0
+
+	if !hasLastRequest {
+		return true, nil
+	}
+
+	if !hasRequestTime {
+		currentTime := time.Now()
+		location := currentTime.Location().String()
+		appDate := services.Date{TimeZone: location, ISOStringDate: app.Request[0].StartedAt.String()}
+
+		currentAppTime, _ := appDate.CurrentTime()
+		lastRequestStartedAt, _ := appDate.ISOTime()
+		timeDiff := currentAppTime.Sub(lastRequestStartedAt).Minutes()
+
+		if int(timeDiff) > 15 {
+			return true, nil
+		}
+
+		if app.Request[0].StatusCode == 503 && app.Request[0].Duration < 15*1000 {
+			return true, nil
+		}
+	}
+
+	for _, rt := range app.RequestTime {
+		lastReqStartedAtStr := time.Now().String()
+		if hasLastRequest {
+			lastReqStartedAtStr = app.Request[0].StartedAt.String()
+		}
+
+		appDate := services.Date{TimeZone: rt.TimeZone, ISOStringDate: lastReqStartedAtStr, HourMinSec: rt.Start}
+		currentAppTime, _ := appDate.CurrentTime()
+		lastRequestStartedAt, _ := appDate.ISOTime()
+		timeDiff := currentAppTime.Sub(lastRequestStartedAt).Minutes()
+
+		if int(timeDiff) > 15 {
+			return true, nil
+		}
+
+		if app.Request[0].StatusCode == 503 && app.Request[0].Duration < 15*1000 {
+			return true, nil
 		}
 	}
 

@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -49,12 +48,6 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	if err != nil {
 		log.Printf("Error making request: %v", err)
 		if isTimeoutError(err) {
-			retryBaseURL := os.Getenv("APPCRONS_RETRY_URL")
-			retryURL := fmt.Sprintf("%s?url=%s", retryBaseURL, URL)
-
-			if err := MakeHTTPRetryRequest(retryURL); err != nil {
-				return response, err
-			}
 			response.StatusCode = 503
 			response.RequestTimeMS = requestTimeMS
 			response.StartedAt = startTime
@@ -71,11 +64,16 @@ func MakeHTTPRequest(URL string) (Response, error) {
 	return response, nil
 }
 
-func MakeHTTPRetryRequest(URL string) error {
-	req, err := http.NewRequest(http.MethodGet, URL, nil)
+func MakeExternalHTTPRequest(URL string) (Response, error) {
+	response := Response{}
+	startTime := time.Now()
+
+	externalURL := fmt.Sprintf("%s?url=%s", os.Getenv("APPCRONS_EXTERNAL_URL"), URL)
+
+	req, err := http.NewRequest(http.MethodGet, externalURL, nil)
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
-		return err
+		return response, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -89,20 +87,30 @@ func MakeHTTPRetryRequest(URL string) error {
 
 	client := &http.Client{
 		Transport: transport,
-		Timeout:   time.Second * 35,
+		Timeout:   time.Minute * 4,
 	}
 
 	res, err := client.Do(req)
+	duration := time.Since(startTime)
+	requestTimeMS := int(duration.Milliseconds())
 
 	if err != nil {
-		return err
+		log.Printf("Error making request: %v", err)
+		if isTimeoutError(err) {
+			response.StatusCode = 503
+			response.RequestTimeMS = requestTimeMS
+			response.StartedAt = startTime
+			response.Message = "Request timeout"
+			return response, nil
+		}
+		return response, err
 	}
-	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
-	log.Printf("Response Body: %s", string(body))
+	response.StatusCode = res.StatusCode
+	response.RequestTimeMS = requestTimeMS
+	response.StartedAt = startTime
 
-	return nil
+	return response, nil
 }
 
 func isTimeoutError(err error) bool {
