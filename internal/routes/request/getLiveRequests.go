@@ -18,7 +18,6 @@ type AppRequestProgress = services.AppRequestProgress
 func sendMessage(message, userId string, clientManager *services.ClientManager) error {
 	w, ok := clientManager.GetClient(userId)
 	if !ok {
-		log.Println("Client not found")
 		return nil
 	}
 
@@ -45,7 +44,6 @@ func sendMessage(message, userId string, clientManager *services.ClientManager) 
 func sendAppToClient(appRequestProgress AppRequestProgress, clientManager *services.ClientManager) error {
 	client, ok := clientManager.GetClient(appRequestProgress.UserID)
 	if !ok {
-		log.Println("Client not found")
 		return nil
 	}
 
