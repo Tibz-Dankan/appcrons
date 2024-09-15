@@ -22,6 +22,7 @@ type User struct {
 	Role                   string         `gorm:"column:role;default:'user';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
 	Feedback               []Feedback     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"feedbacks"`
+	OPT                    []OPT          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"OPT"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt              time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
@@ -70,4 +71,13 @@ type Feedback struct {
 	Message   string    `gorm:"column:message;not null" json:"message"`
 	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
+}
+
+type OPT struct {
+	ID        string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID    string    `gorm:"column:userId;not null;index" json:"userId"`
+	OPT       string    `gorm:"column:OPT;index" json:"OPT"`
+	ExpiresAt time.Time `gorm:"column:expiresAt;not null;index" json:"expiresAt"`
+	CreatedAt time.Time `gorm:"column:createdAt" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt" json:"updatedAt"`
 }
