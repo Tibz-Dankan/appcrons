@@ -22,7 +22,7 @@ type User struct {
 	Role                   string         `gorm:"column:role;default:'user';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
 	Feedback               []Feedback     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"feedbacks"`
-	OPT                    []OPT          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"OPT"`
+	OPT                    []OTP          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"OPT"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt              time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
 	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
@@ -73,10 +73,11 @@ type Feedback struct {
 	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
 }
 
-type OPT struct {
+type OTP struct {
 	ID        string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
 	UserID    string    `gorm:"column:userId;not null;index" json:"userId"`
-	OPT       string    `gorm:"column:OPT;index" json:"OPT"`
+	OTP       int       `gorm:"column:OTP;index" json:"OTP"`
+	IsUsed    bool      `gorm:"column:isUsed;default:false" json:"isUsed"`
 	ExpiresAt time.Time `gorm:"column:expiresAt;not null;index" json:"expiresAt"`
 	CreatedAt time.Time `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"column:updatedAt" json:"updatedAt"`
