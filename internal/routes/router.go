@@ -48,6 +48,7 @@ func AppRouter() *mux.Router {
 	// Auth routes
 	authRouter := router.PathPrefix("/api/v1/auth").Subrouter()
 	auth.SignUpRoute(authRouter)
+	auth.SignUpAdminRoute(authRouter)
 	auth.SignInRoute(authRouter)
 	auth.ForgotPasswordRoute(authRouter)
 	auth.ResetPasswordRoute(authRouter)
