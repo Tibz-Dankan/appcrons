@@ -134,3 +134,47 @@ func (e *Email) SendResetPassword(name, URL, subject string) error {
 
 	return nil
 }
+
+func (e *Email) SendOPT(name, OPT, subject string) error {
+	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
+		return nil
+	}
+	data := struct {
+		Subject string
+		Name    string
+		OPT     string
+		Year    string
+	}{
+		Subject: subject,
+		Name:    name,
+		OPT:     OPT,
+		Year:    strconv.Itoa(time.Now().Year()),
+	}
+
+	var body bytes.Buffer
+
+	templatePath, err := filepath.Abs("./internal/templates/email/opt.html")
+	if err != nil {
+		log.Println("Error finding absolute path:", err)
+		return err
+	}
+
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		log.Println("Error parsing template:", err)
+		return err
+	}
+
+	err = tmpl.Execute(&body, data)
+	if err != nil {
+		log.Println("Error executing template:", err)
+		return err
+	}
+
+	if err := e.send(body.String(), subject); err != nil {
+		log.Println("Error sending email:", err)
+		return err
+	}
+
+	return nil
+}

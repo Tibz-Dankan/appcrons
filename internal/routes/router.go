@@ -50,6 +50,7 @@ func AppRouter() *mux.Router {
 	auth.SignUpRoute(authRouter)
 	auth.SignUpAdminRoute(authRouter)
 	auth.SignInRoute(authRouter)
+	auth.SignInAdminRoute(authRouter)
 	auth.ForgotPasswordRoute(authRouter)
 	auth.ResetPasswordRoute(authRouter)
 	// Authorized Auth routes
