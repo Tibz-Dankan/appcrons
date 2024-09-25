@@ -37,6 +37,8 @@ func HasPermissions(next http.Handler) http.Handler {
 
 		permissions := models.Permissions{}
 
+		// TODO: to add roles distinction in the middleware "sys_admin", "user"
+
 		userPermissions, err := permissions.Get(userId)
 		if err != nil {
 			log.Println("Error reading user permissions:", err)
