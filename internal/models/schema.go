@@ -79,6 +79,17 @@ type OTP struct {
 	OTP       int       `gorm:"column:OTP;index" json:"OTP"`
 	IsUsed    bool      `gorm:"column:isUsed;default:false" json:"isUsed"`
 	ExpiresAt time.Time `gorm:"column:expiresAt;not null;index" json:"expiresAt"`
-	CreatedAt time.Time `gorm:"column:createdAt" json:"createdAt"`
-	UpdatedAt time.Time `gorm:"column:updatedAt" json:"updatedAt"`
+	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
+}
+
+type BugReport struct {
+	ID          string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID      string    `gorm:"column:userId;default:null;index" json:"userId"`
+	User        User      `gorm:"foreignKey:UserID;references:ID;default:null" json:"user"`
+	Title       string    `gorm:"column:title" json:"title"`
+	Description string    `gorm:"column:description;not null" json:"description"`
+	Image       string    `gorm:"column:image;default:null" json:"image"`
+	CreatedAt   time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt   time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
 }
