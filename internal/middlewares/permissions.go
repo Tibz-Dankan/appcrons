@@ -37,8 +37,6 @@ func HasPermissions(next http.Handler) http.Handler {
 
 		permissions := models.Permissions{}
 
-		// TODO: to add roles distinction in the middleware "sys_admin", "user"
-
 		userPermissions, err := permissions.Get(userId)
 		if err != nil {
 			log.Println("Error reading user permissions:", err)
@@ -47,9 +45,16 @@ func HasPermissions(next http.Handler) http.Handler {
 			return
 		}
 
+		ctx := context.WithValue(r.Context(), UserPermissionsKey, userPermissions)
+
 		if userPermissions.UserID == "" {
 			log.Println("User has no permissions")
 			services.AppError("You do not have permission to perform this action", 403, w)
+			return
+		}
+
+		if userPermissions.Role == "sys_admin" {
+			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 
@@ -119,8 +124,6 @@ func HasPermissions(next http.Handler) http.Handler {
 				return
 			}
 		}
-
-		ctx := context.WithValue(r.Context(), UserPermissionsKey, userPermissions)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

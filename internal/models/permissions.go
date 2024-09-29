@@ -69,10 +69,6 @@ func (p *Permissions) Set(userId string) error {
 		userPermissions.Permissions = []string{"READ", "WRITE", "EDIT", "DELETE"}
 	}
 
-	if userPermissions.Role == "client" {
-		userPermissions.Permissions = []string{"READ", "WRITE", "EDIT", "DELETE"}
-	}
-
 	if userPermissions.Role == "sys_admin" {
 		userPermissions.Permissions = []string{"READ"}
 	}
