@@ -43,6 +43,8 @@ func (upload *Upload) initStorageBucket() (*storage.BucketHandle, error) {
 	configStorage := &firebase.Config{
 		StorageBucket: storageBucket,
 	}
+	// TODO: to generate serviceAccountKey.json file with
+	//  its content on the fly getting values from env vars
 	opt := option.WithCredentialsFile(currentDirPath + "/serviceAccountKey.json")
 	app, err := firebase.NewApp(context.Background(), configStorage, opt)
 	if err != nil {
