@@ -87,7 +87,7 @@ type BugReport struct {
 	ID          string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
 	UserID      string    `gorm:"column:userId;default:null;index" json:"userId"`
 	User        User      `gorm:"foreignKey:UserID;references:ID;default:null" json:"user"`
-	Title       string    `gorm:"column:title" json:"title"`
+	Title       string    `gorm:"column:title;not null" json:"title"`
 	Description string    `gorm:"column:description;not null" json:"description"`
 	Image       string    `gorm:"column:image;default:null" json:"image"`
 	CreatedAt   time.Time `gorm:"column:createdAt;index" json:"createdAt"`

@@ -3,6 +3,7 @@ package bugreport
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -15,20 +16,21 @@ import (
 func postBugReport(w http.ResponseWriter, r *http.Request) {
 	bugReport := models.BugReport{}
 
-	err := json.NewDecoder(r.Body).Decode(&bugReport)
-	if err != nil {
-		services.AppError(err.Error(), 400, w)
-		return
-	}
-
-	if bugReport.Title == "" || bugReport.Description == "" {
-		services.AppError("Missing rating/message!", 400, w)
-		return
-	}
-
-	err = r.ParseMultipartForm(10 << 20) // 10 MB limit
+	// Parse the multipart form with a 10 MB limit
+	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
 		services.AppError("Unable to parse form", 400, w)
+		return
+	}
+
+	// Extract 'title' and 'description' values from the form
+	bugReport.Title = r.FormValue("title")
+	bugReport.Description = r.FormValue("description")
+
+	log.Printf("bugReport: +%v ", bugReport)
+
+	if bugReport.Title == "" || bugReport.Description == "" {
+		services.AppError("Missing title or description!", 400, w)
 		return
 	}
 
@@ -39,6 +41,8 @@ func postBugReport(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	log.Println("About to generate random number")
+
 	randNumStr := strconv.Itoa(rand.Intn(9000) + 1000)
 	filePath := "bugreports/" + randNumStr + "_" + fileHeader.Filename
 
@@ -46,9 +50,12 @@ func postBugReport(w http.ResponseWriter, r *http.Request) {
 
 	imageUrl, err := upload.Add(file, fileHeader)
 	if err != nil {
+		log.Println("err :", err)
 		services.AppError(err.Error(), 500, w)
 		return
 	}
+
+	bugReport.Image = imageUrl
 
 	fmt.Println("imageUrl :", imageUrl)
 
@@ -62,7 +69,7 @@ func postBugReport(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string]interface{}{
 		"status":    "success",
-		"message":   "Thank very much for reporting this bug",
+		"message":   "Thank you very much for reporting this bug",
 		"bugReport": newBugReport,
 	}
 
