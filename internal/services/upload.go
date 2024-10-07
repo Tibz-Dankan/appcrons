@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -25,6 +26,8 @@ type Upload struct {
 	FilePath            string `json:"path"`
 }
 
+var firebaseManager = NewFirebaseManager("serviceAccountKey.json")
+
 func (upload *Upload) initStorageBucket() (*storage.BucketHandle, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -37,28 +40,35 @@ func (upload *Upload) initStorageBucket() (*storage.BucketHandle, error) {
 	}
 
 	upload.BaseURL = "https://firebasestorage.googleapis.com/v0/b/"
-	storageBucket := os.Getenv("STORAGE_BUCKET")
+	storageBucket := os.Getenv("FIREBASE_STORAGE_BUCKET")
 	upload.StorageBucketBucket = storageBucket
 
 	configStorage := &firebase.Config{
 		StorageBucket: storageBucket,
 	}
-	// TODO: to generate serviceAccountKey.json file with
-	//  its content on the fly getting values from env vars
+
 	// TODO: to consider aws s3 bucket
+	if err := firebaseManager.CreateFile(); err != nil {
+		firebaseManager.DeleteFile()
+		log.Println("Error creating file:", err)
+	}
+
 	opt := option.WithCredentialsFile(currentDirPath + "/serviceAccountKey.json")
 	app, err := firebase.NewApp(context.Background(), configStorage, opt)
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return nil, err
 	}
 
 	client, err := app.Storage(context.Background())
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return nil, err
 	}
 
 	bucket, err := client.DefaultBucket()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return nil, err
 	}
 
@@ -70,27 +80,32 @@ func (upload *Upload) Add(file multipart.File, fileHeader *multipart.FileHeader)
 
 	filePath := upload.FilePath
 	if filePath == "" {
+		firebaseManager.DeleteFile()
 		return "", errors.New("no file path provided")
 	}
 
 	bucket, err := upload.initStorageBucket()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	wc := bucket.Object(filePath).NewWriter(context.Background())
 	_, err = io.Copy(wc, file)
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	err = wc.Close()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	url, err := upload.getDownloadURL()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
@@ -106,27 +121,32 @@ func (upload *Upload) Update(file multipart.File, fileHeader *multipart.FileHead
 
 	bucket, err := upload.initStorageBucket()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	wc := bucket.Object(filePath).NewWriter(context.Background())
 	_, err = io.Copy(wc, file)
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	err = wc.Close()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	url, err := upload.getDownloadURL()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
 	if url != "" {
 		if err := upload.Delete(savedFilePath); err != nil {
+			firebaseManager.DeleteFile()
 			return "", err
 		}
 
@@ -139,16 +159,19 @@ func (upload *Upload) Update(file multipart.File, fileHeader *multipart.FileHead
 func (upload *Upload) Delete(filePath string) error {
 
 	if filePath == "" {
+		firebaseManager.DeleteFile()
 		return errors.New("no file path provided")
 	}
 
 	bucket, err := upload.initStorageBucket()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return err
 	}
 	obj := bucket.Object(filePath)
 
 	if err := obj.Delete(context.Background()); err != nil {
+		firebaseManager.DeleteFile()
 		return err
 	}
 
@@ -178,6 +201,7 @@ func (upload *Upload) getDownloadURL() (string, error) {
 
 	transformedFilePath, err := upload.transformFilePath()
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
@@ -191,6 +215,7 @@ func (upload *Upload) getDownloadURL() (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
+		firebaseManager.DeleteFile()
 		return "", err
 	}
 
@@ -233,6 +258,7 @@ func (upload *Upload) getDownloadURL() (string, error) {
 		"Firebase storage request duration : %s\n",
 		time.Since(start),
 	)
+	firebaseManager.DeleteFile()
 
 	return downloadURL, nil
 }

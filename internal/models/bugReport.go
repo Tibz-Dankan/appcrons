@@ -80,7 +80,7 @@ func (f *BugReport) FindAllByUser(userId string) ([]BugReport, error) {
 func (f *BugReport) FindAll(createdAtBeforeCursor time.Time) ([]BugReport, int64, error) {
 	var bugReports, userBugReport []BugReport
 
-	query := db.Table("bugreports")
+	query := db.Table("bug_reports")
 
 	var count int64
 	if err := query.Count(&count).Error; err != nil {

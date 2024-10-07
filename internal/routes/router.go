@@ -4,6 +4,7 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/app"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/auth"
+	bugreport "github.com/Tibz-Dankan/keep-active/internal/routes/bugReport"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/feedback"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/monitor"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
@@ -68,6 +69,12 @@ func AppRouter() *mux.Router {
 	feedback.GetFeedbackByUserRoute(feedbackRouter)
 	feedback.GetAllFeedbackRoute(feedbackRouter)
 	feedback.UpdateFeedbackRoute(feedbackRouter)
+
+	// Bug Report Routes
+	bugReportRouter := router.PathPrefix("/api/v1/bugreport").Subrouter()
+	bugreport.PostReportBugRoute(bugReportRouter)
+	bugreport.GetBugReportByUserRoute(bugReportRouter)
+	bugreport.GetAllBugReportsRoute(bugReportRouter)
 
 	// Active route
 	GetActiveRoute(router)
