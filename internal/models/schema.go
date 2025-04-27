@@ -37,6 +37,7 @@ type App struct {
 	IsDisabled      bool           `gorm:"column:isDisabled" json:"isDisabled"`
 	Request         []Request      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requests"`
 	RequestTime     []RequestTime  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestTimes"`
+	RequestCount    []RequestCount `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestCount"`
 	CreatedAt       time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt       time.Time      `gorm:"column:updatedAt;index" json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
@@ -92,4 +93,15 @@ type BugReport struct {
 	Image       string    `gorm:"column:image;default:null" json:"image"`
 	CreatedAt   time.Time `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt   time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
+}
+
+type RequestCount struct {
+	ID        string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	AppID     string    `gorm:"column:appId;not null;index" json:"appId"`
+	Month     string    `gorm:"column:month;not null;index" json:"month"` // Format: "YYYY-MM"
+	Count     int64     `gorm:"column:count;not null" json:"count"`
+	FromDate  time.Time `gorm:"column:fromDate;not null" json:"fromDate"`
+	ToDate    time.Time `gorm:"column:toDate;not null" json:"toDate"`
+	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
 }
