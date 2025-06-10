@@ -7,7 +7,7 @@ import (
 )
 
 // Runs the PublishRequestEvent fn at
-// start of every minute that is a multiple of 5
+// start of every minute that is a multiple of 10
 func schedulePublishRequest() {
 	for {
 		now := time.Now()
@@ -15,7 +15,7 @@ func schedulePublishRequest() {
 		sleepDuration := nextMinute.Sub(now)
 		minute := now.Minute()
 
-		if minute%5 == 0 && now.Second() == 0 {
+		if minute%10 == 0 && now.Second() == 0 {
 			publishers.PublishRequestEvent()
 		}
 
