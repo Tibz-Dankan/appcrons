@@ -19,8 +19,9 @@ type Response struct {
 func MakeHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
+	url := EnsureURLScheme(URL)
 
-	req, err := http.NewRequest(http.MethodGet, URL, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
 		return response, err
@@ -67,8 +68,9 @@ func MakeHTTPRequest(URL string) (Response, error) {
 func MakeExternalHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
+	url := EnsureURLScheme(URL)
 
-	externalURL := fmt.Sprintf("%s?url=%s", os.Getenv("APPCRONS_EXTERNAL_URL"), URL)
+	externalURL := fmt.Sprintf("%s?url=%s", os.Getenv("APPCRONS_EXTERNAL_URL"), url)
 
 	req, err := http.NewRequest(http.MethodGet, externalURL, nil)
 	if err != nil {
