@@ -95,7 +95,7 @@ func validateApp(app models.App) (bool, bool, error) {
 			log.Println("Error converting string to integer:", err)
 		}
 
-		if int(timeDiff) >= requestInterval {
+		if int(timeDiff) >= requestInterval && int(timeDiff) > 5 {
 			return true, requiresExternal, nil
 		}
 		return false, requiresExternal, nil
@@ -137,7 +137,7 @@ func validateApp(app models.App) (bool, bool, error) {
 				log.Println("Error converting string to integer:::", err)
 			}
 
-			if int(timeDiff) >= requestInterval {
+			if int(timeDiff) >= requestInterval && int(timeDiff) > 5 {
 				return true, requiresExternal, nil
 			}
 		}
