@@ -20,7 +20,7 @@ func forgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err = user.FindByEMail(user.Email)
+	user, err = user.FindByEmail(user.Email)
 	if err != nil {
 		services.AppError(err.Error(), 500, w)
 		return

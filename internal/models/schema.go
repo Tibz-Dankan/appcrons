@@ -18,14 +18,14 @@ type User struct {
 	Email                  string         `gorm:"column:email;unique;not null;index" json:"email"`
 	Password               string         `gorm:"column:password;not null" json:"password"`
 	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken"`
-	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt;index" json:"passwordResetExpiresAt"`
+	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt;index" json:"passwordResetExpiresAt,omitempty"`
 	Role                   string         `gorm:"column:role;default:'user';not null" json:"role"`
-	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps"`
-	Feedback               []Feedback     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"feedbacks"`
-	OPT                    []OTP          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"OPT"`
+	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps,omitempty"`
+	Feedback               []Feedback     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"feedbacks,omitempty"`
+	OPT                    []OTP          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"OPT,omitempty"`
 	CreatedAt              time.Time      `gorm:"column:createdAt" json:"createdAt"`
 	UpdatedAt              time.Time      `gorm:"column:updatedAt" json:"updatedAt"`
-	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
+	DeletedAt              gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt,omitempty"`
 }
 
 type App struct {
@@ -40,7 +40,7 @@ type App struct {
 	RequestCount    []RequestCount `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"requestCount"`
 	CreatedAt       time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt       time.Time      `gorm:"column:updatedAt;index" json:"updatedAt"`
-	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
+	DeletedAt       gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt,omitempty"`
 }
 
 type Request struct {
@@ -50,7 +50,7 @@ type Request struct {
 	Duration   int            `gorm:"column:duration;not null" json:"duration"`
 	StartedAt  time.Time      `gorm:"column:startedAt;default:CURRENT_TIMESTAMP;index" json:"startedAt"`
 	CreatedAt  time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
-	DeletedAt  gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
+	DeletedAt  gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt,omitempty"`
 }
 
 type RequestTime struct {
@@ -61,7 +61,7 @@ type RequestTime struct {
 	TimeZone  string         `gorm:"column:timeZone;not null" json:"timeZone"`
 	CreatedAt time.Time      `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"column:updatedAt;index" json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deletedAt;index" json:"deletedAt,omitempty"`
 }
 
 type Feedback struct {
