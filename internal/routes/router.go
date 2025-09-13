@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/admin"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/app"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/auth"
 	bugreport "github.com/Tibz-Dankan/keep-active/internal/routes/bugReport"
@@ -61,6 +62,12 @@ func AppRouter() *mux.Router {
 	auth.UpdateUserDetailsRoute(authorizedAuthRouter)
 	auth.ChangePasswordRoute(authorizedAuthRouter)
 
+	// Admin routes
+	adminRouter := router.PathPrefix("/api/v1/admin").Subrouter()
+	admin.GetAllUsersRoute(adminRouter)
+	admin.GetAppsByUserRoute(adminRouter)
+	admin.GetRequestsByAppRoute(adminRouter)
+	
 	// Feedback Routes
 	feedbackRouter := router.PathPrefix("/api/v1/feedback").Subrouter()
 	feedbackRouter.Use(middlewares.Auth)

@@ -39,7 +39,7 @@ func (u *User) FindOne(id string) (User, error) {
 	return user, nil
 }
 
-func (u *User) FindByEMail(email string) (User, error) {
+func (u *User) FindByEmail(email string) (User, error) {
 	var user User
 	db.First(&user, "email = ?", email)
 
@@ -52,6 +52,80 @@ func (u *User) FindAll() ([]User, error) {
 
 	return users, nil
 }
+type UserWithAppCount struct {
+	User
+	AppCount int64 `json:"appCount"`
+}
+
+func (u *User) FindAllAndIncludeAppCount(limit float64, cursor string) ([]UserWithAppCount, error) {
+	var users []User
+	var usersWithCount []UserWithAppCount
+	
+	query := db.Model(&User{}).Order("\"createdAt\" DESC").Limit(int(limit))
+
+	if cursor != "" {
+		var lastUser User
+		if err := db.Select("\"createdAt\"").Where("id = ?",
+			cursor).First(&lastUser).Error; err != nil {
+			return usersWithCount, err
+		}
+		query = query.Where("\"createdAt\" < ?", lastUser.CreatedAt)
+	}
+
+	query.Find(&users)
+	
+	for _, user := range users {
+		var appCount int64
+		countResult := db.Model(&App{}).Where("\"userId\" = ?", user.ID).Count(&appCount)
+		if countResult.Error != nil {
+			return nil, countResult.Error
+		}
+		
+		userWithCount := UserWithAppCount{
+			User:     user,
+			AppCount: appCount,
+		}
+		usersWithCount = append(usersWithCount, userWithCount)
+	}
+	
+	return usersWithCount, nil
+}
+
+
+// func (a *Article) FindAllByPostedAt(limit int, articleIDCursor string,
+// 	dateCursor time.Time, offset int) ([]Article, int64, error) {
+// 	var articles []Article
+// 	var count int64
+// 	query := db.Model(&Article{}).
+// 		Preload("Author").
+// 		Order("\"postedAt\" DESC").
+// 		Limit(int(limit))
+
+// 	if offset != 0 {
+// 		query = query.Offset(offset)
+// 	}
+
+	// if articleIDCursor != "" {
+	// 	var lastArticle Article
+	// 	if err := db.Select("\"postedAt\"").Where("id = ?",
+	// 		articleIDCursor).First(&lastArticle).Error; err != nil {
+	// 		return nil, 0, err
+	// 	}
+	// 	query = query.Where("\"postedAt\" < ?", lastArticle.PostedAt)
+	// }
+
+	// if !dateCursor.IsZero() {
+	// 	query = query.Where("\"postedAt\" <= ?", dateCursor)
+	// }
+
+	// if err := query.Count(&count).Error; err != nil {
+	// 	return nil, 0, err
+	// }
+
+	// query.Find(&articles)
+
+// 	return articles, count, nil
+// }
 
 // Update updates one user in the database, using the information
 // stored in the receiver u

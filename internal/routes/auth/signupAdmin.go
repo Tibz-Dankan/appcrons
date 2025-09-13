@@ -32,7 +32,7 @@ func signUpAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	savedUser, err := user.FindByEMail(user.Email)
+	savedUser, err := user.FindByEmail(user.Email)
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 		return

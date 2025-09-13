@@ -75,6 +75,89 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 	return apps, nil
 }
 
+// // Approach 0: Original naive implementation without optimization
+// func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) ([]App, error) {
+// 	startTime := time.Now()
+// 	var apps []App
+	
+// 	query := db.Model(&App{}).
+// 	    Preload("RequestTime").
+// 		Order("\"createdAt\" DESC").
+// 		Limit(int(limit))
+
+// 	if cursor != "" {
+// 		var lastApp App
+// 		if err := db.Select("\"createdAt\"").Where("id = ?",
+// 			cursor).First(&lastApp).Error; err != nil {
+// 			return apps, err
+// 		}
+// 		query = query.Where("\"createdAt\" < ?", lastApp.CreatedAt)
+// 	}
+
+// 	query.Find(&apps)
+
+// 	// To be kept for comparison
+// 	for i, app := range apps {
+// 		var requests []Request
+// 		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+// 		app.Request = requests
+// 		apps[i] = app
+// 	}
+
+// 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+
+// 	return apps, nil
+// }
+
+// Approach 1: Using Preload with conditions (GORM v2 feature)
+func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) ([]App, error) {
+	startTime := time.Now()
+	var apps []App
+	var appCount int64
+
+	countQuery := db.Model(&App{}).Order("\"createdAt\" DESC")
+	if countQuery.Error != nil {
+		return nil, countQuery.Error
+	}
+
+	if cursor != "" {
+		var lastApp App
+		if err := db.Select("\"createdAt\"").Where("id = ?", cursor).
+		First(&lastApp).Error; err != nil {
+			return apps, err
+		}
+		countQuery = countQuery.Where("\"createdAt\" < ?", lastApp.CreatedAt)
+	}
+
+	if err := countQuery.Count(&appCount).Error; err != nil {
+		return apps, err
+	}
+	log.Println("Total apps for user in query:", appCount)
+	
+	query := db.Model(&App{}).
+		Preload("RequestTime").
+		Preload("Request", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"createdAt\" DESC").Limit(int(appCount))
+		}).
+		Order("\"createdAt\" DESC").
+		Limit(int(limit))
+
+	if cursor != "" {
+		var lastApp App
+		if err := db.Select("\"createdAt\"").Where("id = ?", cursor).First(&lastApp).Error; err != nil {
+			return apps, err
+		}
+		query = query.Where("\"createdAt\" < ?", lastApp.CreatedAt)
+	}
+
+	if err := query.Find(&apps).Error; err != nil {
+		return apps, err
+	}
+
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+	return apps, nil
+}
+
 func (a *App) FindByName(name string) (App, error) {
 	var app App
 	db.First(&app, "name = ?", name)

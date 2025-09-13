@@ -21,7 +21,6 @@ func main() {
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete},
 		AllowCredentials: true,
-		Debug:            true,
 		AllowedHeaders:   []string{"*"},
 	})
 

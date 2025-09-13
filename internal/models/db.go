@@ -5,6 +5,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -23,6 +24,15 @@ func Db() *gorm.DB {
 
 		env := os.Getenv("GO_ENV")
 		log.Println("GO_ENV:", env)
+
+			// Load dev .env file
+		if env == "development" {
+			err = godotenv.Load()
+			if err != nil {
+				log.Fatalf("Error loading .env file")
+			}
+			log.Println("Loaded .env var file")
+		}
 
 		switch env {
 		case "development":

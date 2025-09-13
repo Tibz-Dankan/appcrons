@@ -44,7 +44,7 @@ func updateUserDetails(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if savedUser.Email != user.Email {
-		existingUser, err := user.FindByEMail(user.Email)
+		existingUser, err := user.FindByEmail(user.Email)
 		if err != nil {
 			services.AppError(err.Error(), 400, w)
 			return
