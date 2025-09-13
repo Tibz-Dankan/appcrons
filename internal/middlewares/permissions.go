@@ -46,15 +46,15 @@ func HasPermissions(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), UserPermissionsKey, userPermissions)
+		
+        if userPermissions.Role == "sys_admin" {
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
 
 		if userPermissions.UserID == "" {
 			log.Println("User has no permissions")
 			services.AppError("You do not have permission to perform this action", 403, w)
-			return
-		}
-
-		if userPermissions.Role == "sys_admin" {
-			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 

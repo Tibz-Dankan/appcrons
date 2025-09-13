@@ -64,6 +64,8 @@ func AppRouter() *mux.Router {
 
 	// Admin routes
 	adminRouter := router.PathPrefix("/api/v1/admin").Subrouter()
+	adminRouter.Use(middlewares.Auth)
+	adminRouter.Use(middlewares.HasPermissions)
 	admin.GetAllUsersRoute(adminRouter)
 	admin.GetAppsByUserRoute(adminRouter)
 	admin.GetRequestsByAppRoute(adminRouter)
