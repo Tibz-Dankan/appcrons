@@ -11,6 +11,7 @@
     "godotenv",
     "gorhill",
     "gorm",
+    "ILIKE",
     "joho",
     "mailjet",
     "myapp",

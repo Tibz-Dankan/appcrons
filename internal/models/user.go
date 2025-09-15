@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -96,40 +97,18 @@ func (u *User) FindAllAndIncludeAppCount(limit float64, cursor string) ([]UserWi
 }
 
 
-// func (a *Article) FindAllByPostedAt(limit int, articleIDCursor string,
-// 	dateCursor time.Time, offset int) ([]Article, int64, error) {
-// 	var articles []Article
-// 	var count int64
-// 	query := db.Model(&Article{}).
-// 		Preload("Author").
-// 		Order("\"postedAt\" DESC").
-// 		Limit(int(limit))
+func (u *User) FindCount() (int64, error) {
+	startTime := time.Now()
+	var userCount int64
 
-// 	if offset != 0 {
-// 		query = query.Offset(offset)
-// 	}
+	if err := db.Model(&User{}).Count(&userCount).Error; err != nil {
+		return userCount, err
+	}
+	log.Println("Total user count:", userCount)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 
-	// if articleIDCursor != "" {
-	// 	var lastArticle Article
-	// 	if err := db.Select("\"postedAt\"").Where("id = ?",
-	// 		articleIDCursor).First(&lastArticle).Error; err != nil {
-	// 		return nil, 0, err
-	// 	}
-	// 	query = query.Where("\"postedAt\" < ?", lastArticle.PostedAt)
-	// }
-
-	// if !dateCursor.IsZero() {
-	// 	query = query.Where("\"postedAt\" <= ?", dateCursor)
-	// }
-
-	// if err := query.Count(&count).Error; err != nil {
-	// 	return nil, 0, err
-	// }
-
-	// query.Find(&articles)
-
-// 	return articles, count, nil
-// }
+	return userCount, nil
+}
 
 // Update updates one user in the database, using the information
 // stored in the receiver u

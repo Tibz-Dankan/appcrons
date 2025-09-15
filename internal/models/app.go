@@ -235,6 +235,19 @@ func (a *App) Search(query, userId string) ([]App, error) {
 	return apps, nil
 }
 
+func (a *App) FindCount() (int64, error) {
+	startTime := time.Now()
+	var appCount int64
+
+	if err := db.Model(&App{}).Count(&appCount).Error; err != nil {
+		return appCount, err
+	}
+	log.Println("Total app count:", appCount)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+
+	return appCount, nil
+}
+
 // Update updates one app in the database, using the information
 // stored in the receiver a
 func (a *App) Update() (App, error) {
