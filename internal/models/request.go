@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -62,6 +63,59 @@ func (r *Request) FindAll() ([]Request, error) {
 	db.Find(&request)
 
 	return request, nil
+}
+
+func (r *Request) FindCurrentMonthCount() (int64, error) {
+	startTime := time.Now()
+	var requestCount int64
+
+	now := time.Now()
+	firstDayOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	firstDayOfNextMonth := firstDayOfMonth.AddDate(0, 1, 0)
+
+	if err := db.Model(&Request{}).
+		Where("\"createdAt\" >= ? AND \"createdAt\" < ?", firstDayOfMonth, firstDayOfNextMonth).
+		Count(&requestCount).Error; err != nil {
+		return requestCount, err
+	}
+
+	currentMonth := now.Format("2006-01")
+	log.Printf("Total Current '%s' count:%d", currentMonth, requestCount)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+	return requestCount, nil
+}
+
+
+func (r *Request) FindExistingCount() (int64, error) {
+	startTime := time.Now()
+	var existingRequestCount int64
+	
+	if err := db.Model(&RequestCount{}).
+		Select("COALESCE(SUM(count), 0)").
+		Scan(&existingRequestCount).Error; err != nil {
+		return existingRequestCount, err
+	}
+	
+	log.Printf("Total existing request count: %d", existingRequestCount)
+	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+	return existingRequestCount, nil
+}
+
+func (r *Request) FindTotalCount() (int64, error) {
+	var count int64
+
+	currentMonthCount, err:= r.FindCurrentMonthCount()
+	if  err != nil {
+		return count, err
+	}
+	ExistingCount, err:= r.FindExistingCount()
+	if  err != nil {
+		return count, err
+	}
+	count = currentMonthCount+ExistingCount
+	
+	log.Printf("Final total request count: %d", count)
+	return count, nil
 }
 
 func (r *Request) Delete(id string) error {
