@@ -80,6 +80,10 @@ func (u *User) FindAllAndIncludeAppCount(limit float64, cursor string) ([]UserWi
 		if countResult.Error != nil {
 			return nil, countResult.Error
 		}
+
+		user.Password = ""
+		user.PasswordResetToken = ""
+		user.PasswordResetExpiresAt = time.Time{}
 		
 		userWithCount := UserWithAppCount{
 			User:     user,

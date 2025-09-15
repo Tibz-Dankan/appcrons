@@ -16,8 +16,8 @@ type User struct {
 	ID                     string         `gorm:"column:id;type:uuid;primaryKey" json:"id"`
 	Name                   string         `gorm:"column:name;not null;index" json:"name"`
 	Email                  string         `gorm:"column:email;unique;not null;index" json:"email"`
-	Password               string         `gorm:"column:password;not null" json:"password"`
-	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken"`
+	Password               string         `gorm:"column:password;not null" json:"password,omitempty"`
+	PasswordResetToken     string         `gorm:"column:passwordResetToken;index" json:"passwordResetToken,omitempty"`
 	PasswordResetExpiresAt time.Time      `gorm:"column:passwordResetExpiresAt;index" json:"passwordResetExpiresAt,omitempty"`
 	Role                   string         `gorm:"column:role;default:'user';not null" json:"role"`
 	App                    []App          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"apps,omitempty"`
