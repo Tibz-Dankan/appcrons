@@ -3,6 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
@@ -58,6 +59,10 @@ func getRequestByUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		services.AppError(err.Error(), 400, w)
 	}
+
+	user.Password = ""
+	user.PasswordResetToken = ""
+	user.PasswordResetExpiresAt = time.Time{}
 
 	data := map[string]interface{}{
 		"user": user,
