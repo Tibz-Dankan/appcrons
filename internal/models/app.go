@@ -53,25 +53,52 @@ func (a *App) FindOne(id string) (App, error) {
 }
 
 func (a *App) FindByUser(userId string) ([]App, error) {
-	var apps []App
-	// TODO: To add cursor based pagination for fetching at maximum 10 apps for each user
-	// TODO: To remove the last last request for each on this query
+	// var apps []App
+	// // TODO: To add cursor based pagination for fetching at maximum 10 apps for each user
+	// // TODO: To remove the last last request for each on this query
+
+	// startTime := time.Now()
+	// result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps, "\"userId\" = ?", userId)
+	// if result.Error != nil {
+	// 	return apps, nil
+	// }
+
+	// for i, app := range apps {
+	// 	var requests []Request
+	// 	db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+	// 	app.Request = requests
+	// 	apps[i] = app
+	// }
+
+	// log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+
+	// return apps, nil
 
 	startTime := time.Now()
-	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps, "\"userId\" = ?", userId)
-	if result.Error != nil {
-		return apps, nil
-	}
+	var apps []App
+	var appCount int64
 
-	for i, app := range apps {
-		var requests []Request
-		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
-		app.Request = requests
-		apps[i] = app
+	log.Println("Fetching all apps by user using optimized implementation")
+
+	countQuery := db.Model(&App{}).Order("\"createdAt\" DESC")
+
+	if err := countQuery.Where("\"userId\" = ?", userId).Count(&appCount).Error; err != nil {
+		return apps, err
+	}
+	log.Println("Total apps for user in query:", appCount)
+	
+	query := db.Model(&App{}).
+		Preload("RequestTime").
+		Preload("Request", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"createdAt\" DESC").Limit(int(appCount))
+		}).
+		Order("\"createdAt\" DESC")
+
+	if err := query.Where("\"userId\" = ?", userId).Find(&apps).Error; err != nil {
+		return apps, err
 	}
 
 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
-
 	return apps, nil
 }
 
@@ -174,27 +201,58 @@ func (a *App) FindByURL(url string) (App, error) {
 	return app, nil
 }
 
+//// Original implementation
+// func (a *App) FindAll() ([]App, error) {
+// 	var apps []App
+
+// 	log.Println("Fetching all apps")
+
+// 	startTime := time.Now()
+// 	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps)
+// 	if result.Error != nil {
+// 		return apps, nil
+// 	}
+
+// 	// TODO: to find pagination solution for this part
+// 	for i, app := range apps {
+// 		var requests []Request
+// 		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
+// 		app.Request = requests
+// 		apps[i] = app
+// 	}
+
+// 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
+
+// 	return apps, nil
+// }
+
+// Optimized
 func (a *App) FindAll() ([]App, error) {
-	var apps []App
-
-	log.Println("Fetching all apps")
-
 	startTime := time.Now()
-	result := db.Preload("RequestTime").Order("\"updatedAt\" desc").Find(&apps)
-	if result.Error != nil {
-		return apps, nil
-	}
+	var apps []App
+	var appCount int64
 
-	// TODO: to find pagination solution for this part
-	for i, app := range apps {
-		var requests []Request
-		db.Order("\"createdAt\" desc").Limit(1).Find(&requests, "\"appId\" = ?", app.ID)
-		app.Request = requests
-		apps[i] = app
+	log.Println("Fetching all apps using optimized implementation")
+
+	countQuery := db.Model(&App{}).Order("\"updatedAt\" DESC")
+	
+	if err := countQuery.Count(&appCount).Error; err != nil {
+		return apps, err
+	}
+	log.Println("Total apps on appcrons:", appCount)
+	
+	query := db.Model(&App{}).
+		Preload("RequestTime").
+		Preload("Request", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"createdAt\" DESC").Limit(int(appCount))
+		}).
+		Order("\"updatedAt\" DESC")
+
+	if err := query.Find(&apps).Error; err != nil {
+		return apps, err
 	}
 
 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
-
 	return apps, nil
 }
 
