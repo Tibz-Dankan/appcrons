@@ -129,7 +129,7 @@ func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) (
 		countQuery = countQuery.Where("\"createdAt\" < ?", lastApp.CreatedAt)
 	}
 
-	if err := countQuery.Count(&appCount).Error; err != nil {
+	if err := countQuery.Where("\"userId\" = ?", userId).Count(&appCount).Error; err != nil {
 		return apps, err
 	}
 	log.Println("Total apps for user in query:", appCount)
@@ -150,7 +150,7 @@ func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) (
 		query = query.Where("\"createdAt\" < ?", lastApp.CreatedAt)
 	}
 
-	if err := query.Find(&apps).Error; err != nil {
+	if err := query.Where("\"userId\" = ?", userId).Find(&apps).Error; err != nil {
 		return apps, err
 	}
 
