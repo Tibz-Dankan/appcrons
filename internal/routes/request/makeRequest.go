@@ -167,7 +167,7 @@ func appRequiresExternalRequest(app models.App) (bool, error) {
 			return true, nil
 		}
 
-		if app.Request[0].StatusCode == 503 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
+		if app.Request[0].StatusCode == 503 ||app.Request[0].StatusCode == 502 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
 			return true, nil
 		}
 	}
@@ -187,7 +187,7 @@ func appRequiresExternalRequest(app models.App) (bool, error) {
 			return true, nil
 		}
 
-		if app.Request[0].StatusCode == 503 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
+		if app.Request[0].StatusCode == 503  ||app.Request[0].StatusCode == 502 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
 			return true, nil
 		}
 	}
