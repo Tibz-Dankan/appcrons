@@ -95,7 +95,7 @@ func validateApp(app models.App) (bool, bool, error) {
 			log.Println("Error converting string to integer:", err)
 		}
 
-		if int(timeDiff) >= requestInterval && int(timeDiff) > 5 {
+		if int(timeDiff) >= requestInterval {
 			return true, requiresExternal, nil
 		}
 		return false, requiresExternal, nil
@@ -137,7 +137,7 @@ func validateApp(app models.App) (bool, bool, error) {
 				log.Println("Error converting string to integer:::", err)
 			}
 
-			if int(timeDiff) >= requestInterval && int(timeDiff) > 5 {
+			if int(timeDiff) >= requestInterval {
 				return true, requiresExternal, nil
 			}
 		}
@@ -167,7 +167,7 @@ func appRequiresExternalRequest(app models.App) (bool, error) {
 			return true, nil
 		}
 
-		if app.Request[0].StatusCode == 503 ||app.Request[0].StatusCode == 502 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
+		if app.Request[0].StatusCode == 503 || app.Request[0].StatusCode == 502 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
 			return true, nil
 		}
 	}
@@ -187,7 +187,7 @@ func appRequiresExternalRequest(app models.App) (bool, error) {
 			return true, nil
 		}
 
-		if app.Request[0].StatusCode == 503  ||app.Request[0].StatusCode == 502 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
+		if app.Request[0].StatusCode == 503 || app.Request[0].StatusCode == 502 || app.Request[0].StatusCode == 429 && app.Request[0].Duration < 15*1000 {
 			return true, nil
 		}
 	}
