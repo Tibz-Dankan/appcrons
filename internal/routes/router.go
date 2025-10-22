@@ -61,6 +61,7 @@ func AppRouter() *mux.Router {
 	authorizedAuthRouter.Use(middlewares.HasPermissions)
 	auth.UpdateUserDetailsRoute(authorizedAuthRouter)
 	auth.ChangePasswordRoute(authorizedAuthRouter)
+	auth.GetUserRoute(authorizedAuthRouter)
 
 	// Admin routes
 	adminRouter := router.PathPrefix("/api/v1/admin").Subrouter()
@@ -71,7 +72,7 @@ func AppRouter() *mux.Router {
 	admin.GetRequestsByAppRoute(adminRouter)
 	admin.GetUserRoute(adminRouter)
 	admin.GetStatsRoute(adminRouter)
-	
+
 	// Feedback Routes
 	feedbackRouter := router.PathPrefix("/api/v1/feedback").Subrouter()
 	feedbackRouter.Use(middlewares.Auth)
