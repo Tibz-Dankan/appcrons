@@ -15,7 +15,7 @@ func schedulePublishRequest() {
 		sleepDuration := nextMinute.Sub(now)
 		minute := now.Minute()
 
-		if minute%10 == 0 && now.Second() == 0 {
+		if minute%5 == 0 && now.Second() == 0 {
 			publishers.PublishRequestEvent()
 		}
 
