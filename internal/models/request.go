@@ -85,17 +85,16 @@ func (r *Request) FindCurrentMonthCount() (int64, error) {
 	return requestCount, nil
 }
 
-
 func (r *Request) FindExistingCount() (int64, error) {
 	startTime := time.Now()
 	var existingRequestCount int64
-	
+
 	if err := db.Model(&RequestCount{}).
 		Select("COALESCE(SUM(count), 0)").
 		Scan(&existingRequestCount).Error; err != nil {
 		return existingRequestCount, err
 	}
-	
+
 	log.Printf("Total existing request count: %d", existingRequestCount)
 	log.Println("queryTimeMS:", int(time.Since(startTime).Milliseconds()))
 	return existingRequestCount, nil
@@ -104,16 +103,16 @@ func (r *Request) FindExistingCount() (int64, error) {
 func (r *Request) FindTotalCount() (int64, error) {
 	var count int64
 
-	currentMonthCount, err:= r.FindCurrentMonthCount()
-	if  err != nil {
+	currentMonthCount, err := r.FindCurrentMonthCount()
+	if err != nil {
 		return count, err
 	}
-	ExistingCount, err:= r.FindExistingCount()
-	if  err != nil {
+	ExistingCount, err := r.FindExistingCount()
+	if err != nil {
 		return count, err
 	}
-	count = currentMonthCount+ExistingCount
-	
+	count = currentMonthCount + ExistingCount
+
 	log.Printf("Final total request count: %d", count)
 	return count, nil
 }
@@ -131,6 +130,5 @@ func (r *Request) DeleteByApp(appId string) error {
 	if err := db.Unscoped().Where("\"appId\" = ?", appId).Delete(&Request{}).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
