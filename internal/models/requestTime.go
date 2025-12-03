@@ -5,13 +5,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func (rt *RequestTime) BeforeCreate(tx *gorm.DB) error {
+func (rc *RequestTime) BeforeCreate(tx *gorm.DB) error {
 	uuid := uuid.New().String()
 	tx.Statement.SetColumn("ID", uuid)
 	return nil
 }
 
-func (rt *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
+func (rc *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
 	result := db.Create(&requestTime)
 
 	if result.Error != nil {
@@ -20,14 +20,14 @@ func (rt *RequestTime) Create(requestTime RequestTime) (RequestTime, error) {
 	return requestTime, nil
 }
 
-func (rt *RequestTime) FindOne(id string) (RequestTime, error) {
+func (rc *RequestTime) FindOne(id string) (RequestTime, error) {
 	var requestTime RequestTime
 	db.First(&requestTime, "id = ?", id)
 
 	return requestTime, nil
 }
 
-func (rt *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
+func (rc *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
 	var requestTimes []RequestTime
 
 	db.Find(&requestTimes, "\"appId\" = ?", appId)
@@ -35,20 +35,20 @@ func (rt *RequestTime) FindByApp(appId string) ([]RequestTime, error) {
 	return requestTimes, nil
 }
 
-func (rt *RequestTime) Update() error {
-	db.Save(&rt)
+func (rc *RequestTime) Update() error {
+	db.Save(&rc)
 
 	return nil
 }
 
-func (rt *RequestTime) UpdateTimeZone(timeZone string) ([]RequestTime, error) {
+func (rc *RequestTime) UpdateTimeZone(timeZone string) ([]RequestTime, error) {
 	var requestTimes []RequestTime
 
-	if err := db.Model(&rt).Where("\"appId\" = ?", rt.AppID).Update("timeZone", timeZone).Error; err != nil {
+	if err := db.Model(&rc).Where("\"appId\" = ?", rc.AppID).Update("timeZone", timeZone).Error; err != nil {
 		return requestTimes, err
 	}
 
-	requestTimes, err := rt.FindByApp(rt.AppID)
+	requestTimes, err := rc.FindByApp(rc.AppID)
 	if err != nil {
 		return requestTimes, err
 	}

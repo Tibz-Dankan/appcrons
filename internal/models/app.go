@@ -86,7 +86,7 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 		return apps, err
 	}
 	log.Println("Total apps for user in query:", appCount)
-	
+
 	query := db.Model(&App{}).
 		Preload("RequestTime").
 		Preload("Request", func(db *gorm.DB) *gorm.DB {
@@ -106,7 +106,7 @@ func (a *App) FindByUser(userId string) ([]App, error) {
 // func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) ([]App, error) {
 // 	startTime := time.Now()
 // 	var apps []App
-	
+
 // 	query := db.Model(&App{}).
 // 	    Preload("RequestTime").
 // 		Order("\"createdAt\" DESC").
@@ -150,7 +150,7 @@ func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) (
 	if cursor != "" {
 		var lastApp App
 		if err := db.Select("\"createdAt\"").Where("id = ?", cursor).
-		First(&lastApp).Error; err != nil {
+			First(&lastApp).Error; err != nil {
 			return apps, err
 		}
 		countQuery = countQuery.Where("\"createdAt\" < ?", lastApp.CreatedAt)
@@ -160,7 +160,7 @@ func (a *App) FindByUserPaginated(userId string, limit float64, cursor string) (
 		return apps, err
 	}
 	log.Println("Total apps for user in query:", appCount)
-	
+
 	query := db.Model(&App{}).
 		Preload("RequestTime").
 		Preload("Request", func(db *gorm.DB) *gorm.DB {
@@ -235,12 +235,12 @@ func (a *App) FindAll() ([]App, error) {
 	log.Println("Fetching all apps using optimized implementation")
 
 	countQuery := db.Model(&App{}).Order("\"updatedAt\" DESC")
-	
+
 	if err := countQuery.Count(&appCount).Error; err != nil {
 		return apps, err
 	}
 	log.Println("Total apps on appcrons:", appCount)
-	
+
 	query := db.Model(&App{}).
 		Preload("RequestTime").
 		Preload("Request", func(db *gorm.DB) *gorm.DB {
@@ -323,11 +323,15 @@ func (a *App) Delete(id string) error {
 
 	request := Request{AppID: id}
 	requestTime := RequestTime{AppID: id}
+	requestCount := RequestCount{AppID: id}
 
 	if err := requestTime.DeleteByApp(id); err != nil {
 		return err
 	}
 	if err := request.DeleteByApp(id); err != nil {
+		return err
+	}
+	if err := requestCount.DeleteByApp(id); err != nil {
 		return err
 	}
 	if err := db.Unscoped().Where("id = ?", id).Delete(&App{}).Error; err != nil {
