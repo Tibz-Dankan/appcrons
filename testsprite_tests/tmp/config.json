@@ -1,0 +1,20 @@
+{
+  "status": "commited",
+  "type": "backend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8080",
+  "backendAuthType": "Bearer token",
+  "backendCredential": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYxODkwNTksImlhdCI6MTc3NjE1NjY1OSwidXNlcklkIjoiZGEwMGVkZDYtN2QyNS00MjA2LTlkZDAtZjY3MjZhOGU0ZWEzIn0.ofgxmJeMaAcnvIqrE5qYXzmD3ayJGQTpGTSatgwaOSs",
+  "executionArgs": {
+    "projectName": "appcrons",
+    "projectPath": "/home/tibs/Desktop/Tibz/programming/projects/appcrons/appcrons",
+    "testIds": [],
+    "additionalInstruction": "1. The target payload for auth correctly exposes `response.json()[\"data\"][\"token\"]`. Proceed naturally.\n2. IMPORT `uuid` IN EVERY TEST. The signup email MUST be dynamic like `f\"user_{uuid.uuid4()}@example.com\"` to prevent 400 Duplicate Email errors on subsequent runs!\n3. `requestInterval` MUST be a string like \"10\", NOT an integer.\n4. For '/get-live', if it disconnects prematurely, treat it as a pass.",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-NM1UXMEL3DN7uwrTgSOEtuojPM4mo1_508O45Us3nCOm04HkfTv1dEQ253HB6Sx0-CN_v3KI58SWQiSNyXUpyjp2ukXdpk047a57UtJnqC6XAlLokaRM2eacVsaa58wyTco"
+    }
+  },
+  "serverPort": 40309,
+  "proxy": "http://a32db7fc-df90-4c62-b3f4-199421a49e43:509yggYBj1Wsb6BsAaUsFBiF7vViveev@tun.testsprite.com:8080"
+}

@@ -1,0 +1,242 @@
+version: "2"
+type: backend
+tech_stack:
+  - Go 1.23
+  - Gorilla Mux
+  - PostgreSQL
+  - Redis
+  - GORM
+features:
+  - name: Authentication API
+    description: User and Admin Registration, Login, and Password Management
+    files:
+      - internal/routes/auth/signup.go
+      - internal/routes/auth/signin.go
+      - internal/routes/auth/changePassword.go
+      - internal/routes/auth/forgotPassword.go
+      - internal/routes/auth/resetPassword.go
+      - internal/routes/auth/updateUserDetails.go
+      - internal/routes/auth/getUser.go
+      - internal/models/user.go
+    endpoints:
+      - method: POST
+        path: /api/v1/auth/signup
+        description: Register a new user
+        auth_required: false
+      - method: POST
+        path: /api/v1/auth/signup-admin
+        description: Register system admin
+        auth_required: false
+      - method: POST
+        path: /api/v1/auth/signin
+        description: Sign in a user
+        auth_required: false
+      - method: POST
+        path: /api/v1/auth/signin-admin
+        description: System Admins Sign in
+        auth_required: false
+      - method: POST
+        path: /api/v1/auth/forgot-password
+        description: Request password reset
+        auth_required: false
+      - method: PATCH
+        path: /api/v1/auth/reset-password/{resetToken}
+        description: Reset password via token
+        auth_required: false
+      - method: PATCH
+        path: /api/v1/auth/user/update/{userId}
+        description: Update user profile details
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/auth/user/update-password/{userId}
+        description: Change user password
+        auth_required: true
+      - method: GET
+        path: /api/v1/auth/user/get/{userId}
+        description: Get specific user details
+        auth_required: true
+  - name: App Management API
+    description: Managing apps to be kept active
+    files:
+      - internal/routes/app/postApp.go
+      - internal/routes/app/updateApp.go
+      - internal/routes/app/getApp.go
+      - internal/routes/app/getAppsByUser.go
+      - internal/routes/app/getAllApps.go
+      - internal/routes/app/disableApp.go
+      - internal/routes/app/enableApp.go
+      - internal/routes/app/deleteApp.go
+      - internal/routes/app/searchApp.go
+      - internal/routes/app/getAppsLastRequestByUser.go
+      - internal/models/app.go
+    endpoints:
+      - method: POST
+        path: /api/v1/apps/post
+        description: Create a new app for monitoring
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/apps/update/{appId}
+        description: Update app settings
+        auth_required: true
+      - method: GET
+        path: /api/v1/apps/get/{appId}
+        description: Get specific app details
+        auth_required: true
+      - method: GET
+        path: /api/v1/apps/get-by-user
+        description: Get all apps for authenticated user
+        auth_required: true
+      - method: GET
+        path: /api/v1/apps/get-all
+        description: Get all apps
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/apps/disable/{appId}
+        description: Disable an app
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/apps/enable/{appId}
+        description: Enable a disabled app
+        auth_required: true
+      - method: DELETE
+        path: /api/v1/apps/delete/{appId}
+        description: Delete an app
+        auth_required: true
+      - method: GET
+        path: /api/v1/apps/search
+        description: Search inside user's apps
+        auth_required: true
+      - method: GET
+        path: /api/v1/apps/get-apps-last-request-by-user
+        description: Get apps with their last request data
+        auth_required: true
+  - name: Requests API
+    description: Retrieve request intervals and statistics recorded for apps
+    files:
+      - internal/routes/request/getRequestByApp.go
+      - internal/routes/request/getRequest.go
+      - internal/routes/request/getLiveRequests.go
+      - internal/routes/request/postRequestTime.go
+      - internal/routes/request/updateRequestTime.go
+      - internal/routes/request/deleteRequestTime.go
+      - internal/routes/request/updateTimeZone.go
+      - internal/models/request.go
+      - internal/models/requestTime.go
+    endpoints:
+      - method: GET
+        path: /api/v1/requests/get-by-app
+        description: Get requests for a specific app
+        auth_required: true
+      - method: GET
+        path: /api/v1/requests/get/{requestId}
+        description: Get specific request details
+        auth_required: true
+      - method: GET
+        path: /api/v1/requests/get-live
+        description: SSE endpoint for live request data
+        auth_required: true
+      - method: POST
+        path: /api/v1/requests/post-request-time
+        description: Define request active intervals
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/requests/update-request-time/{requestTimeId}
+        description: Update active intervals
+        auth_required: true
+      - method: DELETE
+        path: /api/v1/requests/delete-request-time/{requestTimeId}
+        description: Delete interval
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/requests/update-timezone
+        description: Update timezone for request intervals
+        auth_required: true
+  - name: Admin API
+    description: Administration routes for managing users and getting general stats
+    files:
+      - internal/routes/admin/getAllUser.go
+      - internal/routes/admin/getAppsByUser.go
+      - internal/routes/admin/getRequestsByApp.go
+      - internal/routes/admin/getUser.go
+      - internal/routes/admin/getStats.go
+    endpoints:
+      - method: GET
+        path: /api/v1/admin/users
+        description: Get all registered users (sys_admin only)
+        auth_required: true
+      - method: GET
+        path: /api/v1/admin/users/{userId}/apps
+        description: Get apps for a specific user
+        auth_required: true
+      - method: GET
+        path: /api/v1/admin/users/{userId}/apps/{appId}/requests
+        description: Get requests of user's app
+        auth_required: true
+      - method: GET
+        path: /api/v1/admin/users/{userId}
+        description: Get specific user details
+        auth_required: true
+      - method: GET
+        path: /api/v1/admin/stats
+        description: Get system usage statistics
+        auth_required: true
+  - name: Feedback API
+    description: Endpoints for submitting and managing user feedbacks
+    files:
+      - internal/routes/feedback/postFeedback.go
+      - internal/routes/feedback/getFeedbackByUser.go
+      - internal/routes/feedback/getAllFeedback.go
+      - internal/routes/feedback/updateFeedback.go
+      - internal/models/feedback.go
+    endpoints:
+      - method: POST
+        path: /api/v1/feedback/post
+        description: Submit user feedback
+        auth_required: true
+      - method: GET
+        path: /api/v1/feedback/get-by-user
+        description: Get feedback by authed user
+        auth_required: true
+      - method: GET
+        path: /api/v1/feedback/get-all
+        description: Get all feedback entries
+        auth_required: true
+      - method: PATCH
+        path: /api/v1/feedback/update/{feedbackId}
+        description: Update existing feedback
+        auth_required: true
+  - name: Bug Report API
+    description: Endpoints for submitting bug reports
+    files:
+      - internal/routes/bugReport/postBugReport.go
+      - internal/routes/bugReport/getBugReportByUser.go
+      - internal/routes/bugReport/getAllBugReports.go
+      - internal/models/bugReport.go
+    endpoints:
+      - method: POST
+        path: /api/v1/bugreport/post
+        description: Submit a bug report
+        auth_required: false
+      - method: GET
+        path: /api/v1/bugreport/get-by-user
+        description: Get bug reports by user
+        auth_required: false
+      - method: GET
+        path: /api/v1/bugreport/get-all
+        description: Get all bug reports
+        auth_required: false
+  - name: Miscellaneous API
+    description: Monitoring and Health
+    files:
+      - internal/routes/getActive.go
+      - internal/routes/monitor/getMetrics.go
+    endpoints:
+      - method: GET
+        path: /get/active
+        description: Health check / keep-active route
+        auth_required: false
+      - method: GET
+        path: /metrics
+        description: Prometheus metrics
+        auth_required: false
+known_limitations: []
