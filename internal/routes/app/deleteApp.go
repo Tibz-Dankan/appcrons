@@ -35,9 +35,11 @@ func deleteApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dataPayload := map[string]interface{}{}
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": savedApp.Name + " deleted successfully",
+		"data":    dataPayload,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

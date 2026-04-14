@@ -38,10 +38,14 @@ func enableApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dataPayload := map[string]interface{}{
+		"app": app,
+	}
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": "App is enabled successfully",
 		"app":     app,
+		"data":    dataPayload,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
