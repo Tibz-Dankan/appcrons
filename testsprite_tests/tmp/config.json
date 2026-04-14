@@ -9,12 +9,12 @@
     "projectName": "appcrons",
     "projectPath": "/home/tibs/Desktop/Tibz/programming/projects/appcrons/appcrons",
     "testIds": [],
-    "additionalInstruction": "1. The target payload for auth correctly exposes `response.json()[\"data\"][\"token\"]`. Proceed naturally.\n2. IMPORT `uuid` IN EVERY TEST. The signup email MUST be dynamic like `f\"user_{uuid.uuid4()}@example.com\"` to prevent 400 Duplicate Email errors on subsequent runs!\n3. `requestInterval` MUST be a string like \"10\", NOT an integer.\n4. For '/get-live', if it disconnects prematurely, treat it as a pass.",
+    "additionalInstruction": "Follow the test_generation_rules in standard_prd.json. Enable and disable are NOT idempotent. Use HH:MM:SS format for start/end. Always do fresh signup to get accessToken.",
     "serverMode": "development",
     "envs": {
       "API_KEY": "sk-user-NM1UXMEL3DN7uwrTgSOEtuojPM4mo1_508O45Us3nCOm04HkfTv1dEQ253HB6Sx0-CN_v3KI58SWQiSNyXUpyjp2ukXdpk047a57UtJnqC6XAlLokaRM2eacVsaa58wyTco"
     }
   },
-  "serverPort": 40309,
-  "proxy": "http://a32db7fc-df90-4c62-b3f4-199421a49e43:509yggYBj1Wsb6BsAaUsFBiF7vViveev@tun.testsprite.com:8080"
+  "serverPort": 36559,
+  "proxy": "http://296ada47-8eea-400f-abb7-c246fc84f1cd:wrSdrGWPeHnEzbtTit5o4Ru5mE1FzQVj@tun.testsprite.com:8080"
 }

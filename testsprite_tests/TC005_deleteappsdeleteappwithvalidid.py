@@ -2,64 +2,56 @@ import requests
 import uuid
 
 BASE_URL = "http://localhost:8080"
-AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYxODkwNTksImlhdCI6MTc3NjE1NjY1OSwidXNlcklkIjoiZGEwMGVkZDYtN2QyNS00MjA2LTlkZDAtZjY3MjZhOGU0ZWEzIn0.ofgxmJeMaAcnvIqrE5qYXzmD3ayJGQTpGTSatgwaOSs"
-HEADERS = {"Authorization": f"Bearer {AUTH_TOKEN}"}
 TIMEOUT = 30
 
-def test_deleteappsdeleteappwithvalidid():
-    # Step 1: Create a new app to delete later
-    unique_email = f"user_{uuid.uuid4()}@example.com"
-    signup_payload = {
-        "name": "Delete Test User",
-        "email": unique_email,
-        "password": "Secure@1234"
-    }
-    # Signup new user
-    signup_resp = requests.post(f"{BASE_URL}/api/v1/auth/signup", json=signup_payload, timeout=TIMEOUT)
-    assert signup_resp.status_code == 201, f"Signup failed: {signup_resp.text}"
-    signup_data = signup_resp.json()
-    assert signup_data.get("status") == "success"
-    assert isinstance(signup_data.get("data"), dict), "Missing data object in signup response"
-    assert "user" in signup_data["data"], "User data missing in signup response"
-    assert "token" in signup_data["data"], "Token missing in signup response"
-    user_token = signup_data["data"]["token"]
-    user_id = signup_data["data"]["user"]["id"]
-    user_headers = {"Authorization": f"Bearer {user_token}"}
 
-    # Create an app under this user
-    app_payload = {
-        "name": "App to Delete",
-        "url": "https://example-app-to-delete.com",
-        "requestInterval": 10
+def test_deleteappsdeleteappwithvalidid():
+    # Step 1: Signup to get fresh user and accessToken
+    signup_url = f"{BASE_URL}/api/v1/auth/signup"
+    email = f"{uuid.uuid4()}@test.com"
+    signup_payload = {
+        "name": "Test User",
+        "email": email,
+        "password": "TestPass@1234"
     }
-    create_app_resp = requests.post(f"{BASE_URL}/api/v1/apps/post", json=app_payload, headers=user_headers, timeout=TIMEOUT)
-    assert create_app_resp.status_code == 201, f"App creation failed: {create_app_resp.text}"
-    app_data = create_app_resp.json()
-    assert app_data.get("status") == "success"
-    assert "app" in app_data.get("data", {}), "App data missing in create app response"
-    app_id = app_data["data"]["app"]["id"]
+    signup_resp = requests.post(signup_url, json=signup_payload, timeout=TIMEOUT)
+    assert signup_resp.status_code == 201, f"Signup failed: {signup_resp.text}"
+    signup_json = signup_resp.json()
+    assert "accessToken" in signup_json, "No accessToken in signup response"
+    access_token = signup_json["accessToken"]
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    # Step 2: Create an app as fixture
+    create_app_url = f"{BASE_URL}/api/v1/apps/post"
+    app_name = f"App {uuid.uuid4()}"
+    app_url = f"https://app-{uuid.uuid4()}.onrender.com/active"
+    create_app_payload = {
+        "name": app_name,
+        "url": app_url,
+        "requestInterval": "10"
+    }
+    create_resp = requests.post(create_app_url, json=create_app_payload, headers=headers, timeout=TIMEOUT)
+    assert create_resp.status_code == 201, f"App creation failed: {create_resp.text}"
+    create_json = create_resp.json()
+    assert create_json.get("status") == "success", f"App creation status not success: {create_resp.text}"
+    app_data = create_json.get("data", {}).get("app")
+    assert app_data and "id" in app_data, "No app id in response"
+    app_id = app_data["id"]
 
     try:
-        # Step 2: DELETE the created app with valid ID
-        delete_resp = requests.delete(f"{BASE_URL}/api/v1/apps/delete/{app_id}", headers=user_headers, timeout=TIMEOUT)
-        assert delete_resp.status_code in (200, 204), f"Valid delete failed: {delete_resp.text}"
-        if delete_resp.status_code != 204:
-            delete_json = delete_resp.json()
-            assert delete_json.get("status") == "success"
+        # Step 3: Delete the created app - expect 200 success
+        delete_url = f"{BASE_URL}/api/v1/apps/delete/{app_id}"
+        delete_resp = requests.delete(delete_url, headers=headers, timeout=TIMEOUT)
+        assert delete_resp.status_code == 200, f"Failed to delete existing app: {delete_resp.text}"
 
-        # Step 3: Attempt to DELETE a non-existent app ID and expect 404
-        non_existent_app_id = "00000000-0000-0000-0000-000000000000"
-        delete_nonexist_resp = requests.delete(f"{BASE_URL}/api/v1/apps/delete/{non_existent_app_id}", headers=user_headers, timeout=TIMEOUT)
-        assert delete_nonexist_resp.status_code == 404, f"Delete of non-existent app did not return 404: {delete_nonexist_resp.text}"
-        err_json = delete_nonexist_resp.json()
-        assert err_json.get("status") == "error"
-        assert "app not found" in err_json.get("message", "").lower()
+        # Step 4: Attempt to delete the same app again - expect 404 Not Found since app was deleted
+        delete_resp_404 = requests.delete(delete_url, headers=headers, timeout=TIMEOUT)
+        assert delete_resp_404.status_code == 404, f"Deleting non-existent app did not return 404: {delete_resp_404.text}"
     finally:
-        # Cleanup: Ensure the created app is deleted if it still exists
-        # Check if app still exists by trying to delete again quietly
-        try:
-            requests.delete(f"{BASE_URL}/api/v1/apps/delete/{app_id}", headers=user_headers, timeout=TIMEOUT)
-        except:
-            pass
+        # Cleanup: Just in case deletion failed, attempt to delete app to avoid leftover state
+        requests.delete(f"{BASE_URL}/api/v1/apps/delete/{app_id}", headers=headers, timeout=TIMEOUT)
+
 
 test_deleteappsdeleteappwithvalidid()

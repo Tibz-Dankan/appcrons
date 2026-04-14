@@ -1,59 +1,71 @@
 import requests
 import uuid
 
-def test_post_api_post_create_app_with_valid_data():
-    base_url = "http://localhost:8080"
-    timeout = 30
+BASE_URL = "http://localhost:8080"
+SIGNUP_URL = f"{BASE_URL}/api/v1/auth/signup"
+CREATE_APP_URL = f"{BASE_URL}/api/v1/apps/post"
+DELETE_APP_URL_TEMPLATE = f"{BASE_URL}/api/v1/apps/delete/{{appId}}"
 
-    # Step 1: Signup new user with dynamic email to get auth token
-    unique_email = f"user_{uuid.uuid4()}@example.com"
+def test_post_api_post_create_app_with_valid_data():
+    # Step 1: Signup to get fresh access token
+    signup_email = f"{uuid.uuid4()}@test.com"
     signup_payload = {
         "name": "Test User",
-        "email": unique_email,
-        "password": "ValidPass123!"
+        "email": signup_email,
+        "password": "TestPass@1234"
     }
-    signup_response = requests.post(f"{base_url}/api/v1/auth/signup", json=signup_payload, timeout=timeout)
-    assert signup_response.status_code == 201, f"Signup failed: {signup_response.text}"
-    signup_data = signup_response.json()
-    assert signup_data["status"] == "success"
-    token = signup_data["data"]["token"]
-    assert token, "Token not found in signup response"
+    try:
+        signup_resp = requests.post(SIGNUP_URL, json=signup_payload, timeout=30)
+        assert signup_resp.status_code == 201, f"Signup failed with status {signup_resp.status_code}"
+        signup_data = signup_resp.json()
+        assert "accessToken" in signup_data, "accessToken not in signup response"
+        access_token = signup_data["accessToken"]
+        assert signup_data.get("status") == "success", "Signup status not success"
+    except (requests.RequestException, AssertionError) as e:
+        raise e
 
     headers = {
-        "Authorization": f"Bearer {token}",
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
 
-    # Payload requirements: requestInterval as string to match server schema
-    unique_app_name = f"My Test App {uuid.uuid4()}"
-    app_payload = {
-        "name": unique_app_name,
-        "url": "https://my-test-app.example.com/health",
+    # Step 2: Create a new app with valid data
+    app_name = f"App {uuid.uuid4()}"
+    app_url = f"https://app-{uuid.uuid4()}.onrender.com/active"
+    create_app_payload = {
+        "name": app_name,
+        "url": app_url,
         "requestInterval": "10"
     }
 
     app_id = None
     try:
-        # Step 2: POST /api/v1/apps/post to create a new app
-        app_response = requests.post(f"{base_url}/api/v1/apps/post", json=app_payload, headers=headers, timeout=timeout)
-        assert app_response.status_code == 201, f"App creation failed: {app_response.text}"
-        app_response_data = app_response.json()
-        assert app_response_data["status"] == "success"
-        app_data = app_response_data["data"]["app"]
-
-        # Validate the returned app data fields
-        app_id = app_data.get("id")
-        assert app_id, "App ID missing in response"
-        assert app_data.get("name") == app_payload["name"]
-        assert app_data.get("url") == app_payload["url"]
-        assert app_data.get("requestInterval") == 10
-        assert app_data.get("isEnabled") is False
-
+        create_resp = requests.post(CREATE_APP_URL, json=create_app_payload, headers=headers, timeout=30)
+        assert create_resp.status_code == 201, f"Create app failed with status {create_resp.status_code}"
+        create_data = create_resp.json()
+        assert create_data.get("status") == "success", "Create app status not success"
+        assert "data" in create_data and "app" in create_data["data"], "App data missing in response"
+        app = create_data["data"]["app"]
+        assert isinstance(app, dict), "App field is not a dict"
+        assert app.get("name") == app_name, "App name in response does not match"
+        assert app.get("url") == app_url, "App url in response does not match"
+        assert app.get("requestInterval") == "10", "App requestInterval in response does not match"
+        assert "isDisabled" in app, "isDisabled field missing in app response"
+        # According to rules, newly created apps have isDisabled=true by default.
+        assert app["isDisabled"] is True, "Newly created app isDisabled is not true by default"
+        app_id = app.get("id")
+        assert app_id is not None, "App ID missing in response"
+    except (requests.RequestException, AssertionError) as e:
+        raise e
     finally:
-        # Cleanup: delete the created app if created
+        # Cleanup: Delete the created app if app_id is known
         if app_id:
-            del_resp = requests.delete(f"{base_url}/api/v1/apps/delete/{app_id}", headers=headers, timeout=timeout)
-            if del_resp.status_code not in (200, 204, 404):
-                print(f"Warning: Unexpected status code deleting app {app_id}: {del_resp.status_code} {del_resp.text}")
+            try:
+                del_resp = requests.delete(DELETE_APP_URL_TEMPLATE.format(appId=app_id), headers=headers, timeout=30)
+                # Allow 200 success and 403 (if token mismatch, but should not happen here)
+                if del_resp.status_code not in (200, 403, 404):
+                    raise Exception(f"Unexpected status deleting app: {del_resp.status_code}")
+            except requests.RequestException:
+                pass  # Ignore exceptions in cleanup
 
 test_post_api_post_create_app_with_valid_data()
