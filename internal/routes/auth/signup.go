@@ -74,6 +74,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	}
 	tokenData := map[string]interface{}{
 		"token": accessToken,
+		"user":  newUser,
 	}
 	response := map[string]interface{}{
 		"status":      "success",

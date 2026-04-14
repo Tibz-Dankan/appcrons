@@ -49,10 +49,14 @@ func postFeedback(w http.ResponseWriter, r *http.Request) {
 		events.EB.Publish("permissions", user)
 	}
 
+	dataPayload := map[string]interface{}{
+		"feedback": newFeedback,
+	}
 	response := map[string]interface{}{
 		"status":   "success",
 		"message":  "Thank very much for your feedback",
 		"feedback": newFeedback,
+		"data":     dataPayload,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

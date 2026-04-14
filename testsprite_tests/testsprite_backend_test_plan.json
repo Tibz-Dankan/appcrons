@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "postapipostcreateappwithvaliddata",
+    "description": "Test POST /api/v1/apps/post to create a new app with valid data and verify the response contains the app with isEnabled set to false by default."
+  },
+  {
+    "id": "TC002",
+    "title": "patchappsupdateappwithvalidchanges",
+    "description": "Test PATCH /api/v1/apps/update/{appId} to update app details like name and requestInterval and verify the updated app is returned correctly."
+  },
+  {
+    "id": "TC003",
+    "title": "patchappsenableapptogglesenabledstate",
+    "description": "Test PATCH /api/v1/apps/enable/{appId} to enable a disabled app and verify isEnabled is true; also test idempotency by enabling an already enabled app."
+  },
+  {
+    "id": "TC004",
+    "title": "patchappsdisableapptogglesenabledstate",
+    "description": "Test PATCH /api/v1/apps/disable/{appId} to disable an enabled app and verify isEnabled is false; also test idempotency by disabling an already disabled app."
+  },
+  {
+    "id": "TC005",
+    "title": "deleteappsdeleteappwithvalidid",
+    "description": "Test DELETE /api/v1/apps/delete/{appId} to delete an existing app and verify success; also test deleting a non-existent app returns 404."
+  },
+  {
+    "id": "TC006",
+    "title": "postrequestspostrequesttimewithvalidinterval",
+    "description": "Test POST /api/v1/requests/post-request-time with valid startTime before endTime and verify creation of request time frame."
+  },
+  {
+    "id": "TC007",
+    "title": "postrequestspostrequesttimewithinvalidinterval",
+    "description": "Test POST /api/v1/requests/post-request-time with startTime equal or after endTime and verify 400 error with appropriate message."
+  },
+  {
+    "id": "TC008",
+    "title": "getrequestsgetliveprovidesseestream",
+    "description": "Test GET /api/v1/requests/get-live with valid authorization returns 200 and streams live request events via SSE; test missing or expired token returns 401."
+  },
+  {
+    "id": "TC009",
+    "title": "postfeedbackpostfeedbackwithvaliddata",
+    "description": "Test POST /api/v1/feedback/post with valid user token and feedback data and verify creation of feedback entry."
+  },
+  {
+    "id": "TC010",
+    "title": "getmetricsreturnsprometheusmetrics",
+    "description": "Test GET /metrics returns 200 with Prometheus metrics plaintext body and handles high load gracefully; server errors return 500 with error message."
+  }
+]

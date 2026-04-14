@@ -75,6 +75,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 
 	tokenData := map[string]interface{}{
 		"token": accessToken,
+		"user":  userMap,
 	}
 	response := map[string]interface{}{
 		"status":      "success",

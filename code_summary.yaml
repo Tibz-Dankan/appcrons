@@ -1,0 +1,82 @@
+models:
+  - User:
+      fields: [ID, Name, Email, Password, Role, Apps, Feedbacks. OTPs]
+  - App:
+      fields:
+        [
+          ID,
+          UserID,
+          Name,
+          URL,
+          RequestInterval,
+          IsDisabled,
+          Requests,
+          RequestTimes,
+          RequestCounts,
+        ]
+  - Request:
+      fields: [ID, AppID, StatusCode, Duration, StartedAt, CreatedAt]
+  - RequestTime:
+      fields: [ID, AppID, Start, End, TimeZone, CreatedAt, UpdatedAt]
+  - Feedback:
+      fields: [ID, UserID, Rating, Message, CreatedAt, UpdatedAt]
+  - OTP:
+      fields: [ID, UserID, OTP, IsUsed, ExpiresAt, CreatedAt, UpdatedAt]
+  - requestCount:
+      fields: [ID, AppID, Month, Count, FromDate, ToDate, CreatedAt, UpdatedAt]
+  - BugReport:
+      fields: [ID, UserID, Title, Description, Image, CreatedAt, UpdatedAt]
+
+endpoints:
+  Auth:
+    - POST /api/v1/auth/signup: Register new user
+    - POST /api/v1/auth/signup-admin: Register system admin
+    - POST /api/v1/auth/signin: User sign-in
+    - POST /api/v1/auth/signin-admin: System Admin sign-in
+    - POST /api/v1/auth/forgot-password: Request password reset
+    - PATCH /api/v1/auth/reset-password/{resetToken}: Reset password via token
+    - PATCH /api/v1/auth/user/update/{userId}: Update user profile details
+    - PATCH /api/v1/auth/user/update-password/{userId}: Change user password
+    - GET /api/v1/auth/user/get/{userId}: Get specific user details
+
+  Apps:
+    - POST /api/v1/apps/post: Create a new app for monitoring
+    - PATCH /api/v1/apps/update/{appId}: Update app settings
+    - GET /api/v1/apps/get/{appId}: Get specific app details
+    - GET /api/v1/apps/get-by-user: Get all apps for authenticated user
+    - GET /api/v1/apps/get-all: Get all apps
+    - PATCH /api/v1/apps/disable/{appId}: Disable an app
+    - PATCH /api/v1/apps/enable/{appId}: Enable a disabled app
+    - DELETE /api/v1/apps/delete/{appId}: Delete an app
+    - GET /api/v1/apps/search: Search inside user's apps
+    - GET /api/v1/apps/get-apps-last-request-by-user: Get apps with their last request data
+
+  Requests:
+    - GET /api/v1/requests/get-by-app: Get requests for a specific app
+    - GET /api/v1/requests/get/{requestId}: Get specific request details
+    - GET /api/v1/requests/get-live: SSE endpoint for live request data
+    - POST /api/v1/requests/post-request-time: Define request active intervals
+    - PATCH /api/v1/requests/update-request-time/{requestTimeId}: Update active intervals
+    - DELETE /api/v1/requests/delete-request-time/{requestTimeId}: Delete interval
+    - PATCH /api/v1/requests/update-timezone: Update timezone for request intervals
+
+  Admin:
+    - GET /api/v1/admin/users: Get all registered users (sys_admin only)
+    - GET /api/v1/admin/users/{userId}/apps: Get apps for a specific user
+    - GET /api/v1/admin/users/{userId}/apps/{appId}/requests: Get requests of user's app
+    - GET /api/v1/admin/users/{userId}: Get specific user details
+    - GET /api/v1/admin/stats: Get system usage statistics
+
+  Feedback:
+    - POST /api/v1/feedback/post: Submit user feedback
+    - GET /api/v1/feedback/get-by-user: Get feedback by authed user
+    - GET /api/v1/feedback/get-all: Get all feedback entries
+    - PATCH /api/v1/feedback/update/{feedbackId}: Update existing feedback
+
+  BugReport:
+    - POST /api/v1/bugreport/post: Submit a bug report
+    - GET /api/v1/bugreport/get-by-user: Get bug reports by user
+    - GET /api/v1/bugreport/get-all: Get all bug reports
+
+  Others:
+    - GET /get/active: Health check / keep-active route

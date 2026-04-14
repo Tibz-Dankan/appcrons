@@ -71,10 +71,14 @@ func PostApp(w http.ResponseWriter, r *http.Request) {
 		events.EB.Publish("permissions", user)
 	}
 
+	dataPayload := map[string]interface{}{
+		"app": createdApp,
+	}
 	response := map[string]interface{}{
 		"status":  "success",
 		"message": "Created successfully",
 		"app":     createdApp,
+		"data":    dataPayload,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

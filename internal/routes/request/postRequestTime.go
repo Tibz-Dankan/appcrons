@@ -60,10 +60,14 @@ func postRequestTime(w http.ResponseWriter, r *http.Request) {
 		events.EB.Publish("permissions", user)
 	}
 
+	dataPayload := map[string]interface{}{
+		"requestTime": createdRequestTime,
+	}
 	response := map[string]interface{}{
 		"status":      "success",
 		"message":     "Request Time Created successfully",
 		"requestTime": createdRequestTime,
+		"data":        dataPayload,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
