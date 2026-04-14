@@ -72,11 +72,16 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		"email": user.Email,
 		"role":  user.Role,
 	}
+
+	tokenData := map[string]interface{}{
+		"token": accessToken,
+	}
 	response := map[string]interface{}{
 		"status":      "success",
 		"message":     "Sign in successfully",
 		"accessToken": accessToken,
 		"user":        userMap,
+		"data":        tokenData,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
