@@ -79,8 +79,22 @@ func AppError(message string, statusCode int, w http.ResponseWriter) {
 	statusCodeStr := strconv.Itoa(statusCode)
 	if len(statusCodeStr) > 0 && statusCodeStr[0] == '5' {
 		response["status"] = "fail"
+		color := statusColor(statusCode)
+		log.Printf(
+			"%s%s%s\n",
+			color,
+			message,
+			colorReset,
+		)
 	} else {
 		response["status"] = "error"
+		color := statusColor(statusCode)
+		log.Printf(
+			"%s%s%s\n",
+			color,
+			message,
+			colorReset,
+		)
 	}
 
 	exists := statusCodeExists(statusCodeStr, statusCodes)
@@ -144,4 +158,22 @@ func (jwt *JWTError) expired() bool {
 
 func (jwt *JWTError) Found() bool {
 	return jwt.expired() || jwt.invalid()
+}
+
+const (
+	colorGreen  = "\033[32m"
+	colorYellow = "\033[33m"
+	colorRed    = "\033[31m"
+	colorReset  = "\033[0m"
+)
+
+func statusColor(code int) string {
+	switch {
+	case code >= 200 && code < 300:
+		return colorGreen
+	case code >= 300 && code < 400:
+		return colorYellow
+	default:
+		return colorRed
+	}
 }
