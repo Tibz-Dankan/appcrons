@@ -4,65 +4,69 @@ import uuid
 BASE_URL = "http://localhost:8080"
 TIMEOUT = 30
 
-def test_patch_apps_update_app_with_valid_changes():
-    # Signup a new user to get auth token
-    signup_email = f"user_{uuid.uuid4()}@example.com"
+def test_patchappsupdateappwithvalidchanges():
+    # Step 1: Signup new user to get fresh accessToken
+    signup_url = f"{BASE_URL}/api/v1/auth/signup"
+    unique_email = f"{uuid.uuid4()}@test.com"
     signup_payload = {
         "name": "Test User",
-        "email": signup_email,
-        "password": "Secure@1234"
+        "email": unique_email,
+        "password": "TestPass@1234"
     }
-    signup_resp = requests.post(f"{BASE_URL}/api/v1/auth/signup", json=signup_payload, timeout=TIMEOUT)
+    signup_resp = requests.post(signup_url, json=signup_payload, timeout=TIMEOUT)
     assert signup_resp.status_code == 201, f"Signup failed: {signup_resp.text}"
-    signup_data = signup_resp.json()
-    assert signup_data.get("status") == "success", f"Unexpected signup status: {signup_data}"
-    data = signup_data.get("data")
-    assert data is not None, f"Missing 'data' in signup response: {signup_data}"
-    user = data.get("user")
-    assert user is not None, f"Missing 'user' in signup data: {data}"
-    token = data.get("token")
-    assert token is not None, f"Missing 'token' in signup data: {data}"
-    user_id = user.get("id")
-    assert user_id is not None, f"Missing 'id' in user data: {user}"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Create a new app first (use requestInterval as integer on create per PRD)
-    app_create_payload = {
-        "name": "Original App Name",
-        "url": "https://example.com/api",
-        "requestInterval": 10
+    signup_json = signup_resp.json()
+    assert "accessToken" in signup_json, "No accessToken in signup response"
+    token = signup_json["accessToken"]
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
     }
-    app_create_resp = requests.post(f"{BASE_URL}/api/v1/apps/post", json=app_create_payload, headers=headers, timeout=TIMEOUT)
-    assert app_create_resp.status_code == 201, f"App creation failed: {app_create_resp.text}"
-    app_create_data = app_create_resp.json()
-    assert app_create_data.get("status") == "success", f"Unexpected app creation status: {app_create_data}"
-    app = app_create_data["data"].get("app")
-    assert app is not None, f"Missing 'app' in creation data: {app_create_data}" 
-    app_id = app.get("id")
-    assert app_id is not None, f"Missing 'id' in app data: {app}"
+
+    # Step 2: Create an app to update later
+    create_app_url = f"{BASE_URL}/api/v1/apps/post"
+    app_name_orig = f"App {uuid.uuid4()}"
+    app_url_orig = f"https://app-{uuid.uuid4()}.onrender.com/active"
+    create_app_payload = {
+        "name": app_name_orig,
+        "url": app_url_orig,
+        "requestInterval": "10"
+    }
+    create_resp = requests.post(create_app_url, headers=headers, json=create_app_payload, timeout=TIMEOUT)
+    assert create_resp.status_code == 201, f"App creation failed: {create_resp.text}"
+    create_json = create_resp.json()
+    assert create_json.get("status") == "success", f"Unexpected status on app creation: {create_json}"
+    app = create_json.get("data", {}).get("app")
+    assert app and "id" in app, "App ID missing in creation response"
+    app_id = app["id"]
 
     try:
-        # Prepare patch payload with updated name and requestInterval as integer 10
-        patch_payload = {
-            "name": "Updated App Name",
-            "requestInterval": 10
+        # Step 3: PATCH to update app details: change name and requestInterval
+        update_app_url = f"{BASE_URL}/api/v1/apps/update/{app_id}"
+        updated_name = f"Updated {uuid.uuid4()}"
+        updated_url = f"https://upd-{uuid.uuid4()}.onrender.com/active"
+        update_payload = {
+            "name": updated_name,
+            "url": updated_url,
+            "requestInterval": "15"
         }
-        patch_resp = requests.patch(f"{BASE_URL}/api/v1/apps/update/{app_id}", json=patch_payload, headers=headers, timeout=TIMEOUT)
+        patch_resp = requests.patch(update_app_url, headers=headers, json=update_payload, timeout=TIMEOUT)
         assert patch_resp.status_code == 200, f"App update failed: {patch_resp.text}"
-        patch_data = patch_resp.json()
-        assert patch_data.get("status") == "success", f"Unexpected patch status: {patch_data}"
-        updated_app = patch_data["data"].get("app")
-        assert updated_app is not None, f"Missing 'app' in patch response data: {patch_data}"
-        assert updated_app.get("id") == app_id
-        assert updated_app.get("name") == patch_payload["name"]
-        ri = updated_app.get("requestInterval")
-        # requestInterval should be integer 10
-        assert isinstance(ri, int) and ri == 10, f"requestInterval is not correctly updated: {ri}"
+        patch_json = patch_resp.json()
+        assert patch_json.get("status") == "success", f"Unexpected status on app update: {patch_json}"
+        updated_app = patch_json.get("data", {}).get("app")
+        assert updated_app, "Updated app data missing in response"
+
+        # Validate updated fields
+        assert updated_app.get("id") == app_id, "Updated app ID mismatch"
+        assert updated_app.get("name") == updated_name, "App name not updated correctly"
+        assert updated_app.get("url") == updated_url, "App url not updated correctly"
+        assert updated_app.get("requestInterval") == "15", "requestInterval not updated correctly"
+
     finally:
-        # Clean up: delete the created app
-        del_resp = requests.delete(f"{BASE_URL}/api/v1/apps/delete/{app_id}", headers=headers, timeout=TIMEOUT)
-        # Either 200 success or 204 no content is acceptable; tolerate 404 for cleanup safety
-        assert del_resp.status_code in [200, 204, 404]
+        # Cleanup: delete the created app
+        delete_app_url = f"{BASE_URL}/api/v1/apps/delete/{app_id}"
+        del_resp = requests.delete(delete_app_url, headers=headers, timeout=TIMEOUT)
+        assert del_resp.status_code == 200, f"App deletion failed during cleanup: {del_resp.text}"
 
-
-test_patch_apps_update_app_with_valid_changes()
+test_patchappsupdateappwithvalidchanges()

@@ -3,65 +3,73 @@ import uuid
 
 BASE_URL = "http://localhost:8080"
 TIMEOUT = 30
-AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYxODkwNTksImlhdCI6MTc3NjE1NjY1OSwidXNlcklkIjoiZGEwMGVkZDYtN2QyNS00MjA2LTlkZDAtZjY3MjZhOGU0ZWEzIn0.ofgxmJeMaAcnvIqrE5qYXzmD3ayJGQTpGTSatgwaOSs"
-HEADERS_AUTH = {"Authorization": f"Bearer {AUTH_TOKEN}"}
-HEADERS_JSON = {"Content-Type": "application/json"}
 
 def test_patch_apps_disable_app_toggles_enabled_state():
-    # 1. Signup user to get unique email and token
-    signup_email = f"user_{uuid.uuid4()}@example.com"
+    # Step 1: Signup a new user and get accessToken
+    signup_url = f"{BASE_URL}/api/v1/auth/signup"
+    unique_email = f"{uuid.uuid4()}@test.com"
     signup_payload = {
         "name": "Test User",
-        "email": signup_email,
-        "password": "SecurePass123!"
+        "email": unique_email,
+        "password": "TestPass@1234"
     }
-    signup_resp = requests.post(f"{BASE_URL}/api/v1/auth/signup", json=signup_payload, timeout=TIMEOUT)
-    assert signup_resp.status_code == 201, f"Signup failed with status {signup_resp.status_code}: {signup_resp.text}"
+    signup_resp = requests.post(signup_url, json=signup_payload, timeout=TIMEOUT)
+    assert signup_resp.status_code == 201, f"Signup failed: {signup_resp.text}"
     signup_data = signup_resp.json()
-    assert signup_data["status"] == "success"
-    user_token = signup_data["data"]["token"]
-    user_headers = {"Authorization": f"Bearer {user_token}", "Content-Type": "application/json"}
+    access_token = signup_data.get("accessToken")
+    assert access_token, "No accessToken returned from signup"
+    headers = {"Authorization": f"Bearer {access_token}"}
 
-    # 2. Create a new app (isEnabled should be false initially)
-    unique_url = f"https://{uuid.uuid4()}.example.com/health"
-    app_payload = {
-        "name": "App to Disable Test",
-        "url": unique_url,
-        "requestInterval": "10"  # must be string as per API error and PRD
+    # Step 2: Create a new app; new apps are disabled by default (isDisabled = True)
+    create_app_url = f"{BASE_URL}/api/v1/apps/post"
+    app_name = f"App {uuid.uuid4()}"
+    app_url = f"https://app-{uuid.uuid4()}.onrender.com/active"
+    create_app_payload = {
+        "name": app_name,
+        "url": app_url,
+        "requestInterval": "10"
     }
-    app_create_resp = requests.post(f"{BASE_URL}/api/v1/apps/post", headers=user_headers, json=app_payload, timeout=TIMEOUT)
-    assert app_create_resp.status_code == 201, f"App creation failed: {app_create_resp.text}"
-    app_create_data = app_create_resp.json()
-    assert app_create_data["status"] == "success"
-    app = app_create_data["data"]["app"]
-    app_id = app["id"]
+    create_app_resp = requests.post(create_app_url, json=create_app_payload, headers=headers, timeout=TIMEOUT)
+    assert create_app_resp.status_code == 201, f"App creation failed: {create_app_resp.text}"
+    app_data = create_app_resp.json()
+    assert app_data.get("status") == "success"
+    app = app_data.get("data", {}).get("app")
+    assert app, "No app object in response"
+    app_id = app.get("id")
+    assert app_id, "No app ID returned"
 
     try:
-        # 3. Enable the app first to ensure it is enabled before disabling
-        enable_resp = requests.patch(f"{BASE_URL}/api/v1/apps/enable/{app_id}", headers=user_headers, timeout=TIMEOUT)
-        assert enable_resp.status_code == 200, f"Enable app failed: {enable_resp.text}"
-        enable_data = enable_resp.json()
-        assert enable_data["status"] == "success"
-        assert enable_data["data"]["isEnabled"] is True
+        # Step 3: Enable the app first (PATCH /api/v1/apps/enable/{appId})
+        enable_url = f"{BASE_URL}/api/v1/apps/enable/{app_id}"
+        enable_resp = requests.patch(enable_url, headers=headers, timeout=TIMEOUT)
+        assert enable_resp.status_code == 200, f"Enabling app failed: {enable_resp.text}"
+        enable_resp_data = enable_resp.json()
+        assert enable_resp_data.get("status") == "success"
+        enabled_app = enable_resp_data.get("data", {}).get("app")
+        assert enabled_app is not None
+        assert enabled_app.get("isDisabled") is False, "App should be enabled (isDisabled=False)"
 
-        # 4. PATCH disable the enabled app
-        disable_resp = requests.patch(f"{BASE_URL}/api/v1/apps/disable/{app_id}", headers=user_headers, timeout=TIMEOUT)
-        assert disable_resp.status_code == 200, f"Disable app failed: {disable_resp.text}"
-        disable_data = disable_resp.json()
-        assert disable_data["status"] == "success"
-        assert disable_data["data"]["isEnabled"] is False
+        # Step 4: Disable the enabled app (PATCH /api/v1/apps/disable/{appId})
+        disable_url = f"{BASE_URL}/api/v1/apps/disable/{app_id}"
+        disable_resp = requests.patch(disable_url, headers=headers, timeout=TIMEOUT)
+        assert disable_resp.status_code == 200, f"Disabling app failed: {disable_resp.text}"
+        disable_resp_data = disable_resp.json()
+        assert disable_resp_data.get("status") == "success"
+        disabled_app = disable_resp_data.get("data", {}).get("app")
+        assert disabled_app is not None
+        assert disabled_app.get("isDisabled") is True, "App should be disabled (isDisabled=True)"
 
-        # 5. PATCH disable the already disabled app (idempotency)
-        disable_again_resp = requests.patch(f"{BASE_URL}/api/v1/apps/disable/{app_id}", headers=user_headers, timeout=TIMEOUT)
-        assert disable_again_resp.status_code == 200, f"Second disable failed: {disable_again_resp.text}"
+        # Step 5: Attempt to disable again (should fail with 400 and message "app is already disabled")
+        disable_again_resp = requests.patch(disable_url, headers=headers, timeout=TIMEOUT)
+        assert disable_again_resp.status_code == 400, f"Expected 400 when disabling already disabled app, got {disable_again_resp.status_code}"
         disable_again_data = disable_again_resp.json()
-        assert disable_again_data["status"] == "success"
-        assert disable_again_data["data"]["isEnabled"] is False
+        assert disable_again_data.get("status") == "error"
+        assert disable_again_data.get("message") == "app is already disabled"
 
     finally:
-        # Cleanup: delete the app
-        del_resp = requests.delete(f"{BASE_URL}/api/v1/apps/delete/{app_id}", headers=user_headers, timeout=TIMEOUT)
-        # Accept 200/204 success or 404 if already deleted
-        assert del_resp.status_code in (200, 204, 404), f"App deletion failed: {del_resp.status_code}, {del_resp.text}"
+        # Cleanup: Delete the app
+        delete_url = f"{BASE_URL}/api/v1/apps/delete/{app_id}"
+        delete_resp = requests.delete(delete_url, headers=headers, timeout=TIMEOUT)
+        assert delete_resp.status_code == 200, f"App deletion failed: {delete_resp.text}"
 
 test_patch_apps_disable_app_toggles_enabled_state()
