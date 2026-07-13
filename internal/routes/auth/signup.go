@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events"
+	"github.com/Tibz-Dankan/keep-active/internal/middlewares"
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
 	"github.com/gorilla/mux"
@@ -57,6 +58,26 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.ID = userId
+
+	clientIP, _ := r.Context().Value(middlewares.ClientIPKey).(string)
+	device := r.Header.Get("User-Agent")
+
+	location, err := services.GetUserLocationByIP(user.ID, clientIP)
+	if err != nil {
+		log.Println("Error resolving location for session:", err)
+	}
+
+	session := models.Session{
+		UserID:       user.ID,
+		AccessToken:  accessToken,
+		GeneratedVia: "sign up",
+		Device:       device,
+		LocationID:   location.ID,
+	}
+	if _, err := session.Create(session); err != nil {
+		log.Println("Error creating session:", err)
+	}
+
 	if os.Getenv("GO_ENV") == "testing" || os.Getenv("GO_ENV") == "staging" {
 		permission := models.Permissions{}
 		if err := permission.Set(user.ID); err != nil {

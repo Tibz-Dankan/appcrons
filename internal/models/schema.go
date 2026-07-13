@@ -105,3 +105,41 @@ type RequestCount struct {
 	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
 }
+
+type Location struct {
+	ID        string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID    string    `gorm:"column:userId;default:null;index" json:"userId"`
+	IP        string    `gorm:"column:ip;not null;index" json:"ip"`
+	Info      string    `gorm:"column:info;type:text;not null" json:"info"`
+	CreatedAt time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
+	User      User      `gorm:"foreignKey:UserID;references:ID;default:null" json:"user,omitempty"`
+}
+
+type Session struct {
+	ID           string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID       string    `gorm:"column:userId;not null;index" json:"userId"`
+	AccessToken  string    `gorm:"column:accessToken;not null;index" json:"accessToken"`
+	GeneratedVia string    `gorm:"column:generatedVia;not null;index" json:"generatedVia"`
+	Device       string    `gorm:"column:device;type:text;default:'Unknown Device'" json:"device"`
+	LocationID   string    `gorm:"column:locationId;default:null;index" json:"locationId"`
+	IsRevoked    bool      `gorm:"column:isRevoked;default:false" json:"isRevoked"`
+	CreatedAt    time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt    time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
+	User         User      `gorm:"foreignKey:UserID;references:ID;default:null" json:"user,omitempty"`
+	Location     Location  `gorm:"foreignKey:LocationID;references:ID;default:null" json:"location,omitempty"`
+}
+
+type SiteVisit struct {
+	ID         string    `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID     string    `gorm:"column:userId;default:null;index" json:"userId"`
+	Device     string    `gorm:"column:device;type:text;default:'Unknown Device'" json:"device"`
+	Page       string    `gorm:"column:page;not null;index" json:"page"`
+	Path       string    `gorm:"column:path;not null;index" json:"path"`
+	LocationID string    `gorm:"column:locationId;default:null;index" json:"locationId"`
+	CapturedAt time.Time `gorm:"column:capturedAt;not null;index" json:"capturedAt"`
+	CreatedAt  time.Time `gorm:"column:createdAt;index" json:"createdAt"`
+	UpdatedAt  time.Time `gorm:"column:updatedAt;index" json:"updatedAt"`
+	User       User      `gorm:"foreignKey:UserID;references:ID;default:null" json:"user,omitempty"`
+	Location   Location  `gorm:"foreignKey:LocationID;references:ID;default:null" json:"location,omitempty"`
+}
