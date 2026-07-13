@@ -9,6 +9,7 @@ import (
 	"github.com/Tibz-Dankan/keep-active/internal/routes/feedback"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/monitor"
 	"github.com/Tibz-Dankan/keep-active/internal/routes/request"
+	"github.com/Tibz-Dankan/keep-active/internal/routes/sitevisit"
 
 	"github.com/gorilla/mux"
 )
@@ -19,6 +20,7 @@ func AppRouter() *mux.Router {
 	router.Use(middlewares.RequestDuration)
 	router.Use(middlewares.Logger)
 	router.Use(middlewares.RateLimit)
+	router.Use(middlewares.SetClientIp)
 
 	// App routes
 	appRouter := router.PathPrefix("/api/v1/apps").Subrouter()
@@ -87,6 +89,11 @@ func AppRouter() *mux.Router {
 	bugreport.PostReportBugRoute(bugReportRouter)
 	bugreport.GetBugReportByUserRoute(bugReportRouter)
 	bugreport.GetAllBugReportsRoute(bugReportRouter)
+
+	// SiteVisit Routes (anonymous-tolerant)
+	siteVisitRouter := router.PathPrefix("/api/v1/sitevisit").Subrouter()
+	siteVisitRouter.Use(middlewares.OptionalAuth)
+	sitevisit.PostSiteVisitRoute(siteVisitRouter)
 
 	// Active route
 	GetActiveRoute(router)
