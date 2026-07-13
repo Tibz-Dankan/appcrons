@@ -11,7 +11,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: JorgeLNJunior/render-deploy@v1.4.4
         with:
           service_id: ${{ secrets.RENDER_SERVICE_ID }}
@@ -21,6 +21,7 @@ jobs:
           github_deployment: true
           deployment_environment: "production"
           github_token: ${{ secrets.ACCESS_TOKEN_GITHUB }}
+          node-version: 24
 # name: Test and Deploy To Render
 
 # on:
