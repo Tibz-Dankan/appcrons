@@ -75,6 +75,7 @@ func AppRouter() *mux.Router {
 	admin.GetRequestsByAppRoute(adminRouter)
 	admin.GetUserRoute(adminRouter)
 	admin.GetStatsRoute(adminRouter)
+	admin.GetUserCountryDistributionRoute(adminRouter)
 
 	// Feedback Routes
 	feedbackRouter := router.PathPrefix("/api/v1/feedback").Subrouter()
