@@ -12,7 +12,7 @@ const MaintenanceMessage = "Appcrons is undergoing a maintenance, try again late
 const (
 	maintenanceWindowStartStr = "2026-07-14T14:30:00+03:00"
 	// maintenanceWindowEndStr   = "2026-07-14T16:30:00+03:00"
-	maintenanceWindowEndStr = "2026-07-14T17:30:00+03:00"
+	maintenanceWindowEndStr = "2026-07-14T17:08:00+03:00"
 )
 
 var (
