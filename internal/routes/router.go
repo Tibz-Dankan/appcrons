@@ -17,6 +17,7 @@ import (
 func AppRouter() *mux.Router {
 	router := mux.NewRouter()
 
+	router.Use(middlewares.Maintenance)
 	router.Use(middlewares.RequestDuration)
 	router.Use(middlewares.Logger)
 	router.Use(middlewares.RateLimit)

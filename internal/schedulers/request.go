@@ -1,9 +1,11 @@
 package schedulers
 
 import (
+	"log"
 	"time"
 
 	"github.com/Tibz-Dankan/keep-active/internal/events/publishers"
+	"github.com/Tibz-Dankan/keep-active/internal/services"
 )
 
 // Runs the PublishRequestEvent fn at
@@ -16,7 +18,11 @@ func schedulePublishRequest() {
 		minute := now.Minute()
 
 		if minute%5 == 0 && now.Second() == 0 {
-			publishers.PublishRequestEvent()
+			if services.IsMaintenanceActive() {
+				log.Println("Skipping PublishRequestEvent: maintenance window active")
+			} else {
+				publishers.PublishRequestEvent()
+			}
 		}
 
 		time.Sleep(sleepDuration)
