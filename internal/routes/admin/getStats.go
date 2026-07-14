@@ -13,8 +13,9 @@ func getStats(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	app := models.App{}
 	request := models.Request{}
+	location := models.Location{}
 
-	
+
 	userCount, err := user.FindCount()
 	if err != nil {
 		services.AppError(err.Error(), 500, w)
@@ -33,10 +34,24 @@ func getStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	countryDistribution, err := location.FindUserCountryDistribution()
+	if err != nil {
+		services.AppError(err.Error(), 500, w)
+		return
+	}
+
+	countryCount := 0
+	for _, d := range countryDistribution {
+		if d.CountryCode != "" {
+			countryCount++
+		}
+	}
+
 	data := map[string]interface{}{
 		"userCount":    userCount,
 		"appCount":     appCount,
 		"requestCount": requestCount,
+		"countryCount": countryCount,
 	}
 
 	response := map[string]interface{}{
