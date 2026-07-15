@@ -9,7 +9,7 @@ import (
 )
 
 func UpdateUserToAdminRole() {
-	user:= models.User{}
+	user := models.User{}
 
 	env := os.Getenv("GO_ENV")
 	if env == "development" {
@@ -25,15 +25,15 @@ func UpdateUserToAdminRole() {
 		return
 	}
 
-    savedUser, err:= user.FindByEmail(adminEmail)
-    if err != nil {
+	savedUser, err := user.FindByEmail(adminEmail)
+	if err != nil {
 		log.Fatalf("Error loading .env file")
-    }
+	}
 
 	if savedUser.Role == "sys_admin" {
-		log.Printf("%s is already an admin!",savedUser.Name)
+		log.Printf("%s is already an admin!", savedUser.Name)
 		return
-    }
+	}
 
 	err = savedUser.SetRole("sys_admin")
 	if err != nil {
@@ -41,7 +41,7 @@ func UpdateUserToAdminRole() {
 		return
 	}
 
-    if savedUser.ID == "" {
+	if savedUser.ID == "" {
 		log.Println("User of provided email doesn't exist!")
 		return
 	}
@@ -58,7 +58,7 @@ func UpdateUserToAdminRole() {
 		return
 	}
 
-	log.Printf("%s set as sys_admin successfully!",savedUser.Name)
+	log.Printf("%s set as sys_admin successfully!", savedUser.Name)
 }
 
 func init() {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Tibz-Dankan/keep-active/internal/constants"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -47,12 +48,53 @@ func (u *User) FindByEmail(email string) (User, error) {
 	return user, nil
 }
 
+// FindUnknown looks up the shared placeholder "unknown user" row by its
+// well-known sentinel email. Like FindByEmail, a not-found result is not
+// treated as an error - callers must check the returned user's ID.
+func (u *User) FindUnknown() (User, error) {
+	return u.FindByEmail(constants.UNKNOWN_USER_EMAIL)
+}
+
+// FindOrCreateUnknown returns the shared placeholder "unknown user" row,
+// creating it if it doesn't exist yet. Anonymous requests to
+// anonymous-tolerant routes (see middlewares.OptionalAuth) are attributed
+// to this user's id instead of leaving userId blank. Idempotent - safe to
+// call on every process start.
+func (u *User) FindOrCreateUnknown() (User, error) {
+	existing, err := u.FindUnknown()
+	if err != nil {
+		return existing, err
+	}
+	if existing.ID != "" {
+		return existing, nil
+	}
+
+	// Role must be "user" (see ValidRole) - an invented role would fail
+	// permission checks elsewhere. Password is a random, never-shared
+	// string: this account is never signed into.
+	unknownUser := User{
+		Name:     "Unknown User",
+		Email:    constants.UNKNOWN_USER_EMAIL,
+		Password: uuid.New().String(),
+		Role:     "user",
+	}
+
+	id, err := u.Create(unknownUser)
+	if err != nil {
+		return User{}, err
+	}
+	unknownUser.ID = id
+
+	return unknownUser, nil
+}
+
 func (u *User) FindAll() ([]User, error) {
 	var users []User
 	db.Find(&users)
 
 	return users, nil
 }
+
 type UserWithAppCount struct {
 	User
 	AppCount int64 `json:"appCount"`
@@ -61,7 +103,7 @@ type UserWithAppCount struct {
 func (u *User) FindAllAndIncludeAppCount(limit float64, cursor string) ([]UserWithAppCount, error) {
 	var users []User
 	var usersWithCount []UserWithAppCount
-	
+
 	query := db.Model(&User{}).Order("\"createdAt\" DESC").Limit(int(limit))
 
 	if cursor != "" {
@@ -74,7 +116,7 @@ func (u *User) FindAllAndIncludeAppCount(limit float64, cursor string) ([]UserWi
 	}
 
 	query.Find(&users)
-	
+
 	for _, user := range users {
 		var appCount int64
 		countResult := db.Model(&App{}).Where("\"userId\" = ?", user.ID).Count(&appCount)
@@ -85,17 +127,16 @@ func (u *User) FindAllAndIncludeAppCount(limit float64, cursor string) ([]UserWi
 		user.Password = ""
 		user.PasswordResetToken = ""
 		user.PasswordResetExpiresAt = time.Time{}
-		
+
 		userWithCount := UserWithAppCount{
 			User:     user,
 			AppCount: appCount,
 		}
 		usersWithCount = append(usersWithCount, userWithCount)
 	}
-	
+
 	return usersWithCount, nil
 }
-
 
 func (u *User) FindCount() (int64, error) {
 	startTime := time.Now()

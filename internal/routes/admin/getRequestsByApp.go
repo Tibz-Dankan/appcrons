@@ -15,7 +15,7 @@ func getRequestByUser(w http.ResponseWriter, r *http.Request) {
 	app := models.App{}
 	request := models.Request{}
 	date := services.Date{}
-	
+
 	userId := mux.Vars(r)["userId"]
 	appId := mux.Vars(r)["appId"]
 	before := r.URL.Query().Get("before")
@@ -65,8 +65,8 @@ func getRequestByUser(w http.ResponseWriter, r *http.Request) {
 	user.PasswordResetExpiresAt = time.Time{}
 
 	data := map[string]interface{}{
-		"user": user,
-		"app": app,
+		"user":     user,
+		"app":      app,
 		"requests": requests,
 		"count":    count,
 	}

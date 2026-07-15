@@ -15,7 +15,6 @@ func getStats(w http.ResponseWriter, r *http.Request) {
 	request := models.Request{}
 	location := models.Location{}
 
-
 	userCount, err := user.FindCount()
 	if err != nil {
 		services.AppError(err.Error(), 500, w)

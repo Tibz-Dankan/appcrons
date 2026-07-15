@@ -11,9 +11,16 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-// OptionalAuth resolves userId from a bearer token if present and valid,
-// but unlike Auth it never rejects the request - anonymous callers proceed
-// with UserIDKey set to "".
+// OptionalAuth resolves userId from a bearer token if present and valid.
+// Unlike Auth it never rejects the request. Callers with no token, an
+// invalid/expired token, or a token for a user that no longer exists fall
+// back to the shared placeholder "unknown user" id (see
+// models.User.FindUnknown) instead of "", so anonymous traffic never
+// writes a blank userId into Location/SiteVisit (see
+// internal/models/db.go for why that matters). If even the unknown-user
+// lookup fails (e.g. a DB error, or it genuinely doesn't exist yet),
+// userId falls back to "" as a last resort, matching the previous
+// behavior.
 func OptionalAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userId := ""
@@ -45,6 +52,13 @@ func OptionalAuth(next http.Handler) http.Handler {
 						}
 					}
 				}
+			}
+		}
+
+		if userId == "" {
+			User := models.User{}
+			if unknownUser, err := User.FindUnknown(); err == nil && unknownUser.ID != "" {
+				userId = unknownUser.ID
 			}
 		}
 

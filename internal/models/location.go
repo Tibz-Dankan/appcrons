@@ -31,6 +31,22 @@ func (l *Location) FindOne(id string) (Location, error) {
 	return location, nil
 }
 
+// BackfillMissingUserID repoints every Location row whose userId was left
+// blank ("" or NULL) at the given placeholder user id, so the
+// userId->users(id) foreign key constraint can be created against clean
+// data. Returns rows updated.
+func (l *Location) BackfillMissingUserID(unknownUserId string) (int64, error) {
+	result := db.Model(&Location{}).
+		// Where("\"userId\" IS NULL OR \"userId\" = ''").
+		Where("\"userId\" IS NULL").
+		Update("userId", unknownUserId)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return result.RowsAffected, nil
+}
+
 // FindByIP finds the most recently created Location for a given IP,
 // used to avoid re-resolving geo-IP info for an IP already seen before.
 func (l *Location) FindByIP(ip string) (Location, error) {
@@ -57,7 +73,8 @@ type CountryDistribution struct {
 // avoiding a Postgres-only "DISTINCT ON".
 func (l *Location) FindUserCountryDistribution() ([]CountryDistribution, error) {
 	var locations []Location
-	err := db.Where("\"userId\" IS NOT NULL AND \"userId\" != ''").
+	// err := db.Where("\"userId\" IS NOT NULL AND \"userId\" != ''").
+	err := db.Where("\"userId\" IS NOT NULL").
 		Order("\"userId\" asc").Order("\"createdAt\" asc").Find(&locations).Error
 	if err != nil {
 		return nil, err
