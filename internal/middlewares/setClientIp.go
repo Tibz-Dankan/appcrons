@@ -28,6 +28,7 @@ func SetClientIp(next http.Handler) http.Handler {
 			clientIP = r.RemoteAddr
 		}
 
+		// log.Println("SetClientIp address: ", clientIP)
 		log.Println("SetClientIp address: ", clientIP)
 
 		ctx := context.WithValue(r.Context(), ClientIPKey, clientIP)
