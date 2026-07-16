@@ -61,5 +61,5 @@ func getUserCountryDistribution(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserCountryDistributionRoute(router *mux.Router) {
-	router.HandleFunc("/users/countries", getUserCountryDistribution).Methods("GET")
+	router.HandleFunc("/users/countries/distribution", getUserCountryDistribution).Methods("GET")
 }
