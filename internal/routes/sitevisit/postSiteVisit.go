@@ -41,6 +41,10 @@ func postSiteVisit(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(middlewares.UserIDKey).(string)
 	device := r.Header.Get("User-Agent")
 
+	log.Println("postSiteVisit clientIP address: ", clientIP)
+	log.Println("postSiteVisit userId address: ", userId)
+	log.Println("postSiteVisit device address: ", device)
+
 	location, err := services.GetUserLocationByIP(userId, clientIP)
 	if err != nil {
 		log.Println("Error resolving location for site visit:", err)

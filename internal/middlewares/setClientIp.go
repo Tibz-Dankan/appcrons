@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 )
@@ -26,6 +27,8 @@ func SetClientIp(next http.Handler) http.Handler {
 		if clientIP == "" {
 			clientIP = r.RemoteAddr
 		}
+
+		log.Println("SetClientIp address: ", clientIP)
 
 		ctx := context.WithValue(r.Context(), ClientIPKey, clientIP)
 		next.ServeHTTP(w, r.WithContext(ctx))
