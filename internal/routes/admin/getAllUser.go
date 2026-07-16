@@ -42,9 +42,9 @@ func getAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]interface{}{
-		"status":  "success",
-		"message": "Users fetched successfully",
-		"data":    usersWithAppCount,
+		"status":     "success",
+		"message":    "Users fetched successfully",
+		"data":       usersWithAppCount,
 		"pagination": pagination,
 	}
 

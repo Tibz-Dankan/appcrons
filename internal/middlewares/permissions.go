@@ -46,8 +46,8 @@ func HasPermissions(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), UserPermissionsKey, userPermissions)
-		
-        if userPermissions.Role == "sys_admin" {
+
+		if userPermissions.Role == "sys_admin" {
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}

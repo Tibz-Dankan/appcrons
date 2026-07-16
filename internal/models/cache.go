@@ -9,7 +9,7 @@ import (
 )
 
 func RedisClient() *redis.Client {
-    var REDIS_URL string
+	var REDIS_URL string
 
 	env := os.Getenv("GO_ENV")
 	if env == "development" {
@@ -29,8 +29,7 @@ func RedisClient() *redis.Client {
 		log.Fatal("Unrecognized GO_ENV:", env)
 	}
 
-
-    log.Println("REDIS_URL:", REDIS_URL)
+	log.Println("REDIS_URL:", REDIS_URL)
 
 	opt, err := redis.ParseURL(REDIS_URL)
 	if err != nil {
