@@ -60,6 +60,14 @@ func (l *Location) FindByIP(ip string) (Location, error) {
 	return location, nil
 }
 
+func (l *Location) FindByIPAndUserID(ip string, userID string) (Location, error) {
+	var location Location
+
+	db.Where("ip = ? AND \"userId\" = ?", ip, userID).Order("\"createdAt\" desc").First(&location)
+
+	return location, nil
+}
+
 // // CountryDistribution is the per-country breakdown of unique users,
 // // aggregated from geo-IP data captured in Location.Info.
 // type CountryDistribution struct {
