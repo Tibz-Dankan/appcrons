@@ -41,7 +41,7 @@ func getStats(w http.ResponseWriter, r *http.Request) {
 
 	countryCount := 0
 	for _, d := range countryDistribution {
-		if d.CountryCode != "" {
+		if d.LocInfo.CountryCode != "" {
 			countryCount++
 		}
 	}
