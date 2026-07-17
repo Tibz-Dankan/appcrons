@@ -62,7 +62,7 @@ func GetUserLocationByIP(userID string, ip string) (models.Location, error) {
 		return location, fmt.Errorf("empty client IP")
 	}
 
-	existing, err := location.FindByIP(ip)
+	existing, err := location.FindByIPAndUserID(ip, userID)
 	if err != nil {
 		return location, err
 	}
