@@ -67,6 +67,7 @@ func GetUserLocationByIP(userID string, ip string) (models.Location, error) {
 		return location, err
 	}
 	if existing.ID != "" {
+		log.Printf("Location already exists: %+v", existing)
 		return existing, nil
 	}
 
