@@ -55,7 +55,10 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clientIP, _ := r.Context().Value(middlewares.ClientIPKey).(string)
-	device := r.Header.Get("User-Agent")
+	device := r.Header.Get("x-device")
+
+	log.Println("resetPassword clientIP address: ", clientIP)
+	log.Println("resetPassword device address: ", device)
 
 	location, err := services.GetUserLocationByIP(user.ID, clientIP)
 	if err != nil {

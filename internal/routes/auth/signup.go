@@ -60,7 +60,10 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	user.ID = userId
 
 	clientIP, _ := r.Context().Value(middlewares.ClientIPKey).(string)
-	device := r.Header.Get("User-Agent")
+	device := r.Header.Get("x-device")
+
+	log.Println("signup clientIP address: ", clientIP)
+	log.Println("signup device address: ", device)
 
 	location, err := services.GetUserLocationByIP(user.ID, clientIP)
 	if err != nil {
