@@ -39,7 +39,7 @@ func postSiteVisit(w http.ResponseWriter, r *http.Request) {
 
 	clientIP, _ := r.Context().Value(middlewares.ClientIPKey).(string)
 	userId, _ := r.Context().Value(middlewares.UserIDKey).(string)
-	device := r.Header.Get("User-Agent")
+	device := r.Header.Get("x-device")
 
 	log.Println("postSiteVisit clientIP address: ", clientIP)
 	log.Println("postSiteVisit userId address: ", userId)
@@ -49,6 +49,8 @@ func postSiteVisit(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error resolving location for site visit:", err)
 	}
+
+	log.Printf("postSiteVisit location: %+v", location)
 
 	siteVisit := models.SiteVisit{
 		UserID:     userId,
