@@ -151,6 +151,17 @@ func (u *User) FindCount() (int64, error) {
 	return userCount, nil
 }
 
+func (u *User) FindByExcludingIDs(ids []string) ([]User, error) {
+	var users []User
+	if err := db.Model(&User{}).
+		Where("id NOT IN ?", ids).
+		Select("id, name, email, role,\"createdAt\", \"updatedAt\"").
+		Find(&users).Error; err != nil {
+		return users, err
+	}
+	return users, nil
+}
+
 // Update updates one user in the database, using the information
 // stored in the receiver u
 func (u *User) Update() error {

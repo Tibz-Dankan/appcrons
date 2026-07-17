@@ -3,7 +3,6 @@ package admin
 import (
 	"encoding/json"
 	"net/http"
-	"sort"
 
 	"github.com/Tibz-Dankan/keep-active/internal/models"
 	"github.com/Tibz-Dankan/keep-active/internal/services"
@@ -12,7 +11,7 @@ import (
 
 func getUserCountryDistribution(w http.ResponseWriter, r *http.Request) {
 	location := models.Location{}
-	user := models.User{}
+	// user := models.User{}
 
 	distribution, err := location.FindUserCountryDistribution()
 	if err != nil {
@@ -20,34 +19,34 @@ func getUserCountryDistribution(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	totalUserCount, err := user.FindCount()
-	if err != nil {
-		services.AppError(err.Error(), 500, w)
-		return
-	}
+	// totalUserCount, err := user.FindCount()
+	// if err != nil {
+	// 	services.AppError(err.Error(), 500, w)
+	// 	return
+	// }
 
-	var knownUserCount int64
-	unknownIndex := -1
-	for i, d := range distribution {
-		knownUserCount += d.UserCount
-		if d.CountryCode == "" {
-			unknownIndex = i
-		}
-	}
+	// var knownUserCount int64
+	// unknownIndex := -1
+	// for i, d := range distribution {
+	// 	knownUserCount += d.UserCount
+	// 	if d.CountryCode == "" {
+	// 		unknownIndex = i
+	// 	}
+	// }
 
-	if usersWithoutLocation := totalUserCount - knownUserCount; usersWithoutLocation > 0 {
-		if unknownIndex >= 0 {
-			distribution[unknownIndex].UserCount += usersWithoutLocation
-		} else {
-			distribution = append(distribution, models.CountryDistribution{
-				Country: "Unknown", CountryCode: "", UserCount: usersWithoutLocation,
-			})
-		}
-	}
+	// if usersWithoutLocation := totalUserCount - knownUserCount; usersWithoutLocation > 0 {
+	// 	if unknownIndex >= 0 {
+	// 		distribution[unknownIndex].UserCount += usersWithoutLocation
+	// 	} else {
+	// 		distribution = append(distribution, models.CountryDistribution{
+	// 			Country: "Unknown", CountryCode: "", UserCount: usersWithoutLocation,
+	// 		})
+	// 	}
+	// }
 
-	sort.Slice(distribution, func(i, j int) bool {
-		return distribution[i].UserCount > distribution[j].UserCount
-	})
+	// sort.Slice(distribution, func(i, j int) bool {
+	// 	return distribution[i].UserCount > distribution[j].UserCount
+	// })
 
 	response := map[string]interface{}{
 		"status":  "success",
