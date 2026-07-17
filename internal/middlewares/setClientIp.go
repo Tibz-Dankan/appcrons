@@ -17,15 +17,19 @@ func SetClientIp(next http.Handler) http.Handler {
 
 		if os.Getenv("GO_ENV") == "production" {
 			clientIP = r.Header.Get("CF-Connecting-IP")
+			log.Println("IP Cloudflare header: ", clientIP)
 		}
 		if clientIP == "" {
 			clientIP = r.Header.Get("X-Forwarded-For")
+			log.Println("IP X-Forwarded-For: ", clientIP)
 		}
 		if clientIP == "" {
 			clientIP = r.Header.Get("X-Real-IP")
+			log.Println("IP X-Real-IP: ", clientIP)
 		}
 		if clientIP == "" {
 			clientIP = r.RemoteAddr
+			log.Println("IP RemoteAddr: ", clientIP)
 		}
 
 		log.Println("SetClientIp address: ", clientIP)
