@@ -19,7 +19,7 @@ type Response struct {
 func MakeHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
-	url := EnsureURLScheme(URL)
+	url := EnsureURLScheme(RemoveSpaces(URL))
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -68,7 +68,7 @@ func MakeHTTPRequest(URL string) (Response, error) {
 func MakeExternalHTTPRequest(URL string) (Response, error) {
 	response := Response{}
 	startTime := time.Now()
-	url := EnsureURLScheme(URL)
+	url := EnsureURLScheme(RemoveSpaces(URL))
 
 	externalURL := fmt.Sprintf("%s?url=%s", os.Getenv("APPCRONS_EXTERNAL_URL"), url)
 
