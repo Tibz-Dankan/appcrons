@@ -11,7 +11,7 @@ const MaintenanceMessage = "Appcrons is undergoing a maintenance, try again late
 // Hardcoded window for the Render -> Neon Postgres migration.
 const (
 	maintenanceWindowStartStr = "2026-08-26T22:00:00+03:00"
-	maintenanceWindowEndStr   = "2026-08-27T02:00:00+03:00"
+	maintenanceWindowEndStr   = "2026-08-27T01:25:00+03:00"
 )
 
 var (
